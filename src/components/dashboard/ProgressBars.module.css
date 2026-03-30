@@ -2,7 +2,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 1rem 1.125rem;
+  padding: 0.75rem 1rem;
 }
 
 .title {
@@ -11,7 +11,7 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
 }
 
 .bars {

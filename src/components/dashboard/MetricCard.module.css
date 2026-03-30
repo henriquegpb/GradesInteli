@@ -3,7 +3,7 @@
   border: 1px solid var(--border);
   border-top: 2px solid var(--border);
   border-radius: 8px;
-  padding: 0.75rem 0.875rem;
+  padding: 0.55rem 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -19,7 +19,7 @@
 
 .value {
   font-family: var(--font-mono);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.02em;
@@ -41,4 +41,32 @@
 
 .danger {
   border-top-color: var(--red);
+}
+
+.breakdowns {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid var(--border-light, rgba(255,255,255,0.06));
+}
+
+.bdItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bdLabel {
+  font-size: 0.48rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.8;
+}
+
+.bdValue {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-secondary);
 }

@@ -2,30 +2,315 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 1rem 1.125rem;
+  padding: 0.75rem 1rem;
 }
 
-.title {
-  font-size: 0.7rem;
-  font-weight: 500;
+/* ---- two-col body ---- */
+
+.body {
+  display: flex;
+  gap: 0.875rem;
+}
+
+.leftCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.divider {
+  width: 1px;
+  background: var(--border-light);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.rightCol {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* ---- section labels ---- */
+
+.sectionLabel {
+  font-size: 0.58rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin: 0 0 0.6rem;
 }
 
-.sliderRow {
+/* ---- pill toggle ---- */
+
+.pillRow {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.pill {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+  border: none;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.pill:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.pillActive {
+  background: var(--accent);
+  color: white;
+}
+
+/* ---- input row ---- */
+
+.inputRow {
+  margin-top: -0.2rem;
+}
+
+.input {
+  width: 60px;
+  padding: 0.22rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus { border-color: var(--accent); }
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.input { -moz-appearance: textfield; }
+
+/* ---- participação ---- */
+
+.partSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.partHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iconBtn {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+  padding: 0;
+}
+
+.iconBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-secondary);
+}
+
+.selector {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.letter {
+  flex: 1;
+  padding: 0.2rem 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.letter:hover { border-color: var(--accent); color: var(--text-secondary); }
+.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+.partResult {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.partLabel {
+  font-size: 0.52rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.partValue {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.configGrid {
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.configRow {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.configLetter {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  width: 12px;
+}
+
+.configInput {
+  width: 42px;
+  padding: 0.12rem 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  outline: none;
+  text-align: right;
+}
+
+.configInput:focus { border-color: var(--accent); }
+.configInput::-webkit-inner-spin-button,
+.configInput::-webkit-outer-spin-button { -webkit-appearance: none; }
+.configInput { -moz-appearance: textfield; }
+
+/* ---- mini metrics ---- */
+
+.miniMetrics {
+  display: flex;
+  gap: 1rem;
+}
+
+.miniItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.miniLabel {
+  font-size: 0.52rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.miniValue {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+/* ---- RIGHT: prova + objective ---- */
+
+.provaBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.15rem;
+}
+
+.provaLabel {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.provaValue {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.provaStatus {
+  font-size: 0.55rem;
+}
+
+.success { color: var(--green); }
+.warning { color: var(--yellow); }
+.danger { color: var(--red); }
+
+/* ---- objective ---- */
+
+.objectiveBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.objectiveRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.objectiveLabel {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.objectiveRight {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.objectiveValue {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
 }
 
 .slider {
-  flex: 1;
+  width: 100%;
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
+  height: 3px;
   border-radius: 2px;
   background: var(--border);
   outline: none;
@@ -34,8 +319,8 @@
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
@@ -43,131 +328,23 @@
 }
 
 .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--bg);
 }
 
-.sliderValue {
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  color: var(--text-primary);
-  min-width: 2.5rem;
-  text-align: right;
-}
-
-.controls {
-  display: flex;
-  gap: 1.25rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.fieldLabel {
-  font-size: 0.62rem;
+.objectiveMeta {
+  font-size: 0.52rem;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  max-width: 220px;
-}
-
-.input {
-  width: 72px;
-  padding: 0.3rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--bg);
-  color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  outline: none;
-  transition: border-color 0.15s;
+  text-align: center;
 }
 
-.input:focus {
-  border-color: var(--accent);
+@media (max-width: 600px) {
+  .body { flex-direction: column; }
+  .divider { width: auto; height: 1px; }
+  .rightCol { width: auto; }
 }
-
-.input::-webkit-inner-spin-button,
-.input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-}
-.input {
-  -moz-appearance: textfield;
-}
-
-.toggle {
-  width: 34px;
-  height: 18px;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  cursor: pointer;
-  position: relative;
-  transition: background 0.2s, border-color 0.2s;
-  padding: 0;
-}
-
-.toggleOn {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.toggleKnob {
-  display: block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.toggleOn .toggleKnob {
-  transform: translateX(16px);
-  background: white;
-}
-
-.results {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-}
-
-.resultItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
-.resultLabel {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.resultValue {
-  font-family: var(--font-mono);
-  font-size: 1.05rem;
-  color: var(--text-primary);
-}
-
-.resultStatus {
-  font-size: 0.62rem;
-}
-
-.success { color: var(--green); }
-.warning { color: var(--yellow); }
-.danger { color: var(--red); }

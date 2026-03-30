@@ -70,10 +70,16 @@ export function useGradeDashboard() {
     });
   }, []);
 
+  const effectiveMetaFinal = useMemo(() => {
+    const mult = participacaoMultipliers[participacao];
+    return mult !== 0 ? simulacao.metaFinal / mult : simulacao.metaFinal;
+  }, [simulacao.metaFinal, participacao, participacaoMultipliers]);
+
   const metricas: MetricasModulo | null = useMemo(() => {
     if (items.length === 0) return null;
-    return calcularMetricas(items, simulacao);
-  }, [items, simulacao]);
+    const adjusted = { ...simulacao, metaFinal: effectiveMetaFinal };
+    return calcularMetricas(items, adjusted);
+  }, [items, simulacao, effectiveMetaFinal]);
 
   const importHtml = useCallback(
     async (file: File) => {
@@ -174,5 +180,6 @@ export function useGradeDashboard() {
     participacao, setParticipacao,
     participacaoMultipliers, setParticipacaoMultipliers,
     theme, toggleTheme,
+    effectiveMetaFinal,
   };
 }

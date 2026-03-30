@@ -6,7 +6,6 @@ import HtmlUpload from "@/components/import/HtmlUpload";
 import MetricCard from "@/components/dashboard/MetricCard";
 import DistributionChart from "@/components/dashboard/DistributionChart";
 import ProgressBars from "@/components/dashboard/ProgressBars";
-import ParticipacaoCard from "@/components/dashboard/ParticipacaoCard";
 import ActivitiesTable from "@/components/table/ActivitiesTable";
 import UnknownActivitiesPanel from "@/components/table/UnknownActivitiesPanel";
 import SimulationPanel from "@/components/simulation/SimulationPanel";
@@ -21,6 +20,7 @@ export default function Home() {
     participacao, setParticipacao,
     participacaoMultipliers, setParticipacaoMultipliers,
     theme, toggleTheme,
+    effectiveMetaFinal,
   } = useGradeDashboard();
 
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -92,6 +92,11 @@ export default function Home() {
               label="Total acumulado"
               value={fmtNota(metricas.acumuladoTotal, 3)}
               sub={`de ${(Object.values(metricas.pesosPorTipo).reduce((a, b) => a + b, 0) * 10).toFixed(1)} pts possíveis`}
+              breakdowns={[
+                { label: "Pond.", value: fmtNota(metricas.acumuladoPonderadas, 3) },
+                { label: "Artef.", value: fmtNota(metricas.acumuladoArtefatos, 3) },
+                { label: "Prova", value: fmtNota(metricas.acumuladoProva, 3) },
+              ]}
             />
             <MetricCard
               label="Média até o momento"
@@ -100,6 +105,11 @@ export default function Home() {
                   ? fmtNota(metricas.mediaTotalAteOMomento)
                   : "—"
               }
+              breakdowns={[
+                { label: "Pond.", value: metricas.mediaPonderadasAteOMomento !== null ? fmtNota(metricas.mediaPonderadasAteOMomento) : "—" },
+                { label: "Artef.", value: metricas.mediaArtefatosAteOMomento !== null ? fmtNota(metricas.mediaArtefatosAteOMomento) : "—" },
+                { label: "Prova", value: metricas.mediaProvaAteOMomento !== null ? fmtNota(metricas.mediaProvaAteOMomento) : "—" },
+              ]}
             />
             <MetricCard
               label={`Nota na prova p/ ${simulacao.metaFinal.toFixed(1)}`}
@@ -118,7 +128,6 @@ export default function Home() {
             />
           </div>
 
-          <h2 className={styles.sectionTitle}>Acumulado por categoria</h2>
           <div className={styles.categoryCards}>
             <MetricCard
               label="Ponderadas"
@@ -157,20 +166,16 @@ export default function Home() {
             <ProgressBars items={items} />
           </div>
 
-          <div className={styles.chartsRow}>
-            <SimulationPanel
-              simulacao={simulacao}
-              onSimulacaoChange={setSimulacao}
-              metricas={metricas}
-            />
-            <ParticipacaoCard
-              participacao={participacao}
-              multipliers={participacaoMultipliers}
-              mediaFinal={metricas.acumuladoFinalProjetado}
-              onParticipacaoChange={setParticipacao}
-              onMultipliersChange={setParticipacaoMultipliers}
-            />
-          </div>
+          <SimulationPanel
+            simulacao={simulacao}
+            onSimulacaoChange={setSimulacao}
+            metricas={metricas}
+            participacao={participacao}
+            multipliers={participacaoMultipliers}
+            onParticipacaoChange={setParticipacao}
+            onMultipliersChange={setParticipacaoMultipliers}
+            effectiveMetaFinal={effectiveMetaFinal}
+          />
 
           {naoReconhecidas.length > 0 && (
             <UnknownActivitiesPanel
