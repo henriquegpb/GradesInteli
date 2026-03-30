@@ -46,7 +46,6 @@ export function saveState(state: AppState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // storage full or unavailable
   }
 }
 

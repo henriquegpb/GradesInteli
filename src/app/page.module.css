@@ -24,8 +24,6 @@
   font-size: 0.85rem;
 }
 
-/* ---- two-column layout ---- */
-
 .dashboard {
   flex: 1;
   display: grid;
@@ -58,8 +56,6 @@
   margin-bottom: 0.4rem;
   flex-shrink: 0;
 }
-
-/* ---- metrics ---- */
 
 .metricsGrid {
   display: grid;
@@ -128,16 +124,12 @@
   flex-shrink: 0;
 }
 
-/* ---- charts ---- */
-
 .chartsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
   flex-shrink: 0;
 }
-
-/* ---- footer ---- */
 
 .footer {
   padding-top: 0.4rem;
@@ -188,8 +180,6 @@
   opacity: 0.8;
   text-decoration: underline;
 }
-
-/* ---- responsive ---- */
 
 @media (max-width: 900px) {
   .shell {

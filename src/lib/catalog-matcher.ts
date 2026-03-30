@@ -23,12 +23,10 @@ function findCatalogMatch(
   activity: AtividadeImportada,
   usedIndices: Set<number>
 ): number {
-  // exact
   for (let i = 0; i < catalog.length; i++) {
     if (usedIndices.has(i)) continue;
     if (exactMatch(activity.nome, catalog[i].atividade)) return i;
   }
-  // fuzzy
   for (let i = 0; i < catalog.length; i++) {
     if (usedIndices.has(i)) continue;
     if (fuzzyMatch(activity.nome, catalog[i].atividade)) return i;
@@ -50,7 +48,6 @@ export function matchActivities(
   const usedCatalogIndices = new Set<number>();
   const matchedImportIndices = new Set<number>();
 
-  // first pass: apply manual bindings
   for (let i = 0; i < imported.length; i++) {
     const key = normalize(imported[i].nome);
     if (vinculosManuais[key] !== undefined) {
@@ -72,7 +69,6 @@ export function matchActivities(
     }
   }
 
-  // second pass: auto-match
   for (let i = 0; i < imported.length; i++) {
     if (matchedImportIndices.has(i)) continue;
     const ci = findCatalogMatch(imported[i], usedCatalogIndices);
@@ -94,13 +90,11 @@ export function matchActivities(
     }
   }
 
-  // unmatched imported
   for (let i = 0; i < imported.length; i++) {
     if (matchedImportIndices.has(i)) continue;
     naoReconhecidas.push({ importada: imported[i] });
   }
 
-  // catalog entries not matched get their default nota
   for (let i = 0; i < catalog.length; i++) {
     if (usedCatalogIndices.has(i)) continue;
     const cat = catalog[i];

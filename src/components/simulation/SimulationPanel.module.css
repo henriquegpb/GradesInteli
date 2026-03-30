@@ -5,8 +5,6 @@
   padding: 1rem 1.125rem;
 }
 
-/* ---- two-col body ---- */
-
 .body {
   display: flex;
   gap: 0.875rem;
@@ -36,16 +34,12 @@
   gap: 0.75rem;
 }
 
-/* ---- section labels ---- */
-
 .sectionLabel {
   font-size: 0.58rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-
-/* ---- pill toggle ---- */
 
 .pillRow {
   display: flex;
@@ -76,8 +70,6 @@
   color: white;
 }
 
-/* ---- input row ---- */
-
 .inputRow {
   margin-top: -0.2rem;
 }
@@ -99,8 +91,6 @@
 .input::-webkit-inner-spin-button,
 .input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .input { -moz-appearance: textfield; }
-
-/* ---- participação ---- */
 
 .partSection {
   display: flex;
@@ -215,8 +205,6 @@
 .configInput::-webkit-outer-spin-button { -webkit-appearance: none; }
 .configInput { -moz-appearance: textfield; }
 
-/* ---- mini metrics ---- */
-
 .miniMetrics {
   display: flex;
   gap: 1rem;
@@ -240,8 +228,6 @@
   font-size: 0.85rem;
   color: var(--text-primary);
 }
-
-/* ---- RIGHT: prova + objective ---- */
 
 .provaBlock {
   display: flex;
@@ -273,8 +259,6 @@
 .success { color: var(--green); }
 .warning { color: var(--yellow); }
 .danger { color: var(--red); }
-
-/* ---- objective ---- */
 
 .objectiveBlock {
   display: flex;

@@ -123,19 +123,16 @@ function extractStudentName(html: string): string | null {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
-  // Adalove stores the full name in the navigation avatar img alt
   const avatar = doc.querySelector("img.MuiAvatar-img");
   if (avatar) {
     const alt = (avatar.getAttribute("alt") || "").trim();
     if (alt.length > 2) return alt;
   }
 
-  // fallback: regex for the same pattern (works without DOMParser)
   const avatarRegex = /MuiAvatar-img[^>]*alt="([^"]+)"/;
   const avatarMatch = html.match(avatarRegex);
   if (avatarMatch && avatarMatch[1].length > 2) return avatarMatch[1];
 
-  // fallback: navigation-avatar span with first name
   const navSpan = doc.querySelector('[aria-label="navigation-avatar"] span');
   if (navSpan) {
     const name = (navSpan.textContent || "").trim();

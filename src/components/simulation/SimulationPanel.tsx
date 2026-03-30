@@ -51,7 +51,6 @@ export default function SimulationPanel({
   return (
     <div className={styles.wrapper}>
       <div className={styles.body}>
-        {/* ---- LEFT: controls ---- */}
         <div className={styles.leftCol}>
           <span className={styles.sectionLabel}>Nota para faltantes</span>
           <div className={styles.pillRow}>
@@ -154,7 +153,6 @@ export default function SimulationPanel({
 
         <div className={styles.divider} />
 
-        {/* ---- RIGHT: prova + objective ---- */}
         <div className={styles.rightCol}>
           <div className={styles.provaBlock}>
             <span className={styles.provaLabel}>Nota necessária na prova</span>
