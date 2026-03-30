@@ -29,7 +29,13 @@ export function loadState(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw) as Partial<AppState>;
-    return { ...defaultState(), ...parsed };
+    const defaults = defaultState();
+    return {
+      ...defaults,
+      ...parsed,
+      simulacao: { ...defaults.simulacao, ...(parsed.simulacao || {}) },
+      participacaoMultipliers: { ...defaults.participacaoMultipliers, ...(parsed.participacaoMultipliers || {}) },
+    };
   } catch {
     return defaultState();
   }
