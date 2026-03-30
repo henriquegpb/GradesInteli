@@ -28,14 +28,14 @@ interface Props {
   onNotaChange: (id: string, nota: number) => void;
 }
 
-type SortKey = "semana" | "tipo" | "atividade" | "peso" | "nota";
+type SortKey = "original" | "semana" | "tipo" | "atividade" | "peso" | "nota";
 type SortDir = "asc" | "desc";
 
 export default function ActivitiesTable({ items, onNotaChange }: Props) {
   const [semanaFilter, setSemanaFilter] = useState("");
   const [tipoFilter, setTipoFilter] = useState("");
   const [busca, setBusca] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("semana");
+  const [sortKey, setSortKey] = useState<SortKey>("original");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const semanas = useMemo(() => {
@@ -56,14 +56,16 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
       result = result.filter((i) => i.atividade.toLowerCase().includes(q));
     }
 
-    const dir = sortDir === "asc" ? 1 : -1;
-    result = [...result].sort((a, b) => {
-      const va = a[sortKey];
-      const vb = b[sortKey];
-      if (typeof va === "number" && typeof vb === "number")
-        return (va - vb) * dir;
-      return String(va).localeCompare(String(vb)) * dir;
-    });
+    if (sortKey !== "original") {
+      const dir = sortDir === "asc" ? 1 : -1;
+      result = [...result].sort((a, b) => {
+        const va = a[sortKey];
+        const vb = b[sortKey];
+        if (typeof va === "number" && typeof vb === "number")
+          return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+      });
+    }
 
     return result;
   }, [items, semanaFilter, tipoFilter, busca, sortKey, sortDir]);

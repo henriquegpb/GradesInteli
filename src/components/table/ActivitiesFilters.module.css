@@ -7,8 +7,8 @@
 
 .select,
 .search {
-  font-size: 0.7rem;
-  padding: 0.3rem 0.45rem;
+  font-size: 0.65rem;
+  padding: 0.2rem 1.6rem 0.2rem 0.35rem;
   border: 1px solid var(--border);
   border-radius: 5px;
   background: var(--surface);

@@ -3,7 +3,7 @@
   border: 1px solid var(--border);
   border-top: 2px solid var(--border);
   border-radius: 8px;
-  padding: 0.55rem 0.75rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -19,7 +19,7 @@
 
 .value {
   font-family: var(--font-mono);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.02em;

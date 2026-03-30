@@ -180,7 +180,6 @@ export default function Home() {
         </div>
 
         <aside className={styles.sidebar}>
-          <h2 className={styles.sidebarTitle}>Atividades</h2>
           <ActivitiesTable items={items} onNotaChange={updateNota} />
         </aside>
       </div>

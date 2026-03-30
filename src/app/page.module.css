@@ -1,7 +1,7 @@
 .shell {
-  max-width: 1320px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 1rem 1.5rem 0.75rem;
+  padding: 1.25rem 1.75rem 1rem;
   height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -29,7 +29,7 @@
 .dashboard {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 440px;
   gap: 1rem;
   min-height: 0;
 }
@@ -37,7 +37,7 @@
 .main {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
   min-height: 0;
   overflow-y: auto;
   padding-right: 0.25rem;
@@ -80,7 +80,7 @@
   border: 1px solid var(--border);
   border-top: 2px solid var(--border);
   border-radius: 8px;
-  padding: 0.55rem 0.75rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -115,7 +115,7 @@
 
 .dualValue {
   font-family: var(--font-mono);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.02em;

@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Notas Inteli",
+  title: "Inteli Grades",
   description: "Cálculo de notas do módulo — Inteli",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
