@@ -1,0 +1,56 @@
+.wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.125rem;
+}
+
+.title {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.75rem;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  min-width: 68px;
+  flex-shrink: 0;
+}
+
+.track {
+  flex: 1;
+  height: 6px;
+  background: var(--border-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  min-width: 30px;
+  text-align: right;
+}

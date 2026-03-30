@@ -1,0 +1,44 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.success {
+  border-top-color: var(--green);
+}
+
+.warning {
+  border-top-color: var(--yellow);
+}
+
+.danger {
+  border-top-color: var(--red);
+}

@@ -1,0 +1,141 @@
+.wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.125rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.title {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.configBtn {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.configBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-secondary);
+}
+
+.selector {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.letter {
+  flex: 1;
+  padding: 0.35rem 0;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.letter:hover {
+  border-color: var(--accent);
+  color: var(--text-secondary);
+}
+
+.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.result {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.resultLabel {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.resultValue {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.configGrid {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.configRow {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.configLetter {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  width: 14px;
+}
+
+.configInput {
+  width: 52px;
+  padding: 0.2rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  outline: none;
+  text-align: right;
+}
+
+.configInput:focus {
+  border-color: var(--accent);
+}
+
+.configInput::-webkit-inner-spin-button,
+.configInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+.configInput {
+  -moz-appearance: textfield;
+}

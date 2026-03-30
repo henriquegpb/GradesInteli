@@ -1,0 +1,29 @@
+.bar {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.select,
+.search {
+  font-size: 0.7rem;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.select:focus,
+.search:focus {
+  border-color: var(--accent);
+}
+
+.search {
+  flex: 1;
+  min-width: 80px;
+}

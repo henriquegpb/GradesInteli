@@ -1,0 +1,145 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.tableScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.table thead {
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table th {
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sortable {
+  cursor: pointer;
+}
+
+.sortable:hover {
+  color: var(--text-secondary);
+}
+
+.table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.pending {
+  opacity: 0.5;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.typeBadge {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.notaInput {
+  width: 46px;
+  padding: 0.2rem 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  outline: none;
+  transition: border-color 0.15s;
+  text-align: right;
+}
+
+.notaInput:focus {
+  border-color: var(--accent);
+}
+
+.notaInput::-webkit-inner-spin-button,
+.notaInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.notaInput {
+  -moz-appearance: textfield;
+}
+
+.originBadge {
+  font-size: 0.58rem;
+  padding: 0.08rem 0.3rem;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+.matched {
+  background: rgba(80, 200, 120, 0.12);
+  color: var(--green);
+}
+
+.manual {
+  background: rgba(100, 150, 255, 0.12);
+  color: var(--blue);
+}
+
+.unmatched {
+  background: rgba(160, 160, 160, 0.1);
+  color: var(--text-muted);
+}
+
+.count {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}

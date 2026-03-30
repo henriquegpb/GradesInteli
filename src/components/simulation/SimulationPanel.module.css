@@ -1,0 +1,173 @@
+.wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.125rem;
+}
+
+.title {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.6rem;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+.sliderValue {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--text-primary);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.controls {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.fieldLabel {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  max-width: 220px;
+}
+
+.input {
+  width: 72px;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+.input {
+  -moz-appearance: textfield;
+}
+
+.toggle {
+  width: 34px;
+  height: 18px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+  padding: 0;
+}
+
+.toggleOn {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggleKnob {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(16px);
+  background: white;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.resultItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.resultLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.resultValue {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.resultStatus {
+  font-size: 0.62rem;
+}
+
+.success { color: var(--green); }
+.warning { color: var(--yellow); }
+.danger { color: var(--red); }

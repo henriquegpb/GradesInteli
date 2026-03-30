@@ -1,0 +1,38 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.left {
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 0.2rem 0 0;
+}
+
+.ts {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}
+
+.right {
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+}

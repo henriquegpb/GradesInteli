@@ -1,0 +1,86 @@
+.wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.125rem;
+}
+
+.title {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.75rem;
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.chartContainer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.segment {
+  transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;
+}
+
+.centerLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+.legendValue {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+@media (max-width: 480px) {
+  .body {
+    flex-direction: column;
+  }
+}

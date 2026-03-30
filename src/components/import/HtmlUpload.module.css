@@ -1,0 +1,38 @@
+.zone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.zone:hover,
+.dragging {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+}
+
+.input {
+  display: none;
+}
+
+.icon {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.error {
+  font-size: 0.7rem;
+  color: var(--red);
+  margin-left: 0.5rem;
+}

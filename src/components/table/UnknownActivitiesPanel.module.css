@@ -1,0 +1,117 @@
+.wrapper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  background: rgba(255, 160, 50, 0.15);
+  color: var(--orange);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.item {
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  gap: 0.75rem;
+}
+
+.itemName {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.itemMeta {
+  display: block;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.btn {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.catalogList {
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border-light);
+  padding: 0.35rem;
+}
+
+.catalogItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  text-align: left;
+  gap: 0.75rem;
+  transition: background 0.1s;
+}
+
+.catalogItem:hover {
+  background: var(--surface-hover);
+}
+
+.catalogMeta {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
