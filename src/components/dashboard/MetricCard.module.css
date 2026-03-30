@@ -45,7 +45,7 @@
 
 .breakdowns {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
   margin-top: 0.15rem;
   padding-top: 0.2rem;
   border-top: 1px solid var(--border-light, rgba(255,255,255,0.06));
@@ -59,14 +59,11 @@
 
 .bdLabel {
   font-size: 0.48rem;
-  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  opacity: 0.8;
 }
 
 .bdValue {
   font-family: var(--font-mono);
   font-size: 0.62rem;
-  color: var(--text-secondary);
 }

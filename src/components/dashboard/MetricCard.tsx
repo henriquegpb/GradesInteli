@@ -4,6 +4,7 @@ import styles from "./MetricCard.module.css";
 interface Breakdown {
   label: string;
   value: string;
+  color?: string;
 }
 
 interface Props {
@@ -34,7 +35,7 @@ export default function MetricCard({
       {breakdowns && breakdowns.length > 0 && (
         <div className={styles.breakdowns}>
           {breakdowns.map((b) => (
-            <div key={b.label} className={styles.bdItem}>
+            <div key={b.label} className={styles.bdItem} style={b.color ? { color: b.color } : undefined}>
               <span className={styles.bdLabel}>{b.label}</span>
               <span className={styles.bdValue}>{b.value}</span>
             </div>

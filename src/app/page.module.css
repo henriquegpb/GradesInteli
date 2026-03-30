@@ -63,7 +63,7 @@
 
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.4rem;
   flex-shrink: 0;
 }
@@ -72,6 +72,59 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.dualCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dualLabel {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dualBody {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dualCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.dualSubLabel {
+  font-size: 0.5rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dualValue {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.dualDivider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border-light);
   flex-shrink: 0;
 }
 
@@ -84,37 +137,11 @@
   flex-shrink: 0;
 }
 
-/* ---- footer actions ---- */
+/* ---- footer ---- */
 
-.actions {
-  display: flex;
-  gap: 0.4rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border);
-  flex-wrap: wrap;
+.footer {
+  padding-top: 0.4rem;
   flex-shrink: 0;
-}
-
-.actionBtn {
-  font-size: 0.68rem;
-  padding: 0.25rem 0.55rem;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--surface);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.actionBtn:hover {
-  border-color: var(--accent);
-  background: var(--surface-hover);
-  color: var(--text-secondary);
-}
-
-.dangerBtn:hover {
-  border-color: var(--red);
-  color: var(--red);
 }
 
 .headerActions {
@@ -146,11 +173,20 @@
 }
 
 .credit {
-  margin-left: auto;
   font-size: 0.6rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  align-self: center;
+}
+
+.creditLink {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.creditLink:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 /* ---- responsive ---- */
@@ -174,7 +210,7 @@
   }
 
   .metricsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .categoryCards {

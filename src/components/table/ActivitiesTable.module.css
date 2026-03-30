@@ -81,9 +81,9 @@
 .typeBadge {
   display: inline-block;
   font-size: 0.6rem;
-  padding: 0.1rem 0.3rem;
+  padding: 0.1rem 0.4rem;
   border: 1px solid;
-  border-radius: 3px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 

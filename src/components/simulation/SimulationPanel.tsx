@@ -115,14 +115,7 @@ export default function SimulationPanel({
               ))}
             </div>
 
-            <div className={styles.partResult}>
-              <span className={styles.partLabel}>
-                {fmtNota(metricas.acumuladoFinalProjetado)} × {mult.toFixed(2)}
-              </span>
-              <span className={styles.partValue}>{notaComParticipacao.toFixed(2)}</span>
-            </div>
-
-            {showMultConfig && (
+              {showMultConfig && (
               <div className={styles.configGrid}>
                 {LETRAS.map((l) => (
                   <label key={l} className={styles.configRow}>
@@ -203,12 +196,6 @@ export default function SimulationPanel({
                   })
                 }
               />
-            )}
-
-            {mult !== 1 && (
-              <div className={styles.objectiveMeta}>
-                Meta módulo: {effectiveMetaFinal.toFixed(2)}
-              </div>
             )}
           </div>
         </div>

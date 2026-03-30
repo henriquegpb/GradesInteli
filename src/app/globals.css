@@ -19,6 +19,10 @@
   --purple: #9b7bea;
   --teal: #4abfbf;
 
+  --color-ponderada: #FF6300;
+  --color-artefato: #00A995;
+  --color-prova: #F551EE;
+
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Cascadia Code", monospace;
 }
@@ -42,6 +46,10 @@
   --yellow: #a8922e;
   --purple: #7a5ec8;
   --teal: #2e9e9e;
+
+  --color-ponderada: #FF6300;
+  --color-artefato: #00A995;
+  --color-prova: #F551EE;
 }
 
 *,

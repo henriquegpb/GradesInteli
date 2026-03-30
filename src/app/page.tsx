@@ -1,5 +1,4 @@
 "use client";
-import { useRef } from "react";
 import { useGradeDashboard } from "@/hooks/useGradeDashboard";
 import StudentHeader from "@/components/dashboard/StudentHeader";
 import HtmlUpload from "@/components/import/HtmlUpload";
@@ -16,36 +15,16 @@ export default function Home() {
   const {
     items, naoReconhecidas, simulacao, setSimulacao,
     studentName, lastImportAt, metricas, importError, isHydrated,
-    importHtml, updateNota, vincularManualmente, resetAll, exportState, importState,
+    importHtml, updateNota, vincularManualmente, resetAll,
     participacao, setParticipacao,
     participacaoMultipliers, setParticipacaoMultipliers,
     theme, toggleTheme,
     effectiveMetaFinal,
   } = useGradeDashboard();
 
-  const importInputRef = useRef<HTMLInputElement>(null);
-
   if (!isHydrated) return null;
 
   const hasData = items.length > 0;
-
-  const handleExport = () => {
-    const json = exportState();
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "grades-inteli-state.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    file.text().then((json) => importState(json));
-    e.target.value = "";
-  };
 
   const upload = (
     <div className={styles.headerActions}>
@@ -91,12 +70,6 @@ export default function Home() {
             <MetricCard
               label="Total acumulado"
               value={fmtNota(metricas.acumuladoTotal, 3)}
-              sub={`de ${(Object.values(metricas.pesosPorTipo).reduce((a, b) => a + b, 0) * 10).toFixed(1)} pts possíveis`}
-              breakdowns={[
-                { label: "Pond.", value: fmtNota(metricas.acumuladoPonderadas, 3) },
-                { label: "Artef.", value: fmtNota(metricas.acumuladoArtefatos, 3) },
-                { label: "Prova", value: fmtNota(metricas.acumuladoProva, 3) },
-              ]}
             />
             <MetricCard
               label="Média até o momento"
@@ -105,60 +78,58 @@ export default function Home() {
                   ? fmtNota(metricas.mediaTotalAteOMomento)
                   : "—"
               }
-              breakdowns={[
-                { label: "Pond.", value: metricas.mediaPonderadasAteOMomento !== null ? fmtNota(metricas.mediaPonderadasAteOMomento) : "—" },
-                { label: "Artef.", value: metricas.mediaArtefatosAteOMomento !== null ? fmtNota(metricas.mediaArtefatosAteOMomento) : "—" },
-                { label: "Prova", value: metricas.mediaProvaAteOMomento !== null ? fmtNota(metricas.mediaProvaAteOMomento) : "—" },
-              ]}
-            />
-            <MetricCard
-              label={`Nota na prova p/ ${simulacao.metaFinal.toFixed(1)}`}
-              value={fmtNota(metricas.notaNecessariaProva)}
-              variant={
-                metricas.provaStatus === "aprovado"
-                  ? "success"
-                  : metricas.provaStatus === "exigente"
-                    ? "warning"
-                    : "danger"
-              }
-            />
-            <MetricCard
-              label="Projeção final"
-              value={fmtNota(metricas.acumuladoFinalProjetado)}
             />
           </div>
 
           <div className={styles.categoryCards}>
-            <MetricCard
-              label="Ponderadas"
-              value={fmtNota(metricas.acumuladoPonderadas, 3)}
-              sub={
-                metricas.mediaPonderadasAteOMomento !== null
-                  ? `média ${fmtNota(metricas.mediaPonderadasAteOMomento)}`
-                  : "sem nota"
-              }
-              accent="var(--blue)"
-            />
-            <MetricCard
-              label="Artefatos"
-              value={fmtNota(metricas.acumuladoArtefatos, 3)}
-              sub={
-                metricas.mediaArtefatosAteOMomento !== null
-                  ? `média ${fmtNota(metricas.mediaArtefatosAteOMomento)}`
-                  : "sem nota"
-              }
-              accent="var(--green)"
-            />
-            <MetricCard
-              label="Prova"
-              value={fmtNota(metricas.acumuladoProva, 3)}
-              sub={
-                metricas.mediaProvaAteOMomento !== null
-                  ? `média ${fmtNota(metricas.mediaProvaAteOMomento)}`
-                  : "sem nota"
-              }
-              accent="var(--orange)"
-            />
+            <div className={styles.dualCard} style={{ borderTopColor: "var(--color-ponderada)" }}>
+              <span className={styles.dualLabel}>Ponderadas</span>
+              <div className={styles.dualBody}>
+                <div className={styles.dualCol}>
+                  <span className={styles.dualSubLabel}>Acumulado</span>
+                  <span className={styles.dualValue}>{fmtNota(metricas.acumuladoPonderadas, 3)}</span>
+                </div>
+                <div className={styles.dualDivider} />
+                <div className={styles.dualCol}>
+                  <span className={styles.dualSubLabel}>Até o momento</span>
+                  <span className={styles.dualValue}>
+                    {metricas.mediaPonderadasAteOMomento !== null ? fmtNota(metricas.mediaPonderadasAteOMomento) : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.dualCard} style={{ borderTopColor: "var(--color-artefato)" }}>
+              <span className={styles.dualLabel}>Artefatos</span>
+              <div className={styles.dualBody}>
+                <div className={styles.dualCol}>
+                  <span className={styles.dualSubLabel}>Acumulado</span>
+                  <span className={styles.dualValue}>{fmtNota(metricas.acumuladoArtefatos, 3)}</span>
+                </div>
+                <div className={styles.dualDivider} />
+                <div className={styles.dualCol}>
+                  <span className={styles.dualSubLabel}>Até o momento</span>
+                  <span className={styles.dualValue}>
+                    {metricas.mediaArtefatosAteOMomento !== null ? fmtNota(metricas.mediaArtefatosAteOMomento) : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.dualCard} style={{ borderTopColor: "var(--color-prova)" }}>
+              <span className={styles.dualLabel}>Prova</span>
+              <div className={styles.dualBody}>
+                <div className={styles.dualCol}>
+                  <span className={styles.dualSubLabel}>Acumulado</span>
+                  <span className={styles.dualValue}>{fmtNota(metricas.acumuladoProva, 3)}</span>
+                </div>
+                <div className={styles.dualDivider} />
+                <div className={styles.dualCol}>
+                  <span className={styles.dualSubLabel}>Até o momento</span>
+                  <span className={styles.dualValue}>
+                    {metricas.mediaProvaAteOMomento !== null ? fmtNota(metricas.mediaProvaAteOMomento) : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className={styles.chartsRow}>
@@ -184,32 +155,27 @@ export default function Home() {
             />
           )}
 
-          <div className={styles.actions}>
-            <button className={styles.actionBtn} onClick={handleExport}>
-              Exportar JSON
-            </button>
-            <button
-              className={styles.actionBtn}
-              onClick={() => importInputRef.current?.click()}
-            >
-              Importar JSON
-            </button>
-            <input
-              ref={importInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleImportJson}
-              style={{ display: "none" }}
-            />
-            <button
-              className={`${styles.actionBtn} ${styles.dangerBtn}`}
-              onClick={() => {
-                if (confirm("Resetar todos os dados?")) resetAll();
-              }}
-            >
-              Resetar
-            </button>
-            <span className={styles.credit}>Criado por Henrique Barone</span>
+          <div className={styles.footer}>
+            <span className={styles.credit}>
+              Criado por{" "}
+              <a
+                href="https://github.com/henriquegpb"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.creditLink}
+              >
+                Henrique Barone
+              </a>
+              {" · inspirado na famosa "}
+              <a
+                href="https://docs.google.com/spreadsheets/d/1PmS8W2Wg32J6AM097Om1dvlKDnFfx0FmIF6EjEY7H7E/edit?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.creditLink}
+              >
+                planilha
+              </a>
+            </span>
           </div>
         </div>
 

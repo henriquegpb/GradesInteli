@@ -6,12 +6,22 @@ import ActivitiesFilters from "./ActivitiesFilters";
 import styles from "./ActivitiesTable.module.css";
 
 const TYPE_COLORS: Record<string, string> = {
-  Ponderada: "var(--blue)",
-  Artefato: "var(--green)",
-  Prova: "var(--orange)",
+  Ponderada: "var(--color-ponderada)",
+  Artefato: "var(--color-artefato)",
+  Prova: "var(--color-prova)",
   Aula: "var(--purple)",
   Grupo: "var(--teal)",
 };
+
+function pesoColor(peso: number): string {
+  const pct = Math.round(peso * 100);
+  if (pct <= 1) return "var(--green)";
+  if (pct <= 2) return "var(--yellow)";
+  if (pct <= 3) return "var(--orange)";
+  if (pct <= 4) return "var(--red)";
+  if (pct <= 5) return "#991111";
+  return "var(--purple)";
+}
 
 interface Props {
   items: ItemNota[];
@@ -121,7 +131,7 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
                   </span>
                 </td>
                 <td className={styles.name}>{item.atividade}</td>
-                <td className={styles.mono}>{fmtPeso(item.peso)}</td>
+                <td className={styles.mono} style={{ color: pesoColor(item.peso) }}>{fmtPeso(item.peso)}</td>
                 <td>
                   <input
                     className={styles.notaInput}
