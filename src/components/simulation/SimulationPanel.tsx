@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { SimulacaoConfig, MetricasModulo, ParticipacaoLetra, ParticipacaoMultipliers } from "@/types/grades";
 import { fmtNota } from "@/lib/format";
 import { Pencil, X, Settings } from "lucide-react";
+import NumericInput from "@/components/ui/NumericInput";
 import styles from "./SimulationPanel.module.css";
 
 const LETRAS: ParticipacaoLetra[] = ["A", "B", "C", "D", "E"];
@@ -52,7 +53,7 @@ export default function SimulationPanel({
     <div className={styles.wrapper}>
       <div className={styles.body}>
         <div className={styles.leftCol}>
-          <span className={styles.sectionLabel}>Nota para faltantes</span>
+          <span className={styles.sectionLabel}>Nota para atividades restantes</span>
           <div className={styles.pillRow}>
             <button
               className={`${styles.pill} ${!simulacao.manterAteOMomento ? styles.pillActive : ""}`}
@@ -74,20 +75,26 @@ export default function SimulationPanel({
 
           {!simulacao.manterAteOMomento && (
             <div className={styles.inputRow}>
-              <input
-                className={styles.input}
-                type="number"
-                min={0}
-                max={10}
-                step={0.5}
-                value={simulacao.notaAssumida}
-                onChange={(e) =>
-                  onSimulacaoChange({
-                    ...simulacao,
-                    notaAssumida: parseFloat(e.target.value) || 0,
-                  })
-                }
-              />
+              <label className={styles.inputGroup}>
+                <span className={styles.inputLabel} style={{ color: "var(--color-ponderada)" }}>Pond.</span>
+                <NumericInput
+                  className={styles.input}
+                  value={simulacao.notaAssumidaPonderada}
+                  onChange={(v) =>
+                    onSimulacaoChange({ ...simulacao, notaAssumidaPonderada: v })
+                  }
+                />
+              </label>
+              <label className={styles.inputGroup}>
+                <span className={styles.inputLabel} style={{ color: "var(--color-artefato)" }}>Artef.</span>
+                <NumericInput
+                  className={styles.input}
+                  value={simulacao.notaAssumidaArtefato}
+                  onChange={(v) =>
+                    onSimulacaoChange({ ...simulacao, notaAssumidaArtefato: v })
+                  }
+                />
+              </label>
             </div>
           )}
 
@@ -119,18 +126,11 @@ export default function SimulationPanel({
                 {LETRAS.map((l) => (
                   <label key={l} className={styles.configRow}>
                     <span className={styles.configLetter}>{l}</span>
-                    <input
+                    <NumericInput
                       className={styles.configInput}
-                      type="number"
-                      step={0.01}
-                      min={0}
-                      max={2}
                       value={multipliers[l]}
-                      onChange={(e) =>
-                        onMultipliersChange({
-                          ...multipliers,
-                          [l]: parseFloat(e.target.value) || 0,
-                        })
+                      onChange={(v) =>
+                        onMultipliersChange({ ...multipliers, [l]: v })
                       }
                     />
                   </label>

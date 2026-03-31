@@ -4,6 +4,12 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function assumedNota(tipo: string, simulacao: SimulacaoConfig): number {
+  if (tipo === "Ponderada") return simulacao.notaAssumidaPonderada;
+  if (tipo === "Artefato") return simulacao.notaAssumidaArtefato;
+  return simulacao.notaAssumida;
+}
+
 export function acumuladoPorTipo(items: ItemNota[], tipo: string): number {
   return items
     .filter((item) => item.tipo === tipo)
@@ -70,7 +76,7 @@ export function notaNecessariaNaProva(
         ? item.nota
         : simulacao.manterAteOMomento
           ? media
-          : simulacao.notaAssumida;
+          : assumedNota(item.tipo, simulacao);
     return acc + item.peso * notaUsada;
   }, 0);
 
@@ -93,7 +99,7 @@ export function acumuladoFinalProjetado(
     } else if (item.nota !== 0) {
       notaUsada = item.nota;
     } else {
-      notaUsada = simulacao.manterAteOMomento ? media : simulacao.notaAssumida;
+      notaUsada = simulacao.manterAteOMomento ? media : assumedNota(item.tipo, simulacao);
     }
     return acc + item.peso * notaUsada;
   }, 0);
@@ -129,7 +135,7 @@ export function calcularMetricas(
           ? item.nota
           : simulacao.manterAteOMomento
             ? media
-            : simulacao.notaAssumida;
+            : assumedNota(item.tipo, simulacao);
       return acc + item.peso * notaUsada;
     }, 0);
     return (meta - somaSemProva) / pesoProva;

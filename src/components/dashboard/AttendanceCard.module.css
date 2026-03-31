@@ -6,6 +6,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cardDragOver {
+  border-color: #0777DB;
+  background: rgba(7, 119, 219, 0.06);
 }
 
 

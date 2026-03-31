@@ -50,6 +50,8 @@ export interface AtividadeNaoReconhecida {
 
 export interface SimulacaoConfig {
   notaAssumida: number;
+  notaAssumidaPonderada: number;
+  notaAssumidaArtefato: number;
   manterAteOMomento: boolean;
   metaFinal: number;
 }

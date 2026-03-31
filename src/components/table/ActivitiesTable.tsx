@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import type { ItemNota } from "@/types/grades";
 import { fmtNota, fmtPeso } from "@/lib/format";
+import NumericInput from "@/components/ui/NumericInput";
 import ActivitiesFilters from "./ActivitiesFilters";
 import styles from "./ActivitiesTable.module.css";
 
@@ -135,17 +136,10 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
                 <td className={styles.name}>{item.atividade}</td>
                 <td className={styles.mono} style={{ color: pesoColor(item.peso) }}>{fmtPeso(item.peso)}</td>
                 <td>
-                  <input
+                  <NumericInput
                     className={styles.notaInput}
-                    type="number"
-                    min={0}
-                    max={10}
-                    step={0.1}
                     value={item.nota}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value);
-                      if (!isNaN(v)) onNotaChange(item.id, v);
-                    }}
+                    onChange={(v) => onNotaChange(item.id, v)}
                   />
                 </td>
                 <td>

@@ -5,6 +5,8 @@ const STORAGE_KEY = "grades-inteli-state";
 
 const DEFAULT_SIMULACAO: SimulacaoConfig = {
   notaAssumida: 7,
+  notaAssumidaPonderada: 7,
+  notaAssumidaArtefato: 7,
   manterAteOMomento: true,
   metaFinal: 7,
 };

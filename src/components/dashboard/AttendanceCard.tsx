@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
 import type { AttendanceData } from "@/types/grades";
 import styles from "./AttendanceCard.module.css";
 
@@ -11,6 +11,8 @@ interface Props {
 
 export default function AttendanceCard({ attendance, onImport, error }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const dragCounter = useRef(0);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -18,15 +20,58 @@ export default function AttendanceCard({ attendance, onImport, error }: Props) {
     e.target.value = "";
   };
 
+  const onCardDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    setDragOver(true);
+  }, []);
+
+  const onCardDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const onCardDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setDragOver(false);
+    }
+  }, []);
+
+  const onCardDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current = 0;
+      setDragOver(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file && (file.name.endsWith(".html") || file.name.endsWith(".htm"))) {
+        onImport(file);
+      }
+    },
+    [onImport]
+  );
+
+  const dragProps = {
+    onDragEnter: onCardDragEnter,
+    onDragOver: onCardDragOver,
+    onDragLeave: onCardDragLeave,
+    onDrop: onCardDrop,
+  };
+
   if (!attendance) {
     return (
-      <div className={styles.card}>
+      <div className={`${styles.card} ${dragOver ? styles.cardDragOver : ""}`} {...dragProps}>
         <div className={styles.emptyBody}>
           <button className={styles.importBtn} onClick={() => inputRef.current?.click()}>
             Importar Faltas
           </button>
           <span className={styles.hint}>
-            Salve a página <strong>Faltas</strong> do Adalove como HTML
+            Salve a página <strong>Faltas</strong> do Adalove como HTML, ou arraste aqui
           </span>
           {error && <span className={styles.error}>{error}</span>}
         </div>
@@ -40,7 +85,7 @@ export default function AttendanceCard({ attendance, onImport, error }: Props) {
   const critical = attendance.faltasRestantes === 0;
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${dragOver ? styles.cardDragOver : ""}`} {...dragProps}>
       <div className={styles.bigRow}>
         <div className={styles.bigStat}>
           <span className={`${styles.bigValue} ${critical ? styles.critical : danger ? styles.danger : ""}`}>

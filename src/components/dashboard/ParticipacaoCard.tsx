@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { ParticipacaoLetra, ParticipacaoMultipliers } from "@/types/grades";
+import NumericInput from "@/components/ui/NumericInput";
 import styles from "./ParticipacaoCard.module.css";
 
 const LETRAS: ParticipacaoLetra[] = ["A", "B", "C", "D", "E"];
@@ -61,18 +62,11 @@ export default function ParticipacaoCard({
           {LETRAS.map((l) => (
             <label key={l} className={styles.configRow}>
               <span className={styles.configLetter}>{l}</span>
-              <input
+              <NumericInput
                 className={styles.configInput}
-                type="number"
-                step={0.01}
-                min={0}
-                max={2}
                 value={multipliers[l]}
-                onChange={(e) =>
-                  onMultipliersChange({
-                    ...multipliers,
-                    [l]: parseFloat(e.target.value) || 0,
-                  })
+                onChange={(v) =>
+                  onMultipliersChange({ ...multipliers, [l]: v })
                 }
               />
             </label>

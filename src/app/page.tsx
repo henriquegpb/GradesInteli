@@ -1,4 +1,5 @@
 "use client";
+import { useState, useCallback, useRef } from "react";
 import { useGradeDashboard } from "@/hooks/useGradeDashboard";
 import StudentHeader from "@/components/dashboard/StudentHeader";
 import HtmlUpload from "@/components/import/HtmlUpload";
@@ -24,6 +25,41 @@ export default function Home() {
     attendance, importAttendanceHtml, attendanceError,
   } = useGradeDashboard();
 
+  const [dragging, setDragging] = useState(false);
+  const dragCounter = useRef(0);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    setDragging(true);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      dragCounter.current = 0;
+      setDragging(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file && (file.name.endsWith(".html") || file.name.endsWith(".htm"))) {
+        importHtml(file);
+      }
+    },
+    [importHtml]
+  );
+
   if (!isHydrated) return null;
 
   const hasData = items.length > 0;
@@ -43,14 +79,29 @@ export default function Home() {
 
   if (!hasData || !metricas) {
     return (
-      <div className={styles.emptyContainer}>
+      <div
+        className={styles.emptyContainer}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <StudentHeader
           studentName={studentName}
           lastImportAt={lastImportAt}
           uploadSlot={upload}
         />
-        <div className={styles.emptyState}>
-          <h2 className={styles.emptyTitle}>Como usar</h2>
+        <div className={`${styles.emptyState} ${dragging ? styles.emptyDragging : ""}`}>
+          <div className={styles.dropZone}>
+            <span className={styles.dropIcon}>↓</span>
+            <span className={styles.dropText}>Arraste o arquivo HTML aqui</span>
+          </div>
+
+          <div className={styles.dropDivider}>
+            <span>ou</span>
+          </div>
+
+          <h2 className={styles.emptyTitle}>Como exportar do Adalove</h2>
           <ol className={styles.emptySteps}>
             <li>
               Acesse o{" "}
@@ -75,8 +126,8 @@ export default function Home() {
               <em>&quot;Página da Web completa&quot;</em>.
             </li>
             <li>
-              Clique em <strong>Importar HTML</strong> acima e selecione o
-              arquivo <code>.html</code> salvo.
+              Arraste o arquivo <code>.html</code> salvo para cá, ou clique em{" "}
+              <strong>Importar HTML</strong> acima.
             </li>
           </ol>
           <p className={styles.emptyHint}>
@@ -88,7 +139,18 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.shell}>
+    <div
+      className={styles.shell}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {dragging && (
+        <div className={styles.dragOverlay}>
+          <span className={styles.dragOverlayText}>Solte para atualizar notas</span>
+        </div>
+      )}
       <StudentHeader
         studentName={studentName}
         lastImportAt={lastImportAt}

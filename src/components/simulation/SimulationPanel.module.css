@@ -72,6 +72,21 @@
 
 .inputRow {
   margin-top: -0.2rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inputLabel {
+  font-size: 0.55rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .input {

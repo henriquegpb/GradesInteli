@@ -9,17 +9,68 @@
 }
 
 .emptyContainer {
-  max-width: 540px;
-  margin: 0 auto;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 3rem 1.5rem;
+}
+
+.emptyContainer > * {
+  width: 100%;
+  max-width: 540px;
 }
 
 .emptyState {
   margin-top: 2.5rem;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px dashed var(--border);
   border-radius: 10px;
   padding: 1.75rem 2rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.emptyDragging {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 0;
+}
+
+.dropIcon {
+  font-size: 1.5rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.dropText {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.dropDivider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.dropDivider::before,
+.dropDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .emptyTitle {
@@ -92,6 +143,27 @@
   margin: 0;
   border-top: 1px solid var(--border-light, rgba(255,255,255,0.06));
   padding-top: 0.75rem;
+}
+
+.dragOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dragOverlayText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--accent);
+  padding: 0.6rem 1.6rem;
+  border-radius: 10px;
+  letter-spacing: 0.01em;
 }
 
 .dashboard {
