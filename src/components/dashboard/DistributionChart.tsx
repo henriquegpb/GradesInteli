@@ -11,9 +11,10 @@ const TYPE_COLORS: Record<string, string> = {
 
 interface Props {
   pesosPorTipo: Record<string, number>;
+  bare?: boolean;
 }
 
-export default function DistributionChart({ pesosPorTipo }: Props) {
+export default function DistributionChart({ pesosPorTipo, bare }: Props) {
   const entries = Object.entries(pesosPorTipo).filter(([, v]) => v > 0);
   const total = entries.reduce((acc, [, v]) => acc + v, 0);
 
@@ -33,46 +34,50 @@ export default function DistributionChart({ pesosPorTipo }: Props) {
     return { tipo, peso, pct, dashLength, dashOffset };
   });
 
-  return (
-    <div className={styles.wrapper}>
+  const content = (
+    <>
       <h3 className={styles.title}>Distribuição de Nota no Módulo</h3>
       <div className={styles.body}>
-      <div className={styles.chartContainer}>
-        <svg viewBox={`0 0 ${size} ${size}`} className={styles.svg}>
+        <div className={styles.chartContainer}>
+          <svg viewBox={`0 0 ${size} ${size}`} className={styles.svg}>
+            {segments.map((s) => (
+              <circle
+                key={s.tipo}
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke={TYPE_COLORS[s.tipo] || "var(--text-muted)"}
+                strokeWidth={strokeWidth}
+                strokeDasharray={`${s.dashLength} ${circumference - s.dashLength}`}
+                strokeDashoffset={s.dashOffset}
+                className={styles.segment}
+              />
+            ))}
+          </svg>
+          <span className={styles.centerLabel}>
+            {(total * 100).toFixed(0)}%
+          </span>
+        </div>
+        <div className={styles.legend}>
           {segments.map((s) => (
-            <circle
-              key={s.tipo}
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke={TYPE_COLORS[s.tipo] || "var(--text-muted)"}
-              strokeWidth={strokeWidth}
-              strokeDasharray={`${s.dashLength} ${circumference - s.dashLength}`}
-              strokeDashoffset={s.dashOffset}
-              className={styles.segment}
-            />
+            <div key={s.tipo} className={styles.legendItem}>
+              <span
+                className={styles.dot}
+                style={{ background: TYPE_COLORS[s.tipo] || "var(--text-muted)" }}
+              />
+              <span className={styles.legendLabel}>{s.tipo}</span>
+              <span className={styles.legendValue}>
+                {(s.pct * 100).toFixed(0)}%
+              </span>
+            </div>
           ))}
-        </svg>
-        <span className={styles.centerLabel}>
-          {(total * 100).toFixed(0)}%
-        </span>
+        </div>
       </div>
-      <div className={styles.legend}>
-        {segments.map((s) => (
-          <div key={s.tipo} className={styles.legendItem}>
-            <span
-              className={styles.dot}
-              style={{ background: TYPE_COLORS[s.tipo] || "var(--text-muted)" }}
-            />
-            <span className={styles.legendLabel}>{s.tipo}</span>
-            <span className={styles.legendValue}>
-              {(s.pct * 100).toFixed(0)}%
-            </span>
-          </div>
-        ))}
-      </div>
-      </div>
-    </div>
+    </>
   );
+
+  if (bare) return content;
+
+  return <div className={styles.wrapper}>{content}</div>;
 }

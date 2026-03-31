@@ -20,6 +20,7 @@ function defaultState(): AppState {
     participacao: "B",
     participacaoMultipliers: DEFAULT_PARTICIPACAO_MULTIPLIERS,
     theme: "dark",
+    attendance: null,
   };
 }
 

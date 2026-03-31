@@ -5,6 +5,7 @@ import HtmlUpload from "@/components/import/HtmlUpload";
 import MetricCard from "@/components/dashboard/MetricCard";
 import DistributionChart from "@/components/dashboard/DistributionChart";
 import ProgressBars from "@/components/dashboard/ProgressBars";
+import AttendanceCard from "@/components/dashboard/AttendanceCard";
 import ActivitiesTable from "@/components/table/ActivitiesTable";
 import UnknownActivitiesPanel from "@/components/table/UnknownActivitiesPanel";
 import SimulationPanel from "@/components/simulation/SimulationPanel";
@@ -20,6 +21,7 @@ export default function Home() {
     participacaoMultipliers, setParticipacaoMultipliers,
     theme, toggleTheme,
     effectiveMetaFinal,
+    attendance, importAttendanceHtml, attendanceError,
   } = useGradeDashboard();
 
   if (!isHydrated) return null;
@@ -163,8 +165,20 @@ export default function Home() {
           </div>
 
           <div className={styles.chartsRow}>
-            <DistributionChart pesosPorTipo={metricas.pesosPorTipo} />
-            <ProgressBars items={items} />
+            <div className={styles.combinedCard}>
+              <div className={styles.combinedLeft}>
+                <DistributionChart pesosPorTipo={metricas.pesosPorTipo} bare />
+              </div>
+              <div className={styles.combinedDivider} />
+              <div className={styles.combinedRight}>
+                <ProgressBars items={items} bare />
+              </div>
+            </div>
+            <AttendanceCard
+              attendance={attendance}
+              onImport={importAttendanceHtml}
+              error={attendanceError}
+            />
           </div>
 
           <SimulationPanel

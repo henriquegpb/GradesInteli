@@ -98,6 +98,17 @@ export interface ParsedAdalovePayload {
   activities: AtividadeImportada[];
 }
 
+export interface AttendanceData {
+  totalUnits: number;
+  presentes: number;
+  faltas: number;
+  justificados: number;
+  futuros: number;
+  maxFaltasAllowed: number;
+  faltasRestantes: number;
+  percentFaltas: number;
+}
+
 export interface AppState {
   items: ItemNota[];
   naoReconhecidas: AtividadeNaoReconhecida[];
@@ -108,4 +119,5 @@ export interface AppState {
   participacao: ParticipacaoLetra;
   participacaoMultipliers: ParticipacaoMultipliers;
   theme: "dark" | "light";
+  attendance: AttendanceData | null;
 }

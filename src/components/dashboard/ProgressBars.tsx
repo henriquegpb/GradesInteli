@@ -12,9 +12,10 @@ const TYPE_COLORS: Record<string, string> = {
 
 interface Props {
   items: ItemNota[];
+  bare?: boolean;
 }
 
-export default function ProgressBars({ items }: Props) {
+export default function ProgressBars({ items, bare }: Props) {
   const tipos = Object.keys(TYPE_COLORS);
   const data = tipos
     .map((tipo) => {
@@ -29,8 +30,8 @@ export default function ProgressBars({ items }: Props) {
 
   if (data.length === 0) return null;
 
-  return (
-    <div className={styles.wrapper}>
+  const content = (
+    <>
       <h3 className={styles.title}>Progresso por categoria</h3>
       <div className={styles.bars}>
         {data.map((d) => (
@@ -48,6 +49,10 @@ export default function ProgressBars({ items }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
+
+  if (bare) return content;
+
+  return <div className={styles.wrapper}>{content}</div>;
 }
