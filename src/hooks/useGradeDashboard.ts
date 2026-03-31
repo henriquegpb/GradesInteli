@@ -9,10 +9,11 @@ import type {
   ParticipacaoLetra,
   ParticipacaoMultipliers,
   AttendanceData,
+  AttendanceRow,
 } from "@/types/grades";
 import { DEFAULT_PARTICIPACAO_MULTIPLIERS } from "@/types/grades";
 import { parseAdaloveHtml } from "@/lib/adalove-parser";
-import { parseAttendanceHtml } from "@/lib/attendance-parser";
+import { extractAttendanceRows, summarizeAttendanceRows } from "@/lib/attendance-parser";
 import { calcularMetricas } from "@/lib/grade-calculator";
 import { loadState, saveState, clearState, DEFAULT_SIMULACAO } from "@/lib/storage";
 
@@ -30,6 +31,8 @@ export function useGradeDashboard() {
     useState<ParticipacaoMultipliers>(DEFAULT_PARTICIPACAO_MULTIPLIERS);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [attendance, setAttendance] = useState<AttendanceData | null>(null);
+  const [attendanceRows, setAttendanceRows] = useState<AttendanceRow[] | null>(null);
+  const [attendanceUltimaPeso2, setAttendanceUltimaPeso2] = useState(false);
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,7 +48,14 @@ export function useGradeDashboard() {
     setParticipacao(state.participacao);
     setParticipacaoMultipliers(state.participacaoMultipliers);
     setTheme(state.theme);
-    if (state.attendance) setAttendance(state.attendance);
+    const ultima = state.attendanceUltimaPeso2 ?? false;
+    setAttendanceUltimaPeso2(ultima);
+    if (state.attendanceRows && state.attendanceRows.length > 0) {
+      setAttendanceRows(state.attendanceRows);
+      setAttendance(summarizeAttendanceRows(state.attendanceRows, ultima));
+    } else if (state.attendance) {
+      setAttendance(state.attendance);
+    }
     document.documentElement.setAttribute("data-theme", state.theme);
     setIsHydrated(true);
   }, []);
@@ -63,8 +73,17 @@ export function useGradeDashboard() {
       participacaoMultipliers,
       theme,
       attendance,
+      attendanceRows,
+      attendanceUltimaPeso2,
     });
-  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, isHydrated]);
+  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, attendanceRows, attendanceUltimaPeso2, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (attendanceRows && attendanceRows.length > 0) {
+      setAttendance(summarizeAttendanceRows(attendanceRows, attendanceUltimaPeso2));
+    }
+  }, [isHydrated, attendanceRows, attendanceUltimaPeso2]);
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => {
@@ -120,13 +139,15 @@ export function useGradeDashboard() {
     setAttendanceError(null);
     try {
       const html = await file.text();
-      const summary = parseAttendanceHtml(html);
-      const { rows: _, ...data } = summary;
-      setAttendance(data);
+      setAttendanceRows(extractAttendanceRows(html));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erro ao importar faltas";
       setAttendanceError(msg);
     }
+  }, []);
+
+  const setAttendanceUltimaPeso2Flag = useCallback((v: boolean) => {
+    setAttendanceUltimaPeso2(v);
   }, []);
 
   const updateNota = useCallback((id: string, nota: number) => {
@@ -152,6 +173,8 @@ export function useGradeDashboard() {
     setParticipacao("B");
     setParticipacaoMultipliers(DEFAULT_PARTICIPACAO_MULTIPLIERS);
     setAttendance(null);
+    setAttendanceRows(null);
+    setAttendanceUltimaPeso2(false);
     setAttendanceError(null);
   }, []);
 
@@ -159,9 +182,10 @@ export function useGradeDashboard() {
     const state: AppState = {
       items, naoReconhecidas, simulacao, studentName, lastImportAt,
       vinculosManuais, participacao, participacaoMultipliers, theme, attendance,
+      attendanceRows, attendanceUltimaPeso2,
     };
     return JSON.stringify(state, null, 2);
-  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance]);
+  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, attendanceRows, attendanceUltimaPeso2]);
 
   const importState = useCallback((json: string) => {
     try {
@@ -174,6 +198,14 @@ export function useGradeDashboard() {
       setVinculosManuais(state.vinculosManuais || {});
       if (state.participacao) setParticipacao(state.participacao);
       if (state.participacaoMultipliers) setParticipacaoMultipliers(state.participacaoMultipliers);
+      if (state.attendanceRows?.length) {
+        setAttendanceRows(state.attendanceRows);
+      } else if (state.attendance) {
+        setAttendance(state.attendance);
+      }
+      if (state.attendanceUltimaPeso2 !== undefined) {
+        setAttendanceUltimaPeso2(state.attendanceUltimaPeso2);
+      }
     } catch {
       setImportError("JSON inválido");
     }
@@ -188,5 +220,6 @@ export function useGradeDashboard() {
     theme, toggleTheme,
     effectiveMetaFinal,
     attendance, importAttendanceHtml, attendanceError,
+    attendanceUltimaPeso2, setAttendanceUltimaPeso2Flag,
   };
 }

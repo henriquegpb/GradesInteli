@@ -23,6 +23,8 @@ function defaultState(): AppState {
     participacaoMultipliers: DEFAULT_PARTICIPACAO_MULTIPLIERS,
     theme: "dark",
     attendance: null,
+    attendanceRows: null,
+    attendanceUltimaPeso2: false,
   };
 }
 

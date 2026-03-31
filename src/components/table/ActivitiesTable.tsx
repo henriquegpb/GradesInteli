@@ -115,7 +115,6 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
               <th onClick={() => toggleSort("nota")} className={styles.sortable}>
                 Nota{sortIndicator("nota")}
               </th>
-              <th>Origem</th>
             </tr>
           </thead>
           <tbody>
@@ -141,15 +140,6 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
                     value={item.nota}
                     onChange={(v) => onNotaChange(item.id, v)}
                   />
-                </td>
-                <td>
-                  <span className={`${styles.originBadge} ${styles[item.matchStatus]}`}>
-                    {item.matchStatus === "matched"
-                      ? "auto"
-                      : item.matchStatus === "manual"
-                        ? "manual"
-                        : "catálogo"}
-                  </span>
                 </td>
               </tr>
             ))}

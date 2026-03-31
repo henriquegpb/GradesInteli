@@ -14,6 +14,79 @@
   background: rgba(7, 119, 219, 0.06);
 }
 
+.bottomRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.toggleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.ultimaLabel {
+  font-size: 0.52rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+
+.ultimaToggle {
+  display: inline-flex;
+  cursor: pointer;
+  align-items: center;
+}
+
+.ultimaCheckbox {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ultimaTrack {
+  display: block;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--border);
+  position: relative;
+  transition: background 0.15s;
+}
+
+.ultimaTrack::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.ultimaCheckbox:checked + .ultimaTrack {
+  background: rgba(7, 119, 219, 0.35);
+}
+
+.ultimaCheckbox:checked + .ultimaTrack::after {
+  transform: translateX(12px);
+  background: #0777DB;
+}
+
+.ultimaCheckbox:focus-visible + .ultimaTrack {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 
 .emptyBody {
   display: flex;
@@ -52,7 +125,7 @@
 }
 
 .updateBtn {
-  width: 100%;
+  flex: 1;
   padding: 0.3rem;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -64,7 +137,6 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   transition: border-color 0.15s, color 0.15s;
-  margin-top: auto;
 }
 
 .updateBtn:hover {

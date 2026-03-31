@@ -1,23 +1,6 @@
-export type PresencaStatus = "presente" | "falta" | "justificado" | "futuro";
+import type { PresencaStatus, AttendanceRow, AttendanceData } from "@/types/grades";
 
-export interface AttendanceRow {
-  atividade: string;
-  semana: string;
-  dia: string;
-  presencas: PresencaStatus[];
-}
-
-export interface AttendanceSummary {
-  rows: AttendanceRow[];
-  totalUnits: number;
-  presentes: number;
-  faltas: number;
-  justificados: number;
-  futuros: number;
-  maxFaltasAllowed: number;
-  faltasRestantes: number;
-  percentFaltas: number;
-}
+export type { PresencaStatus, AttendanceRow };
 
 function classifyIcon(iconId: string): PresencaStatus {
   if (iconId.includes("x-solido")) return "falta";
@@ -27,7 +10,12 @@ function classifyIcon(iconId: string): PresencaStatus {
   return "futuro";
 }
 
-export function parseAttendanceHtml(html: string): AttendanceSummary {
+function slotWeight(index: number, length: number, ultimaPeso2: boolean): number {
+  if (!ultimaPeso2 || length === 0) return 1;
+  return index === length - 1 ? 2 : 1;
+}
+
+export function extractAttendanceRows(html: string): AttendanceRow[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
@@ -59,20 +47,29 @@ export function parseAttendanceHtml(html: string): AttendanceSummary {
     rows.push({ atividade, semana, dia, presencas });
   });
 
+  return rows;
+}
+
+export function summarizeAttendanceRows(
+  rows: AttendanceRow[],
+  ultimaPresencaPeso2: boolean
+): AttendanceData {
   let presentes = 0;
   let faltas = 0;
   let justificados = 0;
   let futuros = 0;
 
   for (const row of rows) {
-    for (const p of row.presencas) {
+    const len = row.presencas.length;
+    row.presencas.forEach((p, i) => {
+      const w = slotWeight(i, len, ultimaPresencaPeso2);
       switch (p) {
-        case "presente": presentes++; break;
-        case "falta": faltas++; break;
-        case "justificado": justificados++; break;
-        case "futuro": futuros++; break;
+        case "presente": presentes += w; break;
+        case "falta": faltas += w; break;
+        case "justificado": justificados += w; break;
+        case "futuro": futuros += w; break;
       }
-    }
+    });
   }
 
   const totalUnits = presentes + faltas + justificados + futuros;
@@ -81,7 +78,6 @@ export function parseAttendanceHtml(html: string): AttendanceSummary {
   const percentFaltas = totalUnits > 0 ? (faltas / totalUnits) * 100 : 0;
 
   return {
-    rows,
     totalUnits,
     presentes,
     faltas,

@@ -100,6 +100,15 @@ export interface ParsedAdalovePayload {
   activities: AtividadeImportada[];
 }
 
+export type PresencaStatus = "presente" | "falta" | "justificado" | "futuro";
+
+export interface AttendanceRow {
+  atividade: string;
+  semana: string;
+  dia: string;
+  presencas: PresencaStatus[];
+}
+
 export interface AttendanceData {
   totalUnits: number;
   presentes: number;
@@ -122,4 +131,6 @@ export interface AppState {
   participacaoMultipliers: ParticipacaoMultipliers;
   theme: "dark" | "light";
   attendance: AttendanceData | null;
+  attendanceRows: AttendanceRow[] | null;
+  attendanceUltimaPeso2: boolean;
 }

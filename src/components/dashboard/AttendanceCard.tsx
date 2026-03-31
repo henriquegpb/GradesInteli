@@ -1,15 +1,24 @@
 "use client";
 import { useRef, useState, useCallback } from "react";
 import type { AttendanceData } from "@/types/grades";
+import { fmtAttendanceUnits } from "@/lib/format";
 import styles from "./AttendanceCard.module.css";
 
 interface Props {
   attendance: AttendanceData | null;
   onImport: (file: File) => void;
   error: string | null;
+  ultimaPeso2: boolean;
+  onUltimaPeso2Change: (v: boolean) => void;
 }
 
-export default function AttendanceCard({ attendance, onImport, error }: Props) {
+export default function AttendanceCard({
+  attendance,
+  onImport,
+  error,
+  ultimaPeso2,
+  onUltimaPeso2Change,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const dragCounter = useRef(0);
@@ -63,6 +72,25 @@ export default function AttendanceCard({ attendance, onImport, error }: Props) {
     onDrop: onCardDrop,
   };
 
+  const peso2Toggle = (
+    <div className={styles.toggleGroup}>
+      <span className={styles.ultimaLabel}>3º ano</span>
+      <label
+        className={styles.ultimaToggle}
+        title="3ª presença do dia conta em dobro nas faltas e no limite de 20%"
+      >
+        <input
+          type="checkbox"
+          role="switch"
+          checked={ultimaPeso2}
+          onChange={(e) => onUltimaPeso2Change(e.target.checked)}
+          className={styles.ultimaCheckbox}
+        />
+        <span className={styles.ultimaTrack} aria-hidden />
+      </label>
+    </div>
+  );
+
   if (!attendance) {
     return (
       <div className={`${styles.card} ${dragOver ? styles.cardDragOver : ""}`} {...dragProps}>
@@ -74,6 +102,9 @@ export default function AttendanceCard({ attendance, onImport, error }: Props) {
             Salve a página <strong>Faltas</strong> do Adalove como HTML, ou arraste aqui
           </span>
           {error && <span className={styles.error}>{error}</span>}
+        </div>
+        <div className={styles.bottomRow}>
+          {peso2Toggle}
         </div>
         <input ref={inputRef} type="file" accept=".html,.htm" hidden onChange={handleFile} />
       </div>
@@ -89,7 +120,7 @@ export default function AttendanceCard({ attendance, onImport, error }: Props) {
       <div className={styles.bigRow}>
         <div className={styles.bigStat}>
           <span className={`${styles.bigValue} ${critical ? styles.critical : danger ? styles.danger : ""}`}>
-            {attendance.faltasRestantes}
+            {fmtAttendanceUnits(attendance.faltasRestantes)}
           </span>
           <span className={styles.bigLabel}>faltas restantes</span>
         </div>
@@ -120,32 +151,36 @@ export default function AttendanceCard({ attendance, onImport, error }: Props) {
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotPresente}`} />
           <span className={styles.detailLabel}>Presente</span>
-          <span className={styles.detailValue}>{attendance.presentes}</span>
+          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.presentes)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotJustificado}`} />
           <span className={styles.detailLabel}>Justificado</span>
-          <span className={styles.detailValue}>{attendance.justificados}</span>
+          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.justificados)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotFalta}`} />
           <span className={styles.detailLabel}>Faltas</span>
-          <span className={styles.detailValue}>{attendance.faltas}</span>
+          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.faltas)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotFuturo}`} />
           <span className={styles.detailLabel}>A avaliar</span>
-          <span className={styles.detailValue}>{attendance.futuros}</span>
+          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.futuros)}</span>
         </div>
       </div>
 
       <div className={styles.meta}>
-        {evaluated}/{attendance.totalUnits} unidades · máx {attendance.maxFaltasAllowed} faltas (20%)
+        {fmtAttendanceUnits(evaluated)}/{fmtAttendanceUnits(attendance.totalUnits)} unidades · máx{" "}
+        {attendance.maxFaltasAllowed} faltas (20%)
       </div>
 
-      <button className={styles.updateBtn} onClick={() => inputRef.current?.click()}>
-        Atualizar Faltas
-      </button>
+      <div className={styles.bottomRow}>
+        {peso2Toggle}
+        <button className={styles.updateBtn} onClick={() => inputRef.current?.click()}>
+          Atualizar Faltas
+        </button>
+      </div>
       <input ref={inputRef} type="file" accept=".html,.htm" hidden onChange={handleFile} />
     </div>
   );
