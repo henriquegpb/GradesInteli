@@ -11,10 +11,8 @@ import type {
 } from "@/types/grades";
 import { DEFAULT_PARTICIPACAO_MULTIPLIERS } from "@/types/grades";
 import { parseAdaloveHtml } from "@/lib/adalove-parser";
-import { matchActivities, getCatalog } from "@/lib/catalog-matcher";
 import { calcularMetricas } from "@/lib/grade-calculator";
 import { loadState, saveState, clearState, DEFAULT_SIMULACAO } from "@/lib/storage";
-import { normalize } from "@/lib/normalize";
 
 export function useGradeDashboard() {
   const [items, setItems] = useState<ItemNota[]>([]);
@@ -87,10 +85,21 @@ export function useGradeDashboard() {
       try {
         const html = await file.text();
         const payload = parseAdaloveHtml(html);
-        const result = matchActivities(payload.activities, vinculosManuais);
 
-        setItems(result.items);
-        setNaoReconhecidas(result.naoReconhecidas);
+        const newItems: ItemNota[] = payload.activities.map((a, i) => ({
+          id: `imp-${i}`,
+          semana: a.semana,
+          tipo: a.tipo,
+          atividade: a.nome,
+          peso: a.pontos,
+          nota: a.nota,
+          origem: "importado" as const,
+          matchStatus: "matched" as const,
+        }));
+
+        setItems(newItems);
+        setNaoReconhecidas([]);
+        setVinculosManuais({});
         setStudentName(payload.studentName);
         setLastImportAt(new Date().toISOString());
       } catch (err: unknown) {
@@ -98,7 +107,7 @@ export function useGradeDashboard() {
         setImportError(msg);
       }
     },
-    [vinculosManuais]
+    []
   );
 
   const updateNota = useCallback((id: string, nota: number) => {
@@ -108,32 +117,8 @@ export function useGradeDashboard() {
   }, []);
 
   const vincularManualmente = useCallback(
-    (naoReconhecidaIndex: number, catalogIndex: number) => {
-      const nr = naoReconhecidas[naoReconhecidaIndex];
-      if (!nr) return;
-
-      const key = normalize(nr.importada.nome);
-      const newVinculos = { ...vinculosManuais, [key]: catalogIndex };
-      setVinculosManuais(newVinculos);
-
-      const allImported = [
-        ...items
-          .filter((i) => i.origem === "importado" || i.origem === "manual")
-          .map((i) => ({
-            semana: i.semana,
-            tipo: i.tipo,
-            nome: i.atividade,
-            pontos: i.peso,
-            nota: i.nota,
-          })),
-        ...naoReconhecidas.map((nr) => nr.importada),
-      ];
-
-      const result = matchActivities(allImported as any, newVinculos);
-      setItems(result.items);
-      setNaoReconhecidas(result.naoReconhecidas);
-    },
-    [items, naoReconhecidas, vinculosManuais]
+    (_naoReconhecidaIndex: number, _catalogIndex: number) => {},
+    []
   );
 
   const resetAll = useCallback(() => {
