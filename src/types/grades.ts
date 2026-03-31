@@ -19,7 +19,7 @@ export interface AtividadeImportada {
   tipo: TipoAtividade;
   nome: string;
   pontos: number;
-  nota: number;
+  nota: number | null;
 }
 
 export interface AtividadeCatalogo {
@@ -37,7 +37,7 @@ export interface ItemNota {
   tipo: TipoAtividade;
   atividade: string;
   peso: number;
-  nota: number;
+  nota: number | null;
   origem: "catalogo" | "importado" | "manual";
   matchStatus: "matched" | "unmatched" | "manual";
   catalogIndex?: number;

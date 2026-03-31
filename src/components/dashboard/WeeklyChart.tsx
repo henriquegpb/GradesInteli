@@ -12,9 +12,9 @@ export default function WeeklyChart({ items }: Props) {
     const map = new Map<string, { sum: number; count: number; weight: number }>();
 
     for (const item of items) {
-      if (!item.semana || item.nota === 0) continue;
+      if (!item.semana || item.nota === null) continue;
       const entry = map.get(item.semana) || { sum: 0, count: 0, weight: 0 };
-      entry.sum += item.nota * item.peso;
+      entry.sum += (item.nota ?? 0) * item.peso;
       entry.weight += item.peso;
       entry.count += 1;
       map.set(item.semana, entry);

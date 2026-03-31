@@ -81,7 +81,7 @@ export default function SimulationPanel({
                   className={styles.input}
                   value={simulacao.notaAssumidaPonderada}
                   onChange={(v) =>
-                    onSimulacaoChange({ ...simulacao, notaAssumidaPonderada: v })
+                    onSimulacaoChange({ ...simulacao, notaAssumidaPonderada: v ?? 0 })
                   }
                 />
               </label>
@@ -91,7 +91,7 @@ export default function SimulationPanel({
                   className={styles.input}
                   value={simulacao.notaAssumidaArtefato}
                   onChange={(v) =>
-                    onSimulacaoChange({ ...simulacao, notaAssumidaArtefato: v })
+                    onSimulacaoChange({ ...simulacao, notaAssumidaArtefato: v ?? 0 })
                   }
                 />
               </label>
@@ -130,7 +130,7 @@ export default function SimulationPanel({
                       className={styles.configInput}
                       value={multipliers[l]}
                       onChange={(v) =>
-                        onMultipliersChange({ ...multipliers, [l]: v })
+                        onMultipliersChange({ ...multipliers, [l]: v ?? 0 })
                       }
                     />
                   </label>

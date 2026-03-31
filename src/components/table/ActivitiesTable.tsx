@@ -26,7 +26,7 @@ function pesoColor(peso: number): string {
 
 interface Props {
   items: ItemNota[];
-  onNotaChange: (id: string, nota: number) => void;
+  onNotaChange: (id: string, nota: number | null) => void;
 }
 
 type SortKey = "original" | "semana" | "tipo" | "atividade" | "peso" | "nota";
@@ -62,9 +62,11 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
       result = [...result].sort((a, b) => {
         const va = a[sortKey];
         const vb = b[sortKey];
-        if (typeof va === "number" && typeof vb === "number")
-          return (va - vb) * dir;
-        return String(va).localeCompare(String(vb)) * dir;
+        const na = va ?? -1;
+        const nb = vb ?? -1;
+        if (typeof na === "number" && typeof nb === "number")
+          return (na - nb) * dir;
+        return String(na).localeCompare(String(nb)) * dir;
       });
     }
 
@@ -119,7 +121,7 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
           </thead>
           <tbody>
             {filtered.map((item) => (
-              <tr key={item.id} className={item.nota === 0 ? styles.pending : ""}>
+              <tr key={item.id} className={item.nota === null ? styles.pending : ""}>
                 <td className={styles.mono}>{item.semana}</td>
                 <td>
                   <span
@@ -139,6 +141,7 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
                     className={styles.notaInput}
                     value={item.nota}
                     onChange={(v) => onNotaChange(item.id, v)}
+                    allowNull
                   />
                 </td>
               </tr>

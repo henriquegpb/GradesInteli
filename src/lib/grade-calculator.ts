@@ -10,10 +10,14 @@ function assumedNota(tipo: string, simulacao: SimulacaoConfig): number {
   return simulacao.notaAssumida;
 }
 
+function isEvaluated(item: ItemNota): boolean {
+  return item.nota !== null;
+}
+
 export function acumuladoPorTipo(items: ItemNota[], tipo: string): number {
   return items
     .filter((item) => item.tipo === tipo)
-    .reduce((acc, item) => acc + item.peso * item.nota, 0);
+    .reduce((acc, item) => acc + item.peso * (item.nota ?? 0), 0);
 }
 
 export function mediaPonderadaAteOMomento(
@@ -22,25 +26,25 @@ export function mediaPonderadaAteOMomento(
 ): number | null {
   const filtrados = items.filter((item) => {
     const okTipo = tipo ? item.tipo === tipo : true;
-    return okTipo && item.nota !== 0;
+    return okTipo && isEvaluated(item);
   });
 
   const somaPesos = filtrados.reduce((acc, item) => acc + item.peso, 0);
   if (somaPesos === 0) return null;
 
-  const soma = filtrados.reduce((acc, item) => acc + item.peso * item.nota, 0);
+  const soma = filtrados.reduce((acc, item) => acc + item.peso * (item.nota ?? 0), 0);
   return soma / somaPesos;
 }
 
 export function pontosNaoAvaliados(items: ItemNota[]): number {
   return items
-    .filter((item) => item.nota === 0)
+    .filter((item) => !isEvaluated(item))
     .reduce((acc, item) => acc + item.peso, 0);
 }
 
 export function pontosAvaliados(items: ItemNota[]): number {
   return items
-    .filter((item) => item.nota !== 0)
+    .filter((item) => isEvaluated(item))
     .reduce((acc, item) => acc + item.peso, 0);
 }
 
@@ -71,12 +75,11 @@ export function notaNecessariaNaProva(
 
   const somaSemProva = items.reduce((acc, item) => {
     if (item.tipo === "Prova") return acc;
-    const notaUsada =
-      item.nota !== 0
-        ? item.nota
-        : simulacao.manterAteOMomento
-          ? media
-          : assumedNota(item.tipo, simulacao);
+    const notaUsada = isEvaluated(item)
+      ? (item.nota ?? 0)
+      : simulacao.manterAteOMomento
+        ? media
+        : assumedNota(item.tipo, simulacao);
     return acc + item.peso * notaUsada;
   }, 0);
 
@@ -96,8 +99,8 @@ export function acumuladoFinalProjetado(
     let notaUsada: number;
     if (item.tipo === "Prova") {
       notaUsada = notaProva;
-    } else if (item.nota !== 0) {
-      notaUsada = item.nota;
+    } else if (isEvaluated(item)) {
+      notaUsada = item.nota ?? 0;
     } else {
       notaUsada = simulacao.manterAteOMomento ? media : assumedNota(item.tipo, simulacao);
     }
@@ -130,12 +133,11 @@ export function calcularMetricas(
     const media = mediaTotalAtual ?? simulacao.notaAssumida;
     const somaSemProva = items.reduce((acc, item) => {
       if (item.tipo === "Prova") return acc;
-      const notaUsada =
-        item.nota !== 0
-          ? item.nota
-          : simulacao.manterAteOMomento
-            ? media
-            : assumedNota(item.tipo, simulacao);
+      const notaUsada = isEvaluated(item)
+        ? (item.nota ?? 0)
+        : simulacao.manterAteOMomento
+          ? media
+          : assumedNota(item.tipo, simulacao);
       return acc + item.peso * notaUsada;
     }, 0);
     return (meta - somaSemProva) / pesoProva;

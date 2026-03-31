@@ -150,7 +150,7 @@ export function useGradeDashboard() {
     setAttendanceUltimaPeso2(v);
   }, []);
 
-  const updateNota = useCallback((id: string, nota: number) => {
+  const updateNota = useCallback((id: string, nota: number | null) => {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, nota } : item))
     );

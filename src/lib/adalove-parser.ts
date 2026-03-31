@@ -56,9 +56,16 @@ function parseWithRegex(html: string): AtividadeImportada[] {
       pontos = isNaN(pontosRaw) ? 0 : pontosRaw / 100;
     }
 
-    const nota = notaMatch
-      ? parseFloat(cleanHtml(notaMatch[1]).replace(",", ".")) || 0
-      : 0;
+    let nota: number | null = null;
+    if (notaMatch) {
+      const notaText = cleanHtml(notaMatch[1]).replace(",", ".").trim();
+      if (notaText === "-" || notaText === "") {
+        nota = null;
+      } else {
+        const parsed = parseFloat(notaText);
+        nota = isNaN(parsed) ? null : parsed;
+      }
+    }
 
     if (nome) {
       atividades.push({ semana, tipo, nome, pontos, nota });
@@ -104,11 +111,16 @@ function parseWithDOM(html: string): AtividadeImportada[] {
       pontos = isNaN(raw) ? 0 : raw / 100;
     }
 
-    let nota = 0;
+    let nota: number | null = null;
     if (notaCell) {
       const span = notaCell.querySelector("span");
-      nota =
-        parseFloat((span?.textContent || "").trim().replace(",", ".")) || 0;
+      const notaText = (span?.textContent || "").trim().replace(",", ".");
+      if (notaText === "-" || notaText === "") {
+        nota = null;
+      } else {
+        const parsed = parseFloat(notaText);
+        nota = isNaN(parsed) ? null : parsed;
+      }
     }
 
     if (nome) {

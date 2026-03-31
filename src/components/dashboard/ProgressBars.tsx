@@ -22,9 +22,9 @@ export default function ProgressBars({ items, bare }: Props) {
       const ofType = items.filter((i) => i.tipo === tipo);
       if (ofType.length === 0) return null;
       const total = ofType.reduce((a, i) => a + i.peso, 0);
-      const graded = ofType.filter((i) => i.nota !== 0).reduce((a, i) => a + i.peso, 0);
+      const graded = ofType.filter((i) => i.nota !== null).reduce((a, i) => a + i.peso, 0);
       const pct = total > 0 ? graded / total : 0;
-      return { tipo, total, graded, pct, count: ofType.length, gradedCount: ofType.filter((i) => i.nota !== 0).length };
+      return { tipo, total, graded, pct, count: ofType.length, gradedCount: ofType.filter((i) => i.nota !== null).length };
     })
     .filter(Boolean) as { tipo: string; total: number; graded: number; pct: number; count: number; gradedCount: number }[];
 
