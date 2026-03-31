@@ -89,6 +89,7 @@ export interface MetricasModulo {
   provaStatus: "aprovado" | "exigente" | "impossivel";
   acumuladoFinalProjetado: number;
   pontosNaoAvaliados: number;
+  pontosAvaliados: number;
   pesosPorTipo: Record<string, number>;
 }
 

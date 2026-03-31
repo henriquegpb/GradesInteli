@@ -32,6 +32,12 @@ export function pontosNaoAvaliados(items: ItemNota[]): number {
     .reduce((acc, item) => acc + item.peso, 0);
 }
 
+export function pontosAvaliados(items: ItemNota[]): number {
+  return items
+    .filter((item) => item.nota !== 0)
+    .reduce((acc, item) => acc + item.peso, 0);
+}
+
 export function pesoTotalPorTipo(
   items: ItemNota[]
 ): Record<string, number> {
@@ -164,6 +170,7 @@ export function calcularMetricas(
     provaStatus,
     acumuladoFinalProjetado: finalProjetado,
     pontosNaoAvaliados: pontosNaoAvaliados(items),
+    pontosAvaliados: pontosAvaliados(items),
     pesosPorTipo: pesoTotalPorTipo(items),
   };
 }

@@ -17,12 +17,25 @@
   letter-spacing: 0.04em;
 }
 
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
 .value {
   font-family: var(--font-mono);
   font-size: 1.15rem;
   font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+}
+
+.valueSuffix {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
 }
 
 .sub {

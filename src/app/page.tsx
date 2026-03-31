@@ -48,8 +48,37 @@ export default function Home() {
           uploadSlot={upload}
         />
         <div className={styles.emptyState}>
-          <p className={styles.emptyText}>
-            Importe um HTML exportado do Adalove para começar.
+          <h2 className={styles.emptyTitle}>Como usar</h2>
+          <ol className={styles.emptySteps}>
+            <li>
+              Acesse o{" "}
+              <a
+                href="https://adalove.inteli.edu.br"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.emptyLink}
+              >
+                Adalove
+              </a>{" "}
+              e vá até a página <strong>Notas</strong>.
+            </li>
+            <li>
+              Certifique-se de que a <strong>grade de notas</strong> está visível
+              (todas as atividades e pontuações carregadas).
+            </li>
+            <li>
+              Salve a página como HTML:{" "}
+              <kbd className={styles.kbd}>Ctrl+S</kbd> (Windows) ou{" "}
+              <kbd className={styles.kbd}>⌘+S</kbd> (Mac) e escolha{" "}
+              <em>&quot;Página da Web completa&quot;</em>.
+            </li>
+            <li>
+              Clique em <strong>Importar HTML</strong> acima e selecione o
+              arquivo <code>.html</code> salvo.
+            </li>
+          </ol>
+          <p className={styles.emptyHint}>
+            Seus dados ficam salvos no navegador — nada é enviado para nenhum servidor.
           </p>
         </div>
       </div>
@@ -70,6 +99,7 @@ export default function Home() {
             <MetricCard
               label="Total acumulado"
               value={fmtNota(metricas.acumuladoTotal, 3)}
+              valueSuffix={`/ ${fmtNota(metricas.pontosAvaliados * 10, 3)} avaliados`}
             />
             <MetricCard
               label="Média até o momento"

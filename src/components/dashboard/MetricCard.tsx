@@ -10,6 +10,7 @@ interface Breakdown {
 interface Props {
   label: string;
   value: string;
+  valueSuffix?: string;
   sub?: string;
   accent?: string;
   variant?: "default" | "success" | "warning" | "danger";
@@ -19,6 +20,7 @@ interface Props {
 export default function MetricCard({
   label,
   value,
+  valueSuffix,
   sub,
   accent,
   variant = "default",
@@ -30,7 +32,10 @@ export default function MetricCard({
       style={accent ? { borderTopColor: accent } : undefined}
     >
       <span className={styles.label}>{label}</span>
-      <span className={styles.value}>{value}</span>
+      <span className={styles.valueRow}>
+        <span className={styles.value}>{value}</span>
+        {valueSuffix && <span className={styles.valueSuffix}>{valueSuffix}</span>}
+      </span>
       {sub && <span className={styles.sub}>{sub}</span>}
       {breakdowns && breakdowns.length > 0 && (
         <div className={styles.breakdowns}>

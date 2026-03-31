@@ -9,19 +9,89 @@
 }
 
 .emptyContainer {
-  max-width: 600px;
+  max-width: 540px;
   margin: 0 auto;
   padding: 3rem 1.5rem;
 }
 
 .emptyState {
-  text-align: center;
-  padding: 4rem 1rem;
+  margin-top: 2.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.75rem 2rem;
 }
 
-.emptyText {
+.emptyTitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+}
+
+.emptySteps {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 0 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.emptySteps li {
+  counter-increment: step;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding-left: 1.8rem;
+  position: relative;
+}
+
+.emptySteps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.62rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.emptyLink:hover {
+  text-decoration: underline;
+}
+
+.kbd {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.emptyHint {
+  font-size: 0.68rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  margin: 0;
+  border-top: 1px solid var(--border-light, rgba(255,255,255,0.06));
+  padding-top: 0.75rem;
 }
 
 .dashboard {
