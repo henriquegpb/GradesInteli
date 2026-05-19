@@ -71,6 +71,16 @@ body {
   overflow: hidden;
 }
 
+@media (max-width: 900px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg);

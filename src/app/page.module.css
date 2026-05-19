@@ -356,19 +356,23 @@
 @media (max-width: 900px) {
   .shell {
     height: auto;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .dashboard {
     grid-template-columns: 1fr;
+    min-width: 0;
   }
 
   .main {
     overflow: visible;
+    min-width: 0;
   }
 
   .sidebar {
     max-height: 420px;
+    min-width: 0;
   }
 
   .metricsGrid {
@@ -385,6 +389,21 @@
 
   .combinedCard {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .headerActions {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .sidebar {
+    max-height: none;
+  }
+
+  .footer {
+    text-align: center;
   }
 }
 

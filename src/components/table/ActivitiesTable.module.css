@@ -143,3 +143,14 @@
   font-family: var(--font-mono);
   flex-shrink: 0;
 }
+
+@media (max-width: 600px) {
+  .tableScroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .name {
+    max-width: 140px;
+  }
+}
