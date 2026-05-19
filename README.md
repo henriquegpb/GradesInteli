@@ -64,5 +64,5 @@ MIT — use, modifique, distribua. Só não vende como se fosse seu.
 
 ---
 
-Feito com café e desespero por [Henrique Barone](https://github.com/henriquegpb).
+Feito com Redbull e desespero por [Henrique Barone](https://github.com/henriquegpb).
 Inspirado na famosa [planilha](https://docs.google.com/spreadsheets/d/1PmS8W2Wg32J6AM097Om1dvlKDnFfx0FmIF6EjEY7H7E/edit?usp=sharing) que salvou muita gente.

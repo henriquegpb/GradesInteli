@@ -3,6 +3,7 @@ import { useState, useCallback, useRef } from "react";
 import { useGradeDashboard } from "@/hooks/useGradeDashboard";
 import StudentHeader from "@/components/dashboard/StudentHeader";
 import HtmlUpload from "@/components/import/HtmlUpload";
+import GithubStarButton from "@/components/import/GithubStarButton";
 import MetricCard from "@/components/dashboard/MetricCard";
 import DistributionChart from "@/components/dashboard/DistributionChart";
 import ProgressBars from "@/components/dashboard/ProgressBars";
@@ -67,6 +68,7 @@ export default function Home() {
 
   const upload = (
     <div className={styles.headerActions}>
+      {hasData && <GithubStarButton />}
       <HtmlUpload onImport={importHtml} error={importError} />
       <button
         className={styles.themeBtn}
