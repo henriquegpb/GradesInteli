@@ -10,7 +10,7 @@ Importa o HTML do Adalove, calcula tudo automaticamente e mostra exatamente o qu
 
 Porque nenhum aluno deveria reprovar por falta de visibilidade. A famosa [planilha de notas](https://docs.google.com/spreadsheets/d/1PmS8W2Wg32J6AM097Om1dvlKDnFfx0FmIF6EjEY7H7E/edit?usp=sharing) ajudou muita gente, mas dava trabalho demais. Esse projeto automatiza tudo e transforma os dados em um dashboard que faz sentido.
 
-**Grades Inteli é patrimônio dos alunos.** Código aberto, sem pegadinha, sem login, sem coleta de dados. Roda 100% no seu browser.
+**Grades Inteli é patrimônio dos alunos.** Código aberto, sem login, sem coleta de dados. Roda 100% no seu browser.
 
 ## O que faz
 
@@ -49,7 +49,7 @@ Acesse `http://localhost:3000`
 
 ## Contribuindo
 
-O projeto é dos alunos, pra os alunos. Se quiser melhorar alguma coisa:
+O projeto é dos alunos, para os alunos. Se quiser melhorar alguma coisa:
 
 1. Fork o repositório
 2. Cria uma branch (`git checkout -b minha-feature`)
