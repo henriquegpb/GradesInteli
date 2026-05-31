@@ -28,6 +28,7 @@ export default function Home() {
   } = useGradeDashboard();
 
   const [dragging, setDragging] = useState(false);
+  const [ghGlow, setGhGlow] = useState(false);
   const dragCounter = useRef(0);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -68,7 +69,7 @@ export default function Home() {
 
   const upload = (
     <div className={styles.headerActions}>
-      {hasData && <GithubStarButton />}
+      {hasData && <GithubStarButton onHoverChange={setGhGlow} />}
       <HtmlUpload onImport={importHtml} error={importError} />
       <button
         className={styles.themeBtn}
@@ -143,7 +144,7 @@ export default function Home() {
 
   return (
     <div
-      className={styles.shell}
+      className={`${styles.shell} ${ghGlow ? "gh-glow-active" : ""}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -179,7 +180,7 @@ export default function Home() {
           </div>
 
           <div className={styles.categoryCards}>
-            <div className={styles.dualCard} style={{ borderTopColor: "var(--color-ponderada)" }}>
+            <div className={`${styles.dualCard} gh-card`} style={{ borderTopColor: "var(--color-ponderada)" }}>
               <span className={styles.dualLabel}>Ponderadas</span>
               <div className={styles.dualBody}>
                 <div className={styles.dualCol}>
@@ -195,7 +196,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className={styles.dualCard} style={{ borderTopColor: "var(--color-artefato)" }}>
+            <div className={`${styles.dualCard} gh-card`} style={{ borderTopColor: "var(--color-artefato)" }}>
               <span className={styles.dualLabel}>Artefatos</span>
               <div className={styles.dualBody}>
                 <div className={styles.dualCol}>
@@ -211,7 +212,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className={styles.dualCard} style={{ borderTopColor: "var(--color-prova)" }}>
+            <div className={`${styles.dualCard} gh-card`} style={{ borderTopColor: "var(--color-prova)" }}>
               <span className={styles.dualLabel}>Prova</span>
               <div className={styles.dualBody}>
                 <div className={styles.dualCol}>
@@ -230,7 +231,7 @@ export default function Home() {
           </div>
 
           <div className={styles.chartsRow}>
-            <div className={styles.combinedCard}>
+            <div className={`${styles.combinedCard} gh-card`}>
               <div className={styles.combinedLeft}>
                 <DistributionChart pesosPorTipo={metricas.pesosPorTipo} bare />
               </div>

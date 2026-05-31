@@ -5,6 +5,14 @@
   min-height: 0;
 }
 
+.tableCard {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+  border-radius: 8px;
+}
+
 .tableScroll {
   flex: 1;
   min-height: 0;

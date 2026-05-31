@@ -98,8 +98,9 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
         onTipoChange={setTipoFilter}
         onBuscaChange={setBusca}
       />
-      <div className={styles.tableScroll}>
-        <table className={styles.table}>
+      <div className={`${styles.tableCard} gh-card`}>
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
           <thead>
             <tr>
               <th onClick={() => toggleSort("semana")} className={styles.sortable}>
@@ -148,6 +149,7 @@ export default function ActivitiesTable({ items, onNotaChange }: Props) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
       <p className={styles.count}>
         {filtered.length} de {items.length} atividades

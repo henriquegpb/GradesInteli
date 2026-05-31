@@ -1,3 +1,8 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+}
+
 .btn {
   position: relative;
   display: inline-flex;
@@ -43,6 +48,29 @@
 
 .btn:active {
   transform: translateY(0);
+}
+
+.support {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-right: 0;
+  transition:
+    max-width 0.4s ease,
+    opacity 0.3s ease,
+    margin-right 0.4s ease;
+}
+
+.root:hover .support,
+.root:focus-within .support {
+  max-width: 180px;
+  opacity: 1;
+  margin-right: 0.5rem;
 }
 
 .iconWrap {

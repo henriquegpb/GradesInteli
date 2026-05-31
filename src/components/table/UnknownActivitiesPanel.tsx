@@ -19,7 +19,7 @@ export default function UnknownActivitiesPanel({
   if (naoReconhecidas.length === 0) return null;
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} gh-card`}>
       <h3 className={styles.title}>
         Atividades não reconhecidas
         <span className={styles.count}>{naoReconhecidas.length}</span>

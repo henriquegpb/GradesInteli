@@ -28,7 +28,7 @@ export default function MetricCard({
 }: Props) {
   return (
     <div
-      className={`${styles.card} ${styles[variant]}`}
+      className={`${styles.card} ${styles[variant]} gh-card`}
       style={accent ? { borderTopColor: accent } : undefined}
     >
       <span className={styles.label}>{label}</span>

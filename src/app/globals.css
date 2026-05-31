@@ -114,3 +114,61 @@ a {
 button {
   font-family: var(--font-sans);
 }
+
+/* ===== GitHub-button hover broadcast: shining border on all cards ===== */
+@property --gh-angle {
+  syntax: "<angle>";
+  initial-value: 65deg;
+  inherits: false;
+}
+
+/* starts the glow at the top-right corner, then travels around */
+@keyframes gh-spin {
+  from {
+    --gh-angle: 65deg;
+  }
+  to {
+    --gh-angle: 425deg;
+  }
+}
+
+.gh-card {
+  position: relative;
+}
+
+.gh-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  /* a single soft segment that travels around the border */
+  background: conic-gradient(
+    from var(--gh-angle),
+    transparent 0deg,
+    transparent 295deg,
+    rgba(192, 132, 252, 0) 300deg,
+    rgba(244, 114, 182, 0.85) 340deg,
+    rgba(56, 189, 248, 0) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 3px rgba(244, 114, 182, 0.55));
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.gh-glow-active .gh-card::after {
+  opacity: 1;
+  animation: gh-spin 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gh-glow-active .gh-card::after {
+    animation: none;
+  }
+}

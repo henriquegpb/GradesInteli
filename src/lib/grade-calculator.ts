@@ -175,6 +175,7 @@ export function calcularMetricas(
     mediaProvaAteOMomento: mediaPonderadaAteOMomento(items, "Prova"),
     mediaTotalAteOMomento: mediaTotalAtual,
     notaNecessariaProva: notaProva,
+    notaNecessariaProvaRaw: notaProvaRaw,
     provaStatus,
     acumuladoFinalProjetado: finalProjetado,
     pontosNaoAvaliados: pontosNaoAvaliados(items),

@@ -93,7 +93,7 @@ export default function AttendanceCard({
 
   if (!attendance) {
     return (
-      <div className={`${styles.card} ${dragOver ? styles.cardDragOver : ""}`} {...dragProps}>
+      <div className={`${styles.card} ${dragOver ? styles.cardDragOver : ""} gh-card`} {...dragProps}>
         <div className={styles.emptyBody}>
           <button className={styles.importBtn} onClick={() => inputRef.current?.click()}>
             Importar Faltas

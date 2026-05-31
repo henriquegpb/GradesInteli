@@ -50,7 +50,7 @@ export default function SimulationPanel({
   const notaComParticipacao = metricas.acumuladoFinalProjetado * mult;
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} gh-card`}>
       <div className={styles.body}>
         <div className={styles.leftCol}>
           <span className={styles.sectionLabel}>Nota para atividades restantes</span>
@@ -157,7 +157,9 @@ export default function SimulationPanel({
           <div className={styles.provaBlock}>
             <span className={styles.provaLabel}>Nota necessária na prova</span>
             <span className={`${styles.provaValue} ${provaClass}`}>
-              {fmtNota(metricas.notaNecessariaProva)}
+              {metricas.provaStatus === "impossivel"
+                ? fmtNota(metricas.notaNecessariaProvaRaw)
+                : fmtNota(metricas.notaNecessariaProva)}
             </span>
             <span className={`${styles.provaStatus} ${provaClass}`}>
               {provaLabel}
