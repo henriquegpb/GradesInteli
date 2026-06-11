@@ -4,6 +4,8 @@ import { useGradeDashboard } from "@/hooks/useGradeDashboard";
 import StudentHeader from "@/components/dashboard/StudentHeader";
 import HtmlUpload from "@/components/import/HtmlUpload";
 import GithubStarButton from "@/components/import/GithubStarButton";
+import StarPromptModal from "@/components/import/StarPromptModal";
+import { useStarPrompt } from "@/hooks/useStarPrompt";
 import MetricCard from "@/components/dashboard/MetricCard";
 import DistributionChart from "@/components/dashboard/DistributionChart";
 import ProgressBars from "@/components/dashboard/ProgressBars";
@@ -30,6 +32,8 @@ export default function Home() {
   const [dragging, setDragging] = useState(false);
   const [ghGlow, setGhGlow] = useState(false);
   const dragCounter = useRef(0);
+
+  const starPrompt = useStarPrompt(isHydrated, items.length > 0, lastImportAt);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -69,7 +73,9 @@ export default function Home() {
 
   const upload = (
     <div className={styles.headerActions}>
-      {hasData && <GithubStarButton onHoverChange={setGhGlow} />}
+      {hasData && (
+        <GithubStarButton onHoverChange={setGhGlow} onStarClick={starPrompt.markStarClicked} />
+      )}
       <HtmlUpload onImport={importHtml} error={importError} />
       <button
         className={styles.themeBtn}
@@ -155,6 +161,11 @@ export default function Home() {
           <span className={styles.dragOverlayText}>Solte para atualizar notas</span>
         </div>
       )}
+      <StarPromptModal
+        open={starPrompt.isOpen}
+        onStar={starPrompt.onStar}
+        onDismiss={starPrompt.onDismiss}
+      />
       <StudentHeader
         studentName={studentName}
         lastImportAt={lastImportAt}

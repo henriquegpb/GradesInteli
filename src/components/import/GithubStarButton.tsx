@@ -4,9 +4,10 @@ import styles from "./GithubStarButton.module.css";
 
 interface Props {
   onHoverChange?: (hovered: boolean) => void;
+  onStarClick?: () => void;
 }
 
-export default function GithubStarButton({ onHoverChange }: Props) {
+export default function GithubStarButton({ onHoverChange, onStarClick }: Props) {
   return (
     <span className={styles.root}>
       <span className={styles.support}>O seu apoio ajuda muito</span>
@@ -15,6 +16,7 @@ export default function GithubStarButton({ onHoverChange }: Props) {
         target="_blank"
         rel="noopener noreferrer"
         className={styles.btn}
+        onClick={() => onStarClick?.()}
         onMouseEnter={() => onHoverChange?.(true)}
         onMouseLeave={() => onHoverChange?.(false)}
         onFocus={() => onHoverChange?.(true)}
