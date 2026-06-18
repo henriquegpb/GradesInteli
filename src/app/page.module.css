@@ -10,11 +10,23 @@
 
 .emptyContainer {
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 3rem 1.5rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .emptyContainer {
+    padding: 1.5rem 1rem;
+  }
+
+  .emptyState {
+    padding: 1.25rem 1rem;
+  }
 }
 
 .emptyContainer > * {
@@ -135,6 +147,106 @@
   font-size: 0.68rem;
   color: var(--text-secondary);
   line-height: 1.4;
+}
+
+.browserToggle {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.browserBtn {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.browserBtn:hover {
+  border-color: var(--accent);
+  color: var(--text-secondary);
+}
+
+.browserBtnActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.safariSteps {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.safariSteps li {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.bookmarkletRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bookmarklet {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.73rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.bookmarklet:hover {
+  border-color: var(--accent);
+  color: var(--text-secondary);
+}
+
+.bookmarklet:active {
+  cursor: grabbing;
+}
+
+.bookmarkletCopy {
+  padding: 0.3rem 0.8rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.73rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.bookmarkletCopy:hover {
+  opacity: 0.85;
+}
+
+.safariBarHint {
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .emptyHint {

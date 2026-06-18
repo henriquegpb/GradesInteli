@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useGradeDashboard } from "@/hooks/useGradeDashboard";
 import StudentHeader from "@/components/dashboard/StudentHeader";
 import HtmlUpload from "@/components/import/HtmlUpload";
@@ -31,7 +31,33 @@ export default function Home() {
 
   const [dragging, setDragging] = useState(false);
   const [ghGlow, setGhGlow] = useState(false);
+  const [bookmarkletCopied, setBookmarkletCopied] = useState(false);
+  const [browser, setBrowser] = useState<"chrome" | "safari">("chrome");
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+    if (isSafari) setBrowser("safari");
+  }, []);
   const dragCounter = useRef(0);
+  const bookmarkletRef = useRef<HTMLAnchorElement>(null);
+
+  const BOOKMARKLET_CODE =
+    "javascript:(function(){var a=document.querySelector('img.MuiAvatar-img'),t=document.querySelector('table');if(!t){alert('Tabela n\\u00e3o encontrada. V\\u00e1 \\u00e0 aba Notas do ADALove com as atividades carregadas.');return;}var h='<!DOCTYPE html><html><body>'+(a?a.outerHTML:'')+t.outerHTML+'<\\/body><\\/html>',b=new Blob([h],{type:'text\\/html;charset=utf-8'}),u=URL.createObjectURL(b),l=document.createElement('a');l.href=u;l.download='adalove.html';document.body.appendChild(l);l.click();document.body.removeChild(l);setTimeout(function(){URL.revokeObjectURL(u);},100);})();";
+
+  // React blocks javascript: in href props — set it on the DOM directly after mount
+  useEffect(() => {
+    if (bookmarkletRef.current) {
+      bookmarkletRef.current.href = BOOKMARKLET_CODE;
+    }
+  }, [BOOKMARKLET_CODE]);
+
+  const copyBookmarklet = useCallback(() => {
+    navigator.clipboard.writeText(BOOKMARKLET_CODE).then(() => {
+      setBookmarkletCopied(true);
+      setTimeout(() => setBookmarkletCopied(false), 2000);
+    });
+  }, [BOOKMARKLET_CODE]);
 
   const starPrompt = useStarPrompt(isHydrated, items.length > 0, lastImportAt);
 
@@ -112,34 +138,75 @@ export default function Home() {
           </div>
 
           <h2 className={styles.emptyTitle}>Como exportar do Adalove</h2>
-          <ol className={styles.emptySteps}>
-            <li>
-              Acesse o{" "}
-              <a
-                href="https://adalove.inteli.edu.br"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.emptyLink}
-              >
-                Adalove
-              </a>{" "}
-              e vá até a página <strong>Notas</strong>.
-            </li>
-            <li>
-              Certifique-se de que a <strong>grade de notas</strong> está visível
-              (todas as atividades e pontuações carregadas).
-            </li>
-            <li>
-              Salve a página como HTML:{" "}
-              <kbd className={styles.kbd}>Ctrl+S</kbd> (Windows) ou{" "}
-              <kbd className={styles.kbd}>⌘+S</kbd> (Mac) e escolha{" "}
-              <em>&quot;Página da Web completa&quot;</em>.
-            </li>
-            <li>
-              Arraste o arquivo <code>.html</code> salvo para cá, ou clique em{" "}
-              <strong>Importar HTML</strong> acima.
-            </li>
-          </ol>
+
+          <div className={styles.browserToggle}>
+            <button
+              className={`${styles.browserBtn} ${browser === "chrome" ? styles.browserBtnActive : ""}`}
+              onClick={() => setBrowser("chrome")}
+            >
+              Chrome / Firefox
+            </button>
+            <button
+              className={`${styles.browserBtn} ${browser === "safari" ? styles.browserBtnActive : ""}`}
+              onClick={() => setBrowser("safari")}
+            >
+              Safari
+            </button>
+          </div>
+
+          {browser === "chrome" ? (
+            <ol className={styles.emptySteps}>
+              <li>
+                Acesse o{" "}
+                <a href="https://adalove.inteli.edu.br" target="_blank" rel="noopener noreferrer" className={styles.emptyLink}>
+                  Adalove
+                </a>{" "}
+                e vá até a aba <strong>Notas</strong>.
+              </li>
+              <li>
+                Confirme que todas as atividades e pontuações estão carregadas.
+              </li>
+              <li>
+                Pressione <kbd className={styles.kbd}>Ctrl+S</kbd> (Windows) ou{" "}
+                <kbd className={styles.kbd}>⌘S</kbd> (Mac) e escolha{" "}
+                <em>&quot;Página da Web completa&quot;</em>.
+              </li>
+              <li>
+                Arraste o arquivo <code>.html</code> para cá, ou clique em{" "}
+                <strong>Importar HTML</strong> acima.
+              </li>
+            </ol>
+          ) : (
+            <ol className={styles.emptySteps}>
+              <li>
+                Clique em <strong>Copiar código</strong> abaixo.
+              </li>
+              <li>
+                Pressione <kbd className={styles.kbd}>⌘D</kbd> → local{" "}
+                <em>&quot;Barra de favoritos&quot;</em> → <em>Adicionar</em>.
+              </li>
+              <li>
+                Clique com botão direito no
+                favorito → <em>&quot;Editar endereço&quot;</em> → cole o código.
+              </li>
+              <li>
+                No Adalove, aba <strong>Notas</strong> → clique no favorito
+                para baixar → importe aqui.
+              </li>
+            </ol>
+          )}
+
+          {browser === "safari" && (
+            <div className={styles.bookmarkletRow}>
+              <button className={styles.bookmarkletCopy} onClick={copyBookmarklet}>
+                {bookmarkletCopied ? "Copiado!" : "Copiar código"}
+              </button>
+              <a ref={bookmarkletRef} className={styles.bookmarklet} draggable>
+                ou arraste este link
+              </a>
+            </div>
+          )}
+
           <p className={styles.emptyHint}>
             Seus dados ficam salvos no navegador — nada é enviado para nenhum servidor.
           </p>
