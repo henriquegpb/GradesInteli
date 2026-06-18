@@ -13,6 +13,8 @@ import type {
 } from "@/types/grades";
 import { DEFAULT_PARTICIPACAO_MULTIPLIERS } from "@/types/grades";
 import { parseAdaloveHtml } from "@/lib/adalove-parser";
+import { parseAdaloveJson } from "@/lib/adalove-json-parser";
+import type { ParsedAdalovePayload } from "@/types/grades";
 import { extractAttendanceRows, summarizeAttendanceRows } from "@/lib/attendance-parser";
 import { calcularMetricas } from "@/lib/grade-calculator";
 import { loadState, saveState, clearState, DEFAULT_SIMULACAO } from "@/lib/storage";
@@ -104,36 +106,71 @@ export function useGradeDashboard() {
     return calcularMetricas(items, adjusted);
   }, [items, simulacao, effectiveMetaFinal]);
 
+  // Núcleo do import: recebe um payload já parseado (de HTML ou da API) e
+  // popula o dashboard. Compartilhado entre o upload de arquivo e a extensão.
+  const applyPayload = useCallback((payload: ParsedAdalovePayload) => {
+    const newItems: ItemNota[] = payload.activities.map((a, i) => ({
+      id: `imp-${i}`,
+      semana: a.semana,
+      tipo: a.tipo,
+      atividade: a.nome,
+      peso: a.pontos,
+      nota: a.nota,
+      origem: "importado" as const,
+      matchStatus: "matched" as const,
+    }));
+
+    setItems(newItems);
+    setNaoReconhecidas([]);
+    setVinculosManuais({});
+    setStudentName(payload.studentName);
+    setLastImportAt(new Date().toISOString());
+  }, []);
+
   const importHtml = useCallback(
     async (file: File) => {
       setImportError(null);
       try {
         const html = await file.text();
-        const payload = parseAdaloveHtml(html);
-
-        const newItems: ItemNota[] = payload.activities.map((a, i) => ({
-          id: `imp-${i}`,
-          semana: a.semana,
-          tipo: a.tipo,
-          atividade: a.nome,
-          peso: a.pontos,
-          nota: a.nota,
-          origem: "importado" as const,
-          matchStatus: "matched" as const,
-        }));
-
-        setItems(newItems);
-        setNaoReconhecidas([]);
-        setVinculosManuais({});
-        setStudentName(payload.studentName);
-        setLastImportAt(new Date().toISOString());
+        applyPayload(parseAdaloveHtml(html));
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Erro ao importar HTML";
         setImportError(msg);
       }
     },
-    []
+    [applyPayload]
   );
+
+  // Import vindo da extensão do Chrome: ela intercepta a resposta /userdata do
+  // Adalove e a entrega via postMessage. Aceita o JSON cru da API.
+  const importAdaloveJson = useCallback(
+    (json: string) => {
+      setImportError(null);
+      try {
+        applyPayload(parseAdaloveJson(json));
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Erro ao importar dados do Adalove";
+        setImportError(msg);
+      }
+    },
+    [applyPayload]
+  );
+
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      // Aceita apenas mensagens da própria janela (a extensão injeta no mesmo documento).
+      if (e.source !== window) return;
+      const data = e.data;
+      if (!data || data.type !== "GRADESINTELI_IMPORT" || typeof data.payload !== "string") {
+        return;
+      }
+      importAdaloveJson(data.payload);
+      // Confirma o recebimento para a extensão parar de reenviar.
+      window.postMessage({ type: "GRADESINTELI_IMPORT_OK" }, "*");
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [importAdaloveJson]);
 
   const importAttendanceHtml = useCallback(async (file: File) => {
     setAttendanceError(null);

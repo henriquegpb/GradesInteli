@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Adalove → GradesInteli",
+  "version": "1.0.0",
+  "description": "Importa suas notas do Adalove direto para o GradesInteli, sem precisar salvar a página em HTML.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://adalove.inteli.edu.br/*",
+    "https://gradesinteli.vercel.app/*",
+    "http://localhost/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://adalove.inteli.edu.br/*"],
+      "js": ["adalove-interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://adalove.inteli.edu.br/*"],
+      "js": ["adalove-content.js"],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    },
+    {
+      "matches": [
+        "https://gradesinteli.vercel.app/*",
+        "http://localhost/*"
+      ],
+      "js": ["grades-content.js"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
+  ]
+}
