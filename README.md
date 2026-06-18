@@ -23,7 +23,7 @@ Porque nenhum aluno deveria reprovar por falta de visibilidade. A famosa [planil
 
 ## Como usar
 
-1. Acesse o [site](https://grades-inteli.vercel.app) ou rode localmente
+1. Acesse o [site](https://gradesinteli.vercel.app) ou rode localmente
 2. No Adalove, vá em suas notas e salve a página completa (Ctrl+S / Cmd+S)
 3. Clique em "Importar Adalove" e selecione o arquivo `.html`
 4. Pronto — suas notas aparecem no dashboard
