@@ -1,0 +1,71 @@
+.page {
+  height: 100dvh;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--text-secondary);
+  padding: 3rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  width: 100%;
+  max-width: 680px;
+  line-height: 1.65;
+  font-size: 0.92rem;
+}
+
+.content h1 {
+  color: var(--text-primary);
+  font-size: 1.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.content h2 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  margin: 2rem 0 0.6rem;
+}
+
+.content p {
+  margin-bottom: 0.9rem;
+}
+
+.content ul {
+  margin: 0 0 0.9rem;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.content a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.content a:hover {
+  text-decoration: underline;
+}
+
+.content code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+}
+
+.updated {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 1.5rem !important;
+}
+
+.back {
+  margin-top: 2.5rem !important;
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+  border-top: 1px solid var(--border);
+}

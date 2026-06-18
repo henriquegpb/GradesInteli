@@ -3,6 +3,11 @@
   "name": "Adalove → GradesInteli",
   "version": "1.0.0",
   "description": "Importa suas notas do Adalove direto para o GradesInteli, sem precisar salvar a página em HTML.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["storage"],
   "host_permissions": [
     "https://adalove.inteli.edu.br/*",
