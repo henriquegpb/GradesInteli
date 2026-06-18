@@ -202,31 +202,6 @@
   margin-bottom: 1rem;
 }
 
-.bookmarklet {
-  display: inline-block;
-  padding: 0.3rem 0.8rem;
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.73rem;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: grab;
-  user-select: none;
-  transition: border-color 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.bookmarklet:hover {
-  border-color: var(--accent);
-  color: var(--text-secondary);
-}
-
-.bookmarklet:active {
-  cursor: grabbing;
-}
-
 .bookmarkletCopy {
   padding: 0.3rem 0.8rem;
   background: var(--accent);

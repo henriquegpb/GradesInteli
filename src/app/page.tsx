@@ -40,17 +40,9 @@ export default function Home() {
     if (isSafari) setBrowser("safari");
   }, []);
   const dragCounter = useRef(0);
-  const bookmarkletRef = useRef<HTMLAnchorElement>(null);
 
   const BOOKMARKLET_CODE =
     "javascript:(function(){var a=document.querySelector('img.MuiAvatar-img'),t=document.querySelector('table');if(!t){alert('Tabela n\\u00e3o encontrada. V\\u00e1 \\u00e0 aba Notas do ADALove com as atividades carregadas.');return;}var h='<!DOCTYPE html><html><body>'+(a?a.outerHTML:'')+t.outerHTML+'<\\/body><\\/html>',b=new Blob([h],{type:'text\\/html;charset=utf-8'}),u=URL.createObjectURL(b),l=document.createElement('a');l.href=u;l.download='adalove.html';document.body.appendChild(l);l.click();document.body.removeChild(l);setTimeout(function(){URL.revokeObjectURL(u);},100);})();";
-
-  // React blocks javascript: in href props — set it on the DOM directly after mount
-  useEffect(() => {
-    if (bookmarkletRef.current) {
-      bookmarkletRef.current.href = BOOKMARKLET_CODE;
-    }
-  }, [BOOKMARKLET_CODE]);
 
   const copyBookmarklet = useCallback(() => {
     navigator.clipboard.writeText(BOOKMARKLET_CODE).then(() => {
@@ -201,9 +193,6 @@ export default function Home() {
               <button className={styles.bookmarkletCopy} onClick={copyBookmarklet}>
                 {bookmarkletCopied ? "Copiado!" : "Copiar código"}
               </button>
-              <a ref={bookmarkletRef} className={styles.bookmarklet} draggable>
-                ou arraste este link
-              </a>
             </div>
           )}
 
