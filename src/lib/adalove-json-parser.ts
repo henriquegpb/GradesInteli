@@ -14,6 +14,7 @@ interface AdaloveApiActivity {
   evaluated: number;
   folderCaption: string; // ex.: "Semana 06"
   studentUuid: string;
+  sort?: number; // ordem da atividade dentro da semana
   exam?: number;
 }
 
@@ -45,6 +46,12 @@ function parseSemana(folderCaption: string): string {
   if (!m) return "";
   const n = parseInt(m[1], 10);
   return n ? "S" + n : "";
+}
+
+// Número da semana para ordenação (sem semana vai para o fim).
+function weekNum(folderCaption: string): number {
+  const m = (folderCaption || "").match(/(\d+)/);
+  return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
 }
 
 function parseNota(gradeResult: string): number | null {
@@ -80,6 +87,13 @@ export function parseAdaloveJson(jsonText: string): ParsedAdalovePayload {
     // Considera apenas atividades com peso atrelado (avaliadas). Aulas e
     // autoestudos têm gradeWeight 0 e não entram no cálculo — igual ao HTML.
     .filter((a) => typeof a.gradeWeight === "number" && a.gradeWeight > 0)
+    // Ordena por semana (S1, S2, S3…) e, dentro da semana, pelo campo `sort`
+    // da API — para ficar igual à ordem do HTML, que já vinha ordenado.
+    .sort(
+      (a, b) =>
+        weekNum(a.folderCaption) - weekNum(b.folderCaption) ||
+        (a.sort ?? 0) - (b.sort ?? 0)
+    )
     .map((a) => ({
       semana: parseSemana(a.folderCaption),
       tipo: inferTipo(a.caption || ""),

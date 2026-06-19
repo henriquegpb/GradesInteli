@@ -22,11 +22,14 @@
 
   function deliver(pending) {
     if (!pending || typeof pending.json !== "string") return;
-    if (Date.now() - (pending.requestedAt || 0) > MAX_AGE_MS) {
+    const age = Date.now() - (pending.requestedAt || 0);
+    if (age > MAX_AGE_MS) {
+      console.debug("[GradesInteli] import ignorado (antigo, %dms)", age);
       chrome.storage.local.remove("pendingImport");
       return;
     }
 
+    console.debug("[GradesInteli] entregando import ao app");
     // Consome de uma vez para não reimportar sozinho depois.
     chrome.storage.local.remove("pendingImport");
 
@@ -51,6 +54,11 @@
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local" || !changes.pendingImport) return;
     const nv = changes.pendingImport.newValue;
-    if (nv) deliver(nv);
+    if (nv) {
+      console.debug("[GradesInteli] novo clique detectado (storage.onChanged)");
+      deliver(nv);
+    }
   });
+
+  console.debug("[GradesInteli] content script ativo (com onChanged) ✓");
 })();
