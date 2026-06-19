@@ -34,14 +34,13 @@
         return;
       }
       // Re-arma o import com timestamp do clique. O GradesInteli só importa
-      // capturas recentes, e cada clique gera uma nova.
+      // capturas recentes, e cada clique gera uma nova. Se a aba já estiver
+      // aberta, o chrome.storage.onChanged lá atualiza o dashboard ao vivo;
+      // se não estiver, abrimos e o import pendente é lido no load.
       chrome.storage.local.set(
         { pendingImport: { json: cap.json, requestedAt: Date.now() } },
         () => {
-          // Reaproveita a mesma aba (target nomeado) e força o reload com uma
-          // query única — assim o content script do GradesInteli roda de novo
-          // e reimporta a cada clique.
-          window.open(GRADES_URL + "/?i=" + Date.now(), "gradesinteli");
+          window.open(GRADES_URL, "gradesinteli");
         }
       );
     });
