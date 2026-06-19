@@ -76,15 +76,20 @@ export function parseAdaloveJson(jsonText: string): ParsedAdalovePayload {
   const studentName =
     data.students?.find((s) => s.uuid === studentUuid)?.name?.trim() || null;
 
-  const mapped: AtividadeImportada[] = activities.map((a) => ({
-    semana: parseSemana(a.folderCaption),
-    tipo: inferTipo(a.caption || ""),
-    nome: (a.caption || "").trim(),
-    // gradeWeight já vem na escala correta (ex.: Artefato = 4), confirmado via API.
-    // Diferente do HTML, que vinha em centésimos e exigia /100.
-    pontos: typeof a.gradeWeight === "number" ? a.gradeWeight : 0,
-    nota: parseNota(a.gradeResult),
-  }));
+  const mapped: AtividadeImportada[] = activities
+    // Considera apenas atividades com peso atrelado (avaliadas). Aulas e
+    // autoestudos têm gradeWeight 0 e não entram no cálculo — igual ao HTML.
+    .filter((a) => typeof a.gradeWeight === "number" && a.gradeWeight > 0)
+    .map((a) => ({
+      semana: parseSemana(a.folderCaption),
+      tipo: inferTipo(a.caption || ""),
+      nome: (a.caption || "").trim(),
+      // O HTML guarda o peso em centésimos (peso/100); a API entrega o valor
+      // cheio (Artefato = 4). Dividimos por 100 para que API e HTML produzam
+      // exatamente os mesmos acumulados e percentuais.
+      pontos: a.gradeWeight / 100,
+      nota: parseNota(a.gradeResult),
+    }));
 
   return { studentName, activities: mapped };
 }
