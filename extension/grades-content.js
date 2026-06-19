@@ -4,12 +4,15 @@
 // "GRADESINTELI_IMPORT" e popula o dashboard.
 
 (function () {
-  const MAX_AGE_MS = 10 * 60 * 1000; // só importa capturas dos últimos 10 min
+  // Só importa cliques recentes. Cada clique no botão do Adalove re-arma o
+  // pendingImport com um requestedAt novo, então uma visita avulsa ao site
+  // (sem clicar no botão) não dispara reimport e não atropela edições manuais.
+  const MAX_AGE_MS = 60 * 1000;
 
   chrome.storage.local.get("pendingImport", (res) => {
     const pending = res && res.pendingImport;
     if (!pending || typeof pending.json !== "string") return;
-    if (Date.now() - (pending.capturedAt || 0) > MAX_AGE_MS) {
+    if (Date.now() - (pending.requestedAt || 0) > MAX_AGE_MS) {
       chrome.storage.local.remove("pendingImport");
       return;
     }
