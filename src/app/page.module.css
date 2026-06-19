@@ -17,6 +17,111 @@
   align-items: center;
   padding: 3rem 1.5rem;
   box-sizing: border-box;
+  position: relative;
+}
+
+/* Conteúdo real (header + card) sempre acima do skeleton de fundo. */
+.emptyContainer > *:not(.skeleton) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Skeleton do dashboard: só os contornos dos cards, fraco, atrás do card central. */
+.skeleton {
+  position: absolute;
+  top: 5.5rem;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 0.9rem;
+  z-index: 0;
+  opacity: 0.4;
+  pointer-events: none;
+  filter: blur(2px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 40%, transparent 99%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 40%, transparent 99%);
+}
+
+.emptyContainer > .skeleton {
+  max-width: 1200px;
+}
+
+.skelMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.skelRow2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.skelRow3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.skelRowCharts {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 0.6rem;
+}
+
+.skelSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.skelCard {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  height: 80px;
+}
+
+.skelPonderada {
+  border-top: 2px solid var(--color-ponderada);
+}
+
+.skelArtefato {
+  border-top: 2px solid var(--color-artefato);
+}
+
+.skelProva {
+  border-top: 2px solid var(--color-prova);
+}
+
+.skelTall {
+  height: 190px;
+}
+
+.skelPanel {
+  height: 240px;
+}
+
+.skelTableHead {
+  height: 38px;
+}
+
+.skelTable {
+  height: 680px;
+}
+
+@media (max-width: 900px) {
+  .skeleton {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {

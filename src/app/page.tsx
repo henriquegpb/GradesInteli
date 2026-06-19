@@ -114,6 +114,28 @@ export default function Home() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
+        <div className={styles.skeleton} aria-hidden="true">
+          <div className={styles.skelMain}>
+            <div className={styles.skelRow2}>
+              <div className={styles.skelCard} />
+              <div className={styles.skelCard} />
+            </div>
+            <div className={styles.skelRow3}>
+              <div className={`${styles.skelCard} ${styles.skelPonderada}`} />
+              <div className={`${styles.skelCard} ${styles.skelArtefato}`} />
+              <div className={`${styles.skelCard} ${styles.skelProva}`} />
+            </div>
+            <div className={styles.skelRowCharts}>
+              <div className={`${styles.skelCard} ${styles.skelTall}`} />
+              <div className={`${styles.skelCard} ${styles.skelTall}`} />
+            </div>
+            <div className={`${styles.skelCard} ${styles.skelPanel}`} />
+          </div>
+          <div className={styles.skelSidebar}>
+            <div className={`${styles.skelCard} ${styles.skelTableHead}`} />
+            <div className={`${styles.skelCard} ${styles.skelTable}`} />
+          </div>
+        </div>
         <StudentHeader
           studentName={studentName}
           lastImportAt={lastImportAt}
