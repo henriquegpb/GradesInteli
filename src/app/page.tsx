@@ -33,11 +33,19 @@ export default function Home() {
   const [ghGlow, setGhGlow] = useState(false);
   const [bookmarkletCopied, setBookmarkletCopied] = useState(false);
   const [browser, setBrowser] = useState<"chrome" | "safari">("chrome");
+  const [showManual, setShowManual] = useState(false);
+  const [isSafari, setIsSafari] = useState(false);
+
+  const CWS_URL = "https://chromewebstore.google.com/detail/dpgoggjeajlgbkfabfhijccjfbchojpn";
 
   useEffect(() => {
     const ua = navigator.userAgent;
-    const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
-    if (isSafari) setBrowser("safari");
+    const safari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+    if (safari) {
+      setIsSafari(true);
+      setBrowser("safari");
+      setShowManual(true); // Safari não usa a extensão — já mostra o manual
+    }
   }, []);
   const dragCounter = useRef(0);
 
@@ -85,6 +93,16 @@ export default function Home() {
     [importHtml]
   );
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const onPickFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) importHtml(file);
+      e.target.value = "";
+    },
+    [importHtml]
+  );
+
   if (!isHydrated) return null;
 
   const hasData = items.length > 0;
@@ -94,7 +112,7 @@ export default function Home() {
       {hasData && (
         <GithubStarButton onHoverChange={setGhGlow} onStarClick={starPrompt.markStarClicked} />
       )}
-      <HtmlUpload onImport={importHtml} error={importError} />
+      {hasData && <HtmlUpload onImport={importHtml} error={importError} />}
       <button
         className={styles.themeBtn}
         onClick={toggleTheme}
@@ -142,81 +160,134 @@ export default function Home() {
           uploadSlot={upload}
         />
         <div className={`${styles.emptyState} ${dragging ? styles.emptyDragging : ""}`}>
-          <div className={styles.dropZone}>
-            <span className={styles.dropIcon}>↓</span>
-            <span className={styles.dropText}>Arraste o arquivo HTML aqui</span>
-          </div>
+          <a
+            href={CWS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.extensionCta}
+          >
+            <span className={styles.extensionCtaIcon}>⬇</span>
+            <span className={styles.extensionCtaText}>
+              <strong>Baixar a extensão</strong>
+              <span>Importe suas notas com 1 clique direto do Adalove</span>
+            </span>
+          </a>
+          <p className={styles.extensionNote}>
+            {isSafari ? (
+              <>
+                A extensão <strong>não funciona no Safari</strong>. Use a
+                importação manual abaixo.
+              </>
+            ) : (
+              <>Funciona no Chrome, Edge, Brave e outros navegadores Chromium.</>
+            )}
+          </p>
 
           <div className={styles.dropDivider}>
             <span>ou</span>
           </div>
 
-          <h2 className={styles.emptyTitle}>Como exportar do Adalove</h2>
+          <button
+            className={styles.manualToggle}
+            onClick={() => setShowManual((o) => !o)}
+            aria-expanded={showManual}
+          >
+            <span>Importe manualmente (salvar HTML)</span>
+            <span className={`${styles.manualChevron} ${showManual ? styles.manualChevronOpen : ""}`}>
+              ›
+            </span>
+          </button>
 
-          <div className={styles.browserToggle}>
-            <button
-              className={`${styles.browserBtn} ${browser === "chrome" ? styles.browserBtnActive : ""}`}
-              onClick={() => setBrowser("chrome")}
-            >
-              Chrome / Firefox
-            </button>
-            <button
-              className={`${styles.browserBtn} ${browser === "safari" ? styles.browserBtnActive : ""}`}
-              onClick={() => setBrowser("safari")}
-            >
-              Safari
-            </button>
+          <div className={`${styles.collapsible} ${showManual ? styles.collapsibleOpen : ""}`}>
+            <div className={styles.collapsibleInner}>
+              <div className={styles.manualBody}>
+                <div className={styles.browserToggle}>
+                  <button
+                    className={`${styles.browserBtn} ${browser === "chrome" ? styles.browserBtnActive : ""}`}
+                    onClick={() => setBrowser("chrome")}
+                  >
+                    Chrome / Firefox
+                  </button>
+                  <button
+                    className={`${styles.browserBtn} ${browser === "safari" ? styles.browserBtnActive : ""}`}
+                    onClick={() => setBrowser("safari")}
+                  >
+                    Safari
+                  </button>
+                </div>
+
+                {browser === "chrome" ? (
+                  <ol className={styles.emptySteps}>
+                    <li>
+                      Acesse o{" "}
+                      <a href="https://adalove.inteli.edu.br" target="_blank" rel="noopener noreferrer" className={styles.emptyLink}>
+                        Adalove
+                      </a>{" "}
+                      e vá até a aba <strong>Notas</strong>.
+                    </li>
+                    <li>
+                      Confirme que todas as atividades e pontuações estão carregadas.
+                    </li>
+                    <li>
+                      Pressione <kbd className={styles.kbd}>Ctrl+S</kbd> (Windows) ou{" "}
+                      <kbd className={styles.kbd}>⌘S</kbd> (Mac) e escolha{" "}
+                      <em>&quot;Página da Web completa&quot;</em>.
+                    </li>
+                    <li>
+                      Arraste o arquivo <code>.html</code> para a área acima,
+                      ou clique nela para selecionar.
+                    </li>
+                  </ol>
+                ) : (
+                  <ol className={styles.emptySteps}>
+                    <li>
+                      Clique em <strong>Copiar código</strong> abaixo.
+                    </li>
+                    <li>
+                      Pressione <kbd className={styles.kbd}>⌘D</kbd> → local{" "}
+                      <em>&quot;Barra de favoritos&quot;</em> → <em>Adicionar</em>.
+                    </li>
+                    <li>
+                      Clique com botão direito no
+                      favorito → <em>&quot;Editar endereço&quot;</em> → cole o código.
+                    </li>
+                    <li>
+                      No Adalove, aba <strong>Notas</strong> → clique no favorito
+                      para baixar → importe aqui.
+                    </li>
+                  </ol>
+                )}
+
+                {browser === "safari" && (
+                  <div className={styles.bookmarkletRow}>
+                    <button className={styles.bookmarkletCopy} onClick={copyBookmarklet}>
+                      {bookmarkletCopied ? "Copiado!" : "Copiar código"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {browser === "chrome" ? (
-            <ol className={styles.emptySteps}>
-              <li>
-                Acesse o{" "}
-                <a href="https://adalove.inteli.edu.br" target="_blank" rel="noopener noreferrer" className={styles.emptyLink}>
-                  Adalove
-                </a>{" "}
-                e vá até a aba <strong>Notas</strong>.
-              </li>
-              <li>
-                Confirme que todas as atividades e pontuações estão carregadas.
-              </li>
-              <li>
-                Pressione <kbd className={styles.kbd}>Ctrl+S</kbd> (Windows) ou{" "}
-                <kbd className={styles.kbd}>⌘S</kbd> (Mac) e escolha{" "}
-                <em>&quot;Página da Web completa&quot;</em>.
-              </li>
-              <li>
-                Arraste o arquivo <code>.html</code> para cá, ou clique em{" "}
-                <strong>Importar HTML</strong> acima.
-              </li>
-            </ol>
-          ) : (
-            <ol className={styles.emptySteps}>
-              <li>
-                Clique em <strong>Copiar código</strong> abaixo.
-              </li>
-              <li>
-                Pressione <kbd className={styles.kbd}>⌘D</kbd> → local{" "}
-                <em>&quot;Barra de favoritos&quot;</em> → <em>Adicionar</em>.
-              </li>
-              <li>
-                Clique com botão direito no
-                favorito → <em>&quot;Editar endereço&quot;</em> → cole o código.
-              </li>
-              <li>
-                No Adalove, aba <strong>Notas</strong> → clique no favorito
-                para baixar → importe aqui.
-              </li>
-            </ol>
-          )}
+          <button
+            type="button"
+            className={styles.dropZone}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <span className={styles.dropIcon}>↓</span>
+            <span className={styles.dropText}>
+              Arraste o arquivo HTML aqui ou clique para selecionar
+            </span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".html,.htm"
+            onChange={onPickFile}
+            style={{ display: "none" }}
+          />
 
-          {browser === "safari" && (
-            <div className={styles.bookmarkletRow}>
-              <button className={styles.bookmarkletCopy} onClick={copyBookmarklet}>
-                {bookmarkletCopied ? "Copiado!" : "Copiar código"}
-              </button>
-            </div>
-          )}
+          {importError && <p className={styles.importErrorMsg}>{importError}</p>}
 
           <p className={styles.emptyHint}>
             Seus dados ficam salvos no navegador — nada é enviado para nenhum servidor.
