@@ -30,11 +30,14 @@ interface AdaloveApiResponse {
   activities?: AdaloveApiActivity[];
 }
 
-// Classificação por nome — independe do código numérico `type`, que é instável
-// e ainda não mapeamos por completo. O nome é o que o aluno lê na tela.
+// Classificação por nome. NOTA: é heurística e falha quando a turma nomeia as
+// atividades sem a palavra-chave (ex.: "Desafio de Matemática" é Ponderada).
+// O ideal é usar o `type` numérico da API (equivalente ao ícone do HTML) — falta
+// mapear os códigos. Enquanto isso, cobrimos os padrões mais comuns.
 function inferTipo(caption: string): TipoAtividade {
   const c = caption.toLowerCase();
-  if (/artefato/.test(c)) return "Artefato";
+  // "Artefato 1", "Art. 1", "Art.1", "Art 1 [WAD]"
+  if (/artefato|\bart\.?\s*\d/.test(c)) return "Artefato";
   if (/ponderad/.test(c)) return "Ponderada";
   if (/\bprova\b|prova do m[oó]dulo/.test(c)) return "Prova";
   if (/em grupo|trabalho em grupo/.test(c)) return "Grupo";

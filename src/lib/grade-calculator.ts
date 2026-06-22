@@ -119,6 +119,9 @@ export function calcularMetricas(
   const acProva = acumuladoPorTipo(items, "Prova");
   const acTotal = acPonderadas + acArtefatos + acAulas + acGrupo + acProva;
 
+  const provaItems = items.filter((i) => i.tipo === "Prova");
+  const provaFeita = provaItems.length > 0 && provaItems.every(isEvaluated);
+
   const mediaTotalAtual = mediaPonderadaAteOMomento(items);
 
   const meta = simulacao.metaFinal;
@@ -177,6 +180,7 @@ export function calcularMetricas(
     notaNecessariaProva: notaProva,
     notaNecessariaProvaRaw: notaProvaRaw,
     provaStatus,
+    provaFeita,
     acumuladoFinalProjetado: finalProjetado,
     pontosNaoAvaliados: pontosNaoAvaliados(items),
     pontosAvaliados: pontosAvaliados(items),

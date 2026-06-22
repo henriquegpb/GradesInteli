@@ -275,6 +275,14 @@
 .warning { color: var(--yellow); }
 .danger { color: var(--red); }
 
+.feita {
+  background: linear-gradient(120deg, var(--pink) 0%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 .objectiveBlock {
   display: flex;
   flex-direction: column;

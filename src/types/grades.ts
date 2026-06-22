@@ -90,6 +90,7 @@ export interface MetricasModulo {
   notaNecessariaProva: number;
   notaNecessariaProvaRaw: number;
   provaStatus: "aprovado" | "exigente" | "impossivel";
+  provaFeita: boolean;
   acumuladoFinalProjetado: number;
   pontosNaoAvaliados: number;
   pontosAvaliados: number;

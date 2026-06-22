@@ -32,15 +32,17 @@ export default function SimulationPanel({
   const [showSlider, setShowSlider] = useState(false);
   const [showMultConfig, setShowMultConfig] = useState(false);
 
-  const provaLabel =
-    metricas.provaStatus === "aprovado"
+  const provaLabel = metricas.provaFeita
+    ? "Prova já realizada"
+    : metricas.provaStatus === "aprovado"
       ? "Cenário confortável"
       : metricas.provaStatus === "exigente"
         ? "Nota alta necessária"
         : "Acima de 10 — improvável";
 
-  const provaClass =
-    metricas.provaStatus === "aprovado"
+  const provaClass = metricas.provaFeita
+    ? styles.success
+    : metricas.provaStatus === "aprovado"
       ? styles.success
       : metricas.provaStatus === "exigente"
         ? styles.warning
@@ -156,10 +158,16 @@ export default function SimulationPanel({
         <div className={styles.rightCol}>
           <div className={styles.provaBlock}>
             <span className={styles.provaLabel}>Nota necessária na prova</span>
-            <span className={`${styles.provaValue} ${provaClass}`}>
-              {metricas.provaStatus === "impossivel"
-                ? fmtNota(metricas.notaNecessariaProvaRaw)
-                : fmtNota(metricas.notaNecessariaProva)}
+            <span
+              className={`${styles.provaValue} ${
+                metricas.provaFeita ? styles.feita : provaClass
+              }`}
+            >
+              {metricas.provaFeita
+                ? "Feita"
+                : metricas.provaStatus === "impossivel"
+                  ? fmtNota(metricas.notaNecessariaProvaRaw)
+                  : fmtNota(metricas.notaNecessariaProva)}
             </span>
             <span className={`${styles.provaStatus} ${provaClass}`}>
               {provaLabel}
