@@ -14,7 +14,7 @@ Porque nenhum aluno deveria reprovar por falta de visibilidade. A famosa [planil
 
 ## O que faz
 
-- **Importação direta do Adalove** — salva a página de notas como HTML e faz upload. Pronto.
+- **Importação direta do Adalove** — pela extensão do navegador (um clique) ou salvando a página de notas como HTML e fazendo upload.
 - **Cálculo automático** — acumulado por categoria, média até o momento, nota necessária na prova.
 - **Simulação** — escolhe uma nota alvo e vê em tempo real o que precisa acontecer.
 - **Participação** — seleciona sua categoria (A-E) e vê o impacto real no resultado final.
@@ -23,10 +23,42 @@ Porque nenhum aluno deveria reprovar por falta de visibilidade. A famosa [planil
 
 ## Como usar
 
-1. Acesse o [site](https://gradesinteli.vercel.app) ou rode localmente
+A forma mais fácil é pela **extensão do navegador** — importa suas notas com um clique, sem salvar página nem fazer upload de arquivo.
+
+[**📥 Baixe a extensão na Chrome Web Store**](https://chromewebstore.google.com/detail/adalove-%E2%86%92-gradesinteli/dpgoggjeajlgbkfabfhijccjfbchojpn)
+
+1. Instale a extensão pelo link acima
+2. No Adalove, abra a aba **Notas** (Acadêmico → Vida Acadêmica → Notas) e espere as atividades carregarem
+3. Clique no botão **"✓ Abrir no GradesInteli"** que aparece no canto — o dashboard abre já preenchido
+
+<p align="center">
+  <img src="assets/img/AdaloveButton.png" alt="Botão 'Abrir no GradesInteli' dentro do Adalove" width="420" style="border-radius: 12px;" />
+</p>
+
+**Como funciona:** quando você abre suas notas, o Adalove já busca os dados na API dele. A extensão apenas *observa* essa resposta (usando a sua própria sessão), guarda no `chrome.storage` local e entrega direto ao GradesInteli via `postMessage`. Não mexe no seu token, não faz login por você e não manda nada para servidores de terceiros. Mais detalhes em [`extension/README.md`](extension/README.md).
+
+<details>
+<summary><b>Sem a extensão?</b> Importar via HTML (Ctrl+S / Cmd+S)</summary>
+
+<br>
+
+1. Acesse o [site](https://gradesinteli.vercel.app)
 2. No Adalove, vá em suas notas e salve a página completa (Ctrl+S / Cmd+S)
 3. Clique em "Importar Adalove" e selecione o arquivo `.html`
 4. Pronto — suas notas aparecem no dashboard
+
+</details>
+
+<details>
+<summary>Instalar a extensão em modo desenvolvedor</summary>
+
+<br>
+
+1. Abra `chrome://extensions` (ou `edge://extensions`)
+2. Ative o **Modo do desenvolvedor**
+3. **Carregar sem compactação** / **Load unpacked** → selecione a pasta `extension/`
+
+</details>
 
 ## Rodando localmente
 
