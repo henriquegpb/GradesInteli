@@ -100,6 +100,7 @@ export interface MetricasModulo {
 export interface ParsedAdalovePayload {
   studentName: string | null;
   activities: AtividadeImportada[];
+  attendanceRows?: AttendanceRow[];
 }
 
 export type PresencaStatus = "presente" | "falta" | "justificado" | "futuro";

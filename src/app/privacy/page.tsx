@@ -12,7 +12,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.content}>
         <h1>Política de Privacidade</h1>
-        <p className={styles.updated}>Última atualização: 18 de junho de 2026</p>
+        <p className={styles.updated}>Última atualização: 23 de junho de 2026</p>
 
         <p>
           O <strong>GradesInteli</strong> e a extensão de navegador{" "}
@@ -70,8 +70,8 @@ export default function PrivacyPage() {
         <h2>Permissões da extensão</h2>
         <ul>
           <li>
-            <strong>adalove.inteli.edu.br</strong> — ler as notas e atividades que a
-            página já carregou.
+            <strong>adalove.inteli.edu.br</strong> — ler as notas, atividades e
+            presenças que a página já carregou.
           </li>
           <li>
             <strong>gradesinteli.vercel.app</strong> — entregar esses dados ao

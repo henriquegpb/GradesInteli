@@ -125,7 +125,12 @@ export function useGradeDashboard() {
     setVinculosManuais({});
     setStudentName(payload.studentName);
     setLastImportAt(new Date().toISOString());
-  }, []);
+    if (payload.attendanceRows && payload.attendanceRows.length > 0) {
+      setAttendanceRows(payload.attendanceRows);
+      setAttendance(summarizeAttendanceRows(payload.attendanceRows, attendanceUltimaPeso2));
+      setAttendanceError(null);
+    }
+  }, [attendanceUltimaPeso2]);
 
   const importHtml = useCallback(
     async (file: File) => {

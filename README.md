@@ -17,13 +17,14 @@ Porque nenhum aluno deveria reprovar por falta de visibilidade. A famosa [planil
 - **Importação direta do Adalove** — pela extensão do navegador (um clique) ou salvando a página de notas como HTML e fazendo upload.
 - **Cálculo automático** — acumulado por categoria, média até o momento, nota necessária na prova.
 - **Simulação** — escolhe uma nota alvo e vê em tempo real o que precisa acontecer.
+- **Faltas** — importa presenças do Adalove e calcula quantas faltas ainda cabem no limite de 20%.
 - **Participação** — seleciona sua categoria (A-E) e vê o impacto real no resultado final.
 - **Persistência local** — tudo fica salvo no localStorage do seu browser. Fecha e abre de novo, tá tudo lá.
 - **Tema claro/escuro** — porque cada um tem seu estilo.
 
 ## Como usar
 
-A forma mais fácil é pela **extensão do navegador** — importa suas notas com um clique, sem salvar página nem fazer upload de arquivo.
+A forma mais fácil é pela **extensão do navegador** — importa suas notas e faltas com um clique, sem salvar página nem fazer upload de arquivo.
 
 [**📥 Baixe a extensão na Chrome Web Store**](https://chromewebstore.google.com/detail/adalove-%E2%86%92-gradesinteli/dpgoggjeajlgbkfabfhijccjfbchojpn)
 

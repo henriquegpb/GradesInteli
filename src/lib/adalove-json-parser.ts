@@ -1,4 +1,10 @@
-import type { TipoAtividade, AtividadeImportada, ParsedAdalovePayload } from "@/types/grades";
+import type {
+  TipoAtividade,
+  AtividadeImportada,
+  AttendanceRow,
+  ParsedAdalovePayload,
+  PresencaStatus,
+} from "@/types/grades";
 
 // ---------------------------------------------------------------------------
 // Parser do JSON da API do Adalove (endpoint /sections/{uuid}/userdata).
@@ -16,6 +22,16 @@ interface AdaloveApiActivity {
   studentUuid: string;
   sort?: number; // ordem da atividade dentro da semana
   exam?: number;
+  date?: string | null;
+  attendance1?: number | string | null;
+  attendance2?: number | string | null;
+  attendance3?: number | string | null;
+  absenceAllowanceType?: number | string | null;
+  absenceAllowanceTypeName?: string | null;
+  absenceAllowanceReason?: string | null;
+  absenceAllowanceUuid?: string | null;
+  absencePeriod?: number | string | null;
+  ticketNumber?: number | string | null;
 }
 
 interface AdaloveApiStudent {
@@ -51,6 +67,73 @@ function parseSemana(folderCaption: string): string {
   if (!m) return "";
   const n = parseInt(m[1], 10);
   return n ? "S" + n : "";
+}
+
+function parseDia(date?: string | null): string {
+  const m = (date || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}` : "";
+}
+
+function hasAllowance(activity: AdaloveApiActivity, slot: number): boolean {
+  const period = activity.absencePeriod;
+  const periodMatches =
+    period == null ||
+    period === "" ||
+    Number(period) === slot;
+
+  return Boolean(
+    periodMatches &&
+      (activity.absenceAllowanceUuid ||
+        activity.absenceAllowanceType ||
+        activity.absenceAllowanceTypeName ||
+        activity.absenceAllowanceReason ||
+        activity.ticketNumber)
+  );
+}
+
+function parseAttendanceValue(
+  value: number | string | null | undefined,
+  activity: AdaloveApiActivity,
+  slot: number
+): PresencaStatus {
+  const n = Number(value);
+  if (Number.isNaN(n) || n < 0) return "futuro";
+  if (n > 0) return "presente";
+  return hasAllowance(activity, slot) ? "justificado" : "falta";
+}
+
+function hasAttendanceSlots(activity: AdaloveApiActivity): boolean {
+  return [activity.attendance1, activity.attendance2, activity.attendance3].some(
+    (value) => value !== undefined && value !== null
+  );
+}
+
+function shouldImportAttendance(activity: AdaloveApiActivity): boolean {
+  if (!hasAttendanceSlots(activity)) return false;
+  const values = [activity.attendance1, activity.attendance2, activity.attendance3];
+  const hasRecordedAttendance = values.some((value) => Number(value) >= 0);
+  return hasRecordedAttendance || activity.type === 2;
+}
+
+function parseAttendanceRows(activities: AdaloveApiActivity[]): AttendanceRow[] {
+  return activities
+    .filter(shouldImportAttendance)
+    .sort(
+      (a, b) =>
+        weekNum(a.folderCaption) - weekNum(b.folderCaption) ||
+        (a.sort ?? 0) - (b.sort ?? 0)
+    )
+    .map((a) => ({
+      atividade: (a.caption || "").trim(),
+      semana: parseSemana(a.folderCaption),
+      dia: parseDia(a.date),
+      presencas: [a.attendance1, a.attendance2, a.attendance3].flatMap((value, i) =>
+        value === undefined || value === null
+          ? []
+          : [parseAttendanceValue(value, a, i + 1)]
+      ),
+    }))
+    .filter((row) => row.atividade && row.presencas.length > 0);
 }
 
 // Número da semana para ordenação (sem semana vai para o fim).
@@ -110,5 +193,7 @@ export function parseAdaloveJson(jsonText: string): ParsedAdalovePayload {
       nota: parseNota(a.gradeResult),
     }));
 
-  return { studentName, activities: mapped };
+  const attendanceRows = parseAttendanceRows(activities);
+
+  return { studentName, activities: mapped, attendanceRows };
 }

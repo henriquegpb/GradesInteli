@@ -1,6 +1,6 @@
 # Adalove → GradesInteli (extensão)
 
-Importa suas notas do Adalove direto para o [GradesInteli](https://gradesinteli.vercel.app),
+Importa suas notas e faltas do Adalove direto para o [GradesInteli](https://gradesinteli.vercel.app),
 sem precisar salvar a página em HTML (CMD+S).
 
 ## Como funciona
@@ -25,7 +25,7 @@ guarda localmente e, ao clicar no botão, abre o GradesInteli já preenchido.
 1. Acesse o Adalove logado e abra a aba **Notas** (Acadêmico → Vida Acadêmica → Notas).
 2. Aguarde as atividades carregarem. O botão no canto inferior direito muda para
    **"✓ Abrir no GradesInteli"**.
-3. Clique nele. O GradesInteli abre em uma nova aba já com suas notas importadas.
+3. Clique nele. O GradesInteli abre em uma nova aba já com suas notas e faltas importadas.
 
 ## Arquivos
 
