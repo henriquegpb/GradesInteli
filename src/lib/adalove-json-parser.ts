@@ -30,17 +30,19 @@ interface AdaloveApiResponse {
   activities?: AdaloveApiActivity[];
 }
 
-// Classificação por nome. NOTA: é heurística e falha quando a turma nomeia as
-// atividades sem a palavra-chave (ex.: "Desafio de Matemática" é Ponderada).
-// O ideal é usar o `type` numérico da API (equivalente ao ícone do HTML) — falta
-// mapear os códigos. Enquanto isso, cobrimos os padrões mais comuns.
-function inferTipo(caption: string): TipoAtividade {
-  const c = caption.toLowerCase();
+// Classificação por nome. O `type` numérico da API não separa perfeitamente
+// aulas e ponderadas: em payloads reais, `type: 11` aparece tanto em materiais
+// sem peso quanto em atividades ponderadas. Como aulas/autoestudos com peso 0
+// são filtrados antes do cálculo, atividade avaliada sem outro sinal explícito
+// deve cair como Ponderada, não Aula.
+function inferTipo(activity: AdaloveApiActivity): TipoAtividade {
+  const c = (activity.caption || "").toLowerCase();
   // "Artefato 1", "Art. 1", "Art.1", "Art 1 [WAD]"
+  if (/\bprova\b|prova do m[oó]dulo/.test(c) || activity.exam === 1) return "Prova";
   if (/artefato|\bart\.?\s*\d/.test(c)) return "Artefato";
-  if (/ponderad/.test(c)) return "Ponderada";
-  if (/\bprova\b|prova do m[oó]dulo/.test(c)) return "Prova";
   if (/em grupo|trabalho em grupo/.test(c)) return "Grupo";
+  if (/ponderad/.test(c)) return "Ponderada";
+  if (typeof activity.gradeWeight === "number" && activity.gradeWeight > 0) return "Ponderada";
   return "Aula";
 }
 
@@ -99,7 +101,7 @@ export function parseAdaloveJson(jsonText: string): ParsedAdalovePayload {
     )
     .map((a) => ({
       semana: parseSemana(a.folderCaption),
-      tipo: inferTipo(a.caption || ""),
+      tipo: inferTipo(a),
       nome: (a.caption || "").trim(),
       // O HTML guarda o peso em centésimos (peso/100); a API entrega o valor
       // cheio (Artefato = 4). Dividimos por 100 para que API e HTML produzam
