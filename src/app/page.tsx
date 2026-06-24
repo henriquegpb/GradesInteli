@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { Download } from "lucide-react";
 import { useGradeDashboard } from "@/hooks/useGradeDashboard";
 import StudentHeader from "@/components/dashboard/StudentHeader";
 import HtmlUpload from "@/components/import/HtmlUpload";
@@ -111,6 +112,18 @@ export default function Home() {
     <div className={styles.headerActions}>
       {hasData && (
         <GithubStarButton onHoverChange={setGhGlow} onStarClick={starPrompt.markStarClicked} />
+      )}
+      {hasData && (
+        <a
+          href={CWS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.installExtensionBtn}
+          title="Instalar extensão"
+        >
+          <Download size={13} strokeWidth={2} aria-hidden="true" />
+          <span>Instalar extensão</span>
+        </a>
       )}
       {hasData && <HtmlUpload onImport={importHtml} error={importError} />}
       <button

@@ -628,6 +628,40 @@
   gap: 0.4rem;
 }
 
+.installExtensionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(110, 123, 242, 0.35);
+  border-radius: 6px;
+  background: rgba(110, 123, 242, 0.10);
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.installExtensionBtn:hover {
+  border-color: var(--accent);
+  background: rgba(110, 123, 242, 0.16);
+  color: var(--text-primary);
+}
+
+.installExtensionBtn:active {
+  transform: translateY(0);
+}
+
+.installExtensionBtn span {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
 .themeBtn {
   width: 28px;
   height: 28px;
