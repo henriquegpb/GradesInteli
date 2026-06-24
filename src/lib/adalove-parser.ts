@@ -11,8 +11,28 @@ const ICON_MAP: Record<string, TipoAtividade> = {
   "user-group-solido": "Prova",
 };
 
-function inferTipo(iconName: string): TipoAtividade {
-  return ICON_MAP[iconName] || "";
+function extractIconName(source: string): string {
+  for (const iconName of Object.keys(ICON_MAP)) {
+    if (source.includes(iconName)) return iconName;
+  }
+
+  const iconMatch = source.match(/(?:data-src|src)=["']([^"']*\.svg)["']/);
+  const iconPath = iconMatch ? iconMatch[1] : "";
+  return iconPath.split("/").pop()?.replace(/\.svg$/, "") || "";
+}
+
+function inferTipoFromText(text: string, pontos = 0): TipoAtividade {
+  const normalized = text.toLowerCase();
+  if (/\bprova\b|prova do m[oó]dulo/.test(normalized)) return "Prova";
+  if (/artefato|\bart\.?\s*\d/.test(normalized)) return "Artefato";
+  if (/em grupo|trabalho em grupo/.test(normalized)) return "Grupo";
+  if (/ponderad/.test(normalized)) return "Ponderada";
+  if (pontos > 0) return "Ponderada";
+  return "";
+}
+
+function inferTipo(iconName: string, text = "", pontos = 0): TipoAtividade {
+  return ICON_MAP[iconName] || inferTipoFromText(text, pontos);
 }
 
 function parseWithRegex(html: string): AtividadeImportada[] {
@@ -22,10 +42,6 @@ function parseWithRegex(html: string): AtividadeImportada[] {
 
   while ((match = rowRegex.exec(html)) !== null) {
     const row = match[1];
-
-    const iconMatch = row.match(/data-src="[^"]*\/([a-zA-Z0-9-]+)\.svg"/);
-    const iconName = iconMatch ? iconMatch[1] : "";
-    const tipo = inferTipo(iconName);
 
     const nomeMatch = row.match(
       /<span[^>]*class="[^"]*caption-activity[^"]*"[^>]*>(.*?)<\/span>/
@@ -56,6 +72,9 @@ function parseWithRegex(html: string): AtividadeImportada[] {
       pontos = isNaN(pontosRaw) ? 0 : pontosRaw / 100;
     }
 
+    const iconName = extractIconName(row);
+    const tipo = inferTipo(iconName, nome, pontos);
+
     let nota: number | null = null;
     if (notaMatch) {
       const notaText = cleanHtml(notaMatch[1]).replace(",", ".").trim();
@@ -82,12 +101,6 @@ function parseWithDOM(html: string): AtividadeImportada[] {
   const atividades: AtividadeImportada[] = [];
 
   rows.forEach((row) => {
-    const svgEl = row.querySelector("svg[data-src]");
-    const iconName = svgEl
-      ? (svgEl.getAttribute("data-src") || "").split("/").pop()?.replace(".svg", "") || ""
-      : "";
-    const tipo = inferTipo(iconName);
-
     const nomeEl = row.querySelector(".caption-activity");
     const nome = nomeEl ? (nomeEl.textContent || "").trim() : "";
 
@@ -110,6 +123,14 @@ function parseWithDOM(html: string): AtividadeImportada[] {
       );
       pontos = isNaN(raw) ? 0 : raw / 100;
     }
+
+    const iconEl = row.querySelector('[data-src*=".svg"], [src*=".svg"]');
+    const iconSource =
+      iconEl?.getAttribute("data-src") ||
+      iconEl?.getAttribute("src") ||
+      row.innerHTML;
+    const iconName = extractIconName(iconSource);
+    const tipo = inferTipo(iconName, nome, pontos);
 
     let nota: number | null = null;
     if (notaCell) {
