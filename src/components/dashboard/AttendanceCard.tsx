@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState, useCallback } from "react";
-import type { AttendanceData } from "@/types/grades";
+import type { AttendanceData, AttendanceSource } from "@/types/grades";
 import { fmtAttendanceUnits } from "@/lib/format";
 import styles from "./AttendanceCard.module.css";
 
@@ -10,6 +10,7 @@ interface Props {
   error: string | null;
   ultimaPeso2: boolean;
   onUltimaPeso2Change: (v: boolean) => void;
+  source: AttendanceSource;
 }
 
 export default function AttendanceCard({
@@ -18,6 +19,7 @@ export default function AttendanceCard({
   error,
   ultimaPeso2,
   onUltimaPeso2Change,
+  source,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -65,12 +67,18 @@ export default function AttendanceCard({
     [onImport]
   );
 
-  const dragProps = {
-    onDragEnter: onCardDragEnter,
-    onDragOver: onCardDragOver,
-    onDragLeave: onCardDragLeave,
-    onDrop: onCardDrop,
-  };
+  // Quando a fonte é a API (extensão), atualização vem só pelo botão da
+  // extensão no Adalove — não expõe drag/drop nem botão de upload aqui.
+  const allowsUpload = source !== "api";
+
+  const dragProps = allowsUpload
+    ? {
+        onDragEnter: onCardDragEnter,
+        onDragOver: onCardDragOver,
+        onDragLeave: onCardDragLeave,
+        onDrop: onCardDrop,
+      }
+    : {};
 
   const peso2Toggle = (
     <div className={styles.toggleGroup}>
@@ -177,11 +185,15 @@ export default function AttendanceCard({
 
       <div className={styles.bottomRow}>
         {peso2Toggle}
-        <button className={styles.updateBtn} onClick={() => inputRef.current?.click()}>
-          Atualizar Faltas
-        </button>
+        {allowsUpload && (
+          <button className={styles.updateBtn} onClick={() => inputRef.current?.click()}>
+            Atualizar Faltas
+          </button>
+        )}
       </div>
-      <input ref={inputRef} type="file" accept=".html,.htm" hidden onChange={handleFile} />
+      {allowsUpload && (
+        <input ref={inputRef} type="file" accept=".html,.htm" hidden onChange={handleFile} />
+      )}
     </div>
   );
 }

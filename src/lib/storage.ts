@@ -25,6 +25,7 @@ function defaultState(): AppState {
     attendance: null,
     attendanceRows: null,
     attendanceUltimaPeso2: false,
+    attendanceSource: null,
   };
 }
 

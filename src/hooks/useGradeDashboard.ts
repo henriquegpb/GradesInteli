@@ -10,6 +10,7 @@ import type {
   ParticipacaoMultipliers,
   AttendanceData,
   AttendanceRow,
+  AttendanceSource,
 } from "@/types/grades";
 import { DEFAULT_PARTICIPACAO_MULTIPLIERS } from "@/types/grades";
 import { parseAdaloveHtml } from "@/lib/adalove-parser";
@@ -36,6 +37,7 @@ export function useGradeDashboard() {
   const [attendanceRows, setAttendanceRows] = useState<AttendanceRow[] | null>(null);
   const [attendanceUltimaPeso2, setAttendanceUltimaPeso2] = useState(false);
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
+  const [attendanceSource, setAttendanceSource] = useState<AttendanceSource>(null);
 
   useEffect(() => {
     const state = loadState();
@@ -58,6 +60,7 @@ export function useGradeDashboard() {
     } else if (state.attendance) {
       setAttendance(state.attendance);
     }
+    setAttendanceSource(state.attendanceSource ?? null);
     document.documentElement.setAttribute("data-theme", state.theme);
     setIsHydrated(true);
   }, []);
@@ -77,8 +80,9 @@ export function useGradeDashboard() {
       attendance,
       attendanceRows,
       attendanceUltimaPeso2,
+      attendanceSource,
     });
-  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, attendanceRows, attendanceUltimaPeso2, isHydrated]);
+  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, attendanceRows, attendanceUltimaPeso2, attendanceSource, isHydrated]);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -129,6 +133,7 @@ export function useGradeDashboard() {
       setAttendanceRows(payload.attendanceRows);
       setAttendance(summarizeAttendanceRows(payload.attendanceRows, attendanceUltimaPeso2));
       setAttendanceError(null);
+      setAttendanceSource("api");
     }
   }, [attendanceUltimaPeso2]);
 
@@ -182,6 +187,7 @@ export function useGradeDashboard() {
     try {
       const html = await file.text();
       setAttendanceRows(extractAttendanceRows(html));
+      setAttendanceSource("html");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erro ao importar faltas";
       setAttendanceError(msg);
@@ -218,16 +224,17 @@ export function useGradeDashboard() {
     setAttendanceRows(null);
     setAttendanceUltimaPeso2(false);
     setAttendanceError(null);
+    setAttendanceSource(null);
   }, []);
 
   const exportState = useCallback((): string => {
     const state: AppState = {
       items, naoReconhecidas, simulacao, studentName, lastImportAt,
       vinculosManuais, participacao, participacaoMultipliers, theme, attendance,
-      attendanceRows, attendanceUltimaPeso2,
+      attendanceRows, attendanceUltimaPeso2, attendanceSource,
     };
     return JSON.stringify(state, null, 2);
-  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, attendanceRows, attendanceUltimaPeso2]);
+  }, [items, naoReconhecidas, simulacao, studentName, lastImportAt, vinculosManuais, participacao, participacaoMultipliers, theme, attendance, attendanceRows, attendanceUltimaPeso2, attendanceSource]);
 
   const importState = useCallback((json: string) => {
     try {
@@ -248,6 +255,9 @@ export function useGradeDashboard() {
       if (state.attendanceUltimaPeso2 !== undefined) {
         setAttendanceUltimaPeso2(state.attendanceUltimaPeso2);
       }
+      if (state.attendanceSource !== undefined) {
+        setAttendanceSource(state.attendanceSource);
+      }
     } catch {
       setImportError("JSON inválido");
     }
@@ -263,5 +273,6 @@ export function useGradeDashboard() {
     effectiveMetaFinal,
     attendance, importAttendanceHtml, attendanceError,
     attendanceUltimaPeso2, setAttendanceUltimaPeso2Flag,
+    attendanceSource,
   };
 }

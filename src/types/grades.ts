@@ -123,6 +123,8 @@ export interface AttendanceData {
   percentFaltas: number;
 }
 
+export type AttendanceSource = "api" | "html" | null;
+
 export interface AppState {
   items: ItemNota[];
   naoReconhecidas: AtividadeNaoReconhecida[];
@@ -136,4 +138,5 @@ export interface AppState {
   attendance: AttendanceData | null;
   attendanceRows: AttendanceRow[] | null;
   attendanceUltimaPeso2: boolean;
+  attendanceSource: AttendanceSource;
 }

@@ -27,6 +27,7 @@ export default function Home() {
     effectiveMetaFinal,
     attendance, importAttendanceHtml, attendanceError,
     attendanceUltimaPeso2, setAttendanceUltimaPeso2Flag,
+    attendanceSource,
   } = useGradeDashboard();
 
   const [dragging, setDragging] = useState(false);
@@ -406,6 +407,7 @@ export default function Home() {
               error={attendanceError}
               ultimaPeso2={attendanceUltimaPeso2}
               onUltimaPeso2Change={setAttendanceUltimaPeso2Flag}
+              source={attendanceSource}
             />
           </div>
 

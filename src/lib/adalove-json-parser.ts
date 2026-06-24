@@ -75,14 +75,17 @@ function parseDia(date?: string | null): string {
 }
 
 function hasAllowance(activity: AdaloveApiActivity, slot: number): boolean {
+  // absencePeriod é o slot a partir do qual o abono vale (e segue até o slot 3).
+  // Period=1 cobre 1,2,3; period=2 cobre 2,3; period=3 cobre só 3. Null/vazio
+  // significa "vale para todos os slots".
   const period = activity.absencePeriod;
-  const periodMatches =
+  const periodCovers =
     period == null ||
     period === "" ||
-    Number(period) === slot;
+    Number(period) <= slot;
 
   return Boolean(
-    periodMatches &&
+    periodCovers &&
       (activity.absenceAllowanceUuid ||
         activity.absenceAllowanceType ||
         activity.absenceAllowanceTypeName ||
@@ -98,8 +101,12 @@ function parseAttendanceValue(
 ): PresencaStatus {
   const n = Number(value);
   if (Number.isNaN(n) || n < 0) return "futuro";
+  // Abonos vencem o valor numérico: o Adalove normaliza a presença para "10"
+  // (equivalente a presente) quando o abono é aceito, então sem isso o slot
+  // entraria como presente em vez de justificado.
+  if (hasAllowance(activity, slot)) return "justificado";
   if (n > 0) return "presente";
-  return hasAllowance(activity, slot) ? "justificado" : "falta";
+  return "falta";
 }
 
 function hasAttendanceSlots(activity: AdaloveApiActivity): boolean {
@@ -112,7 +119,12 @@ function shouldImportAttendance(activity: AdaloveApiActivity): boolean {
   if (!hasAttendanceSlots(activity)) return false;
   const values = [activity.attendance1, activity.attendance2, activity.attendance3];
   const hasRecordedAttendance = values.some((value) => Number(value) >= 0);
-  return hasRecordedAttendance || activity.type === 2;
+  // Aulas (type 2), workshops/sprint reviews/provas (type 1) entram mesmo com
+  // todos os slots em -1 (são dias de aula ainda futuros). Demais tipos só
+  // entram se já têm algum valor registrado — evita puxar ponderadas/artefatos
+  // que vêm com -1/-1/-1 só porque a API preenche o campo.
+  const isClassActivity = activity.type === 1 || activity.type === 2;
+  return hasRecordedAttendance || isClassActivity;
 }
 
 function parseAttendanceRows(activities: AdaloveApiActivity[]): AttendanceRow[] {
