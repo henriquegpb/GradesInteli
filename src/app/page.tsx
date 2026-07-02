@@ -431,6 +431,7 @@ export default function Home() {
             onParticipacaoChange={setParticipacao}
             onMultipliersChange={setParticipacaoMultipliers}
             effectiveMetaFinal={effectiveMetaFinal}
+            attendance={attendance}
           />
 
           {naoReconhecidas.length > 0 && (

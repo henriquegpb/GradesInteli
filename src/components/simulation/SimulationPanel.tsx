@@ -1,6 +1,6 @@
 "use client";
 import { useState, type CSSProperties } from "react";
-import type { SimulacaoConfig, MetricasModulo, ParticipacaoLetra, ParticipacaoMultipliers } from "@/types/grades";
+import type { SimulacaoConfig, MetricasModulo, ParticipacaoLetra, ParticipacaoMultipliers, AttendanceData } from "@/types/grades";
 import { fmtNota } from "@/lib/format";
 import { Pencil, X, Settings } from "lucide-react";
 import NumericInput from "@/components/ui/NumericInput";
@@ -25,6 +25,7 @@ interface Props {
   onParticipacaoChange: (p: ParticipacaoLetra) => void;
   onMultipliersChange: (m: ParticipacaoMultipliers) => void;
   effectiveMetaFinal: number;
+  attendance: AttendanceData | null;
 }
 
 export default function SimulationPanel({
@@ -36,6 +37,7 @@ export default function SimulationPanel({
   onParticipacaoChange,
   onMultipliersChange,
   effectiveMetaFinal,
+  attendance,
 }: Props) {
   const [showSlider, setShowSlider] = useState(false);
   const [showMultConfig, setShowMultConfig] = useState(false);
@@ -67,6 +69,29 @@ export default function SimulationPanel({
   const moduloCompleto =
     metricas.pontosAvaliados > 0 && metricas.pontosNaoAvaliados <= EPS;
   const notaFinal = metricas.acumuladoTotal;
+
+  // Falta reprova independente da nota — só mostramos se as faltas foram importadas.
+  if (attendance && attendance.percentFaltas >= 21) {
+    return (
+      <div className={`${styles.wrapper} gh-card`}>
+        <div className={styles.completeBody}>
+          <span className={styles.completeEyebrow}>Módulo encerrado</span>
+          <span className={`${styles.completeTitle} ${styles.danger}`}>
+            Bombou por falta
+          </span>
+          <div className={styles.completeGradeRow}>
+            <span className={styles.completeGradeLabel}>Faltas</span>
+            <span className={`${styles.completeGrade} ${styles.danger}`}>
+              {attendance.percentFaltas.toFixed(1)}%
+            </span>
+          </div>
+          <span className={`${styles.completeMessage} ${styles.danger}`}>
+            Que errada hein, esse limite de 20% não tem sentido mesmo.
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   if (moduloCompleto) {
     const estado =
