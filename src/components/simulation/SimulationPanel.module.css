@@ -274,6 +274,7 @@
 .success { color: var(--green); }
 .warning { color: var(--yellow); }
 .danger { color: var(--red); }
+.info { color: var(--blue); }
 
 .feita {
   background: linear-gradient(120deg, var(--pink) 0%, var(--teal) 100%);

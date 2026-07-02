@@ -42,19 +42,23 @@ export default function SimulationPanel({
 
   const provaLabel = metricas.provaFeita
     ? "Prova já realizada"
-    : metricas.provaStatus === "aprovado"
-      ? "Cenário confortável"
-      : metricas.provaStatus === "exigente"
-        ? "Nota alta necessária"
-        : "Acima de 10 — improvável";
+    : metricas.provaStatus === "folga"
+      ? "Teoricamente, pode negativar"
+      : metricas.provaStatus === "aprovado"
+        ? "Cenário confortável"
+        : metricas.provaStatus === "exigente"
+          ? "Nota alta necessária"
+          : "Acima de 10 — improvável";
 
   const provaClass = metricas.provaFeita
     ? styles.success
-    : metricas.provaStatus === "aprovado"
-      ? styles.success
-      : metricas.provaStatus === "exigente"
-        ? styles.warning
-        : styles.danger;
+    : metricas.provaStatus === "folga"
+      ? styles.info
+      : metricas.provaStatus === "aprovado"
+        ? styles.success
+        : metricas.provaStatus === "exigente"
+          ? styles.warning
+          : styles.danger;
 
   const mult = multipliers[participacao];
   const notaComParticipacao = metricas.acumuladoFinalProjetado * mult;
@@ -276,7 +280,8 @@ export default function SimulationPanel({
             >
               {metricas.provaFeita
                 ? "Feita"
-                : metricas.provaStatus === "impossivel"
+                : metricas.provaStatus === "impossivel" ||
+                    metricas.provaStatus === "folga"
                   ? fmtNota(metricas.notaNecessariaProvaRaw)
                   : fmtNota(metricas.notaNecessariaProva)}
             </span>

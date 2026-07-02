@@ -89,7 +89,7 @@ export interface MetricasModulo {
   mediaTotalAteOMomento: number | null;
   notaNecessariaProva: number;
   notaNecessariaProvaRaw: number;
-  provaStatus: "aprovado" | "exigente" | "impossivel";
+  provaStatus: "folga" | "aprovado" | "exigente" | "impossivel";
   provaFeita: boolean;
   acumuladoFinalProjetado: number;
   pontosNaoAvaliados: number;

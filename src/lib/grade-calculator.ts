@@ -146,9 +146,9 @@ export function calcularMetricas(
     return (meta - somaSemProva) / pesoProva;
   })();
 
-  let provaStatus: "aprovado" | "exigente" | "impossivel";
-  if (notaProvaRaw <= 0) {
-    provaStatus = "aprovado";
+  let provaStatus: "folga" | "aprovado" | "exigente" | "impossivel";
+  if (notaProvaRaw < 0) {
+    provaStatus = "folga";
   } else if (notaProvaRaw > 10) {
     provaStatus = "impossivel";
   } else if (notaProvaRaw > 7) {
