@@ -1,12 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { SimulacaoConfig, MetricasModulo, ParticipacaoLetra, ParticipacaoMultipliers } from "@/types/grades";
 import { fmtNota } from "@/lib/format";
 import { Pencil, X, Settings } from "lucide-react";
 import NumericInput from "@/components/ui/NumericInput";
+import ElectricBorder from "@/components/ui/ElectricBorder";
 import styles from "./SimulationPanel.module.css";
 
 const LETRAS: ParticipacaoLetra[] = ["A", "B", "C", "D", "E"];
+
+const BARES_CELEBRACAO: { titulo: string; sub: string; tilt: number; href?: string }[] = [
+  { titulo: "Rolê no Share 🪩", sub: "Resenha com os amigos", tilt: -4, href: "https://sharesl.com.br/en/unidades/butanta" },
+  { titulo: "Chopp no São Conrado 🍺", sub: "Um chopp pra desestressar", tilt: 3, href: "https://botecosaoconrado.com.br/" },
+  { titulo: "Night no Vila JK 🍸", sub: "Joga tudo pra cima kkkk", tilt: 3.5, href: "https://www.vilajk.com.br/" },
+  { titulo: "Tarde conhecendo a Nora AI ⭐️", sub: "", tilt: -4.5, href: "https://www.linkedin.com/in/hbarone/" },
+];
 
 interface Props {
   simulacao: SimulacaoConfig;
@@ -50,6 +58,109 @@ export default function SimulationPanel({
 
   const mult = multipliers[participacao];
   const notaComParticipacao = metricas.acumuladoFinalProjetado * mult;
+
+  const EPS = 1e-9;
+  const moduloCompleto =
+    metricas.pontosAvaliados > 0 && metricas.pontosNaoAvaliados <= EPS;
+  const notaFinal = metricas.acumuladoTotal;
+
+  if (moduloCompleto) {
+    const estado =
+      notaFinal < 4 ? "reprovado" : notaFinal < 7 ? "recuperacao" : "aprovado";
+
+    const conteudo = {
+      reprovado: {
+        eyebrow: "Módulo encerrado",
+        titulo: "Reprovado",
+        mensagem: "Aqui acabou kkkk Próxima vez é mais fácil porque você já estudou isso",
+        valueClass: styles.danger,
+        statusClass: styles.danger,
+      },
+      recuperacao: {
+        eyebrow: "Módulo encerrado",
+        titulo: "Recuperação",
+        mensagem: "Ainda tem salvação, você já estudou tudo, corre atrás da recuperação!",
+        valueClass: styles.warning,
+        statusClass: styles.warning,
+      },
+      aprovado: {
+        eyebrow: "Módulo concluído",
+        titulo: "Aprovado!",
+        mensagem: "Mandou muito bem, agora da um tempo pro seu Claude e vai celebrar 🎉",
+        valueClass: styles.feita,
+        statusClass: styles.success,
+      },
+    }[estado];
+
+    const cardInterno = (
+      <div className={styles.completeBody}>
+        <span className={styles.completeEyebrow}>{conteudo.eyebrow}</span>
+        <span className={`${styles.completeTitle} ${conteudo.valueClass}`}>
+          {conteudo.titulo}
+        </span>
+        <div className={styles.completeGradeRow}>
+          <span className={styles.completeGradeLabel}>Nota final</span>
+          <span className={`${styles.completeGrade} ${conteudo.valueClass}`}>
+            {fmtNota(notaFinal)}
+          </span>
+        </div>
+        <span className={`${styles.completeMessage} ${conteudo.statusClass}`}>
+          {conteudo.mensagem}
+        </span>
+      </div>
+    );
+
+    if (estado === "aprovado") {
+      const renderBar = (bar: (typeof BARES_CELEBRACAO)[number]) => {
+        const style = { "--tilt": `${bar.tilt}deg` } as CSSProperties;
+        const inner = (
+          <>
+            <span className={styles.barName}>{bar.titulo}</span>
+            <span className={styles.barBairro}>{bar.sub}</span>
+          </>
+        );
+        return bar.href ? (
+          <a
+            key={bar.titulo}
+            className={styles.barCard}
+            style={style}
+            href={bar.href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {inner}
+          </a>
+        ) : (
+          <div key={bar.titulo} className={styles.barCard} style={style}>
+            {inner}
+          </div>
+        );
+      };
+
+      return (
+        <ElectricBorder
+          color="#7df9ff"
+          speed={0.7}
+          chaos={0.07}
+          borderRadius={12}
+        >
+          <div className={styles.electricCard}>
+            <div className={styles.celebrateLayout}>
+              <div className={styles.barColumn}>
+                {BARES_CELEBRACAO.slice(0, 2).map(renderBar)}
+              </div>
+              {cardInterno}
+              <div className={styles.barColumn}>
+                {BARES_CELEBRACAO.slice(2, 4).map(renderBar)}
+              </div>
+            </div>
+          </div>
+        </ElectricBorder>
+      );
+    }
+
+    return <div className={`${styles.wrapper} gh-card`}>{cardInterno}</div>;
+  }
 
   return (
     <div className={`${styles.wrapper} gh-card`}>

@@ -344,6 +344,146 @@
   border: 2px solid var(--bg);
 }
 
+.completeBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0;
+}
+
+.completeEyebrow {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.completeTitle {
+  font-family: var(--font-mono);
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.completeGradeRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.completeGradeLabel {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.completeGrade {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.completeMessage {
+  font-size: 0.68rem;
+  margin-top: 0.15rem;
+}
+
+.celebrateLayout {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.celebrateLayout > .completeBody {
+  flex-shrink: 0;
+  width: 240px;
+}
+
+.barColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.celebrateLayout > .barColumn:first-child {
+  align-items: flex-start;
+}
+
+.celebrateLayout > .barColumn:last-child {
+  align-items: flex-end;
+}
+
+.barCard {
+  width: 78%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  text-decoration: none;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.2s ease, border-color 0.15s, box-shadow 0.2s;
+}
+
+.barCard:hover {
+  border-color: #7df9ff;
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 0 6px 18px rgba(125, 249, 255, 0.12);
+}
+
+.barName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.barBairro {
+  font-size: 0.56rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.electricCard {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.25rem 1.375rem;
+  box-shadow:
+    inset 0 0 26px rgba(125, 249, 255, 0.16),
+    inset 0 0 60px rgba(125, 249, 255, 0.06);
+}
+
+@media (max-width: 720px) {
+  .celebrateLayout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .barColumn {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .barColumn > * {
+    flex: 1;
+    min-width: 120px;
+  }
+  .celebrateLayout > .completeBody {
+    width: auto;
+  }
+}
+
 .objectiveMeta {
   font-size: 0.52rem;
   color: var(--text-muted);
