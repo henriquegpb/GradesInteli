@@ -88,7 +88,7 @@ export default function PrivacyPage() {
           Dúvidas sobre privacidade? Escreva para{" "}
           <a href="mailto:henrique@noraai.co">henrique@noraai.co</a> ou abra uma issue no{" "}
           <a
-            href="https://github.com/henriquegpb/GradesInteli"
+            href="https://github.com/henriquegpb/gradesinteli"
             target="_blank"
             rel="noopener noreferrer"
           >

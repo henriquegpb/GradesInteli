@@ -63,7 +63,7 @@ A forma mais fácil é pela **extensão do navegador** — importa suas notas e 
 
 ## Star History
 
-<a href="https://github.com/henriquegpb/GradesInteli/stargazers">
+<a href="https://github.com/henriquegpb/gradesinteli/stargazers">
  <picture>
    <source media="(prefers-color-scheme: dark)" srcset="assets/img/star-history-dark.svg" />
    <source media="(prefers-color-scheme: light)" srcset="assets/img/star-history-light.svg" />
@@ -74,8 +74,8 @@ A forma mais fácil é pela **extensão do navegador** — importa suas notas e 
 ## Rodando localmente
 
 ```bash
-git clone https://github.com/henriquegpb/GradesInteli.git
-cd GradesInteli
+git clone https://github.com/henriquegpb/gradesinteli.git
+cd gradesinteli
 npm install
 npm run dev
 ```

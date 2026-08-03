@@ -4,7 +4,7 @@
 // (that needs GitHub OAuth + a backend), so we treat "clicked the star CTA" as
 // the signal and never nag again after that.
 
-export const REPO_URL = "https://github.com/henriquegpb/GradesInteli";
+export const REPO_URL = "https://github.com/henriquegpb/gradesinteli";
 
 const STORAGE_KEY = "gi-star-v1";
 

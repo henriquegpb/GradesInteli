@@ -4,7 +4,7 @@
 
 import { writeFile, mkdir } from "node:fs/promises";
 
-const REPO = process.env.GITHUB_REPOSITORY || "henriquegpb/GradesInteli";
+const REPO = process.env.GITHUB_REPOSITORY || "henriquegpb/gradesinteli";
 const TOKEN = process.env.GITHUB_TOKEN;
 const OUT_DIR = "assets/img";
 

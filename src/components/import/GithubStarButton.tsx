@@ -12,7 +12,7 @@ export default function GithubStarButton({ onHoverChange, onStarClick }: Props) 
     <span className={styles.root}>
       <span className={styles.support}>O seu apoio ajuda muito</span>
       <a
-        href="https://github.com/henriquegpb/GradesInteli"
+        href="https://github.com/henriquegpb/gradesinteli"
         target="_blank"
         rel="noopener noreferrer"
         className={styles.btn}
