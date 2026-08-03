@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const SITE_URL = "https://www.gradesinteli.com";
-const TITLE = "GradesInteli — cálculo de notas do módulo";
+const TITLE = "GradesInteli - cálculo de notas do módulo";
 const DESCRIPTION =
   "Importe suas notas do Adalove e veja exatamente quanto precisa tirar na prova para passar. Open source, sem login, roda 100% no seu browser.";
 
