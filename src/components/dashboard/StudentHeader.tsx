@@ -17,7 +17,7 @@ export default function StudentHeader({ studentName, lastImportAt, uploadSlot }:
       <div className={styles.left}>
         <h1 className={styles.title}>{title}</h1>
         <p className={styles.sub}>
-          Inteli — Cálculo de notas do módulo
+          Inteli - Cálculo de notas do módulo
           {lastImportAt && (
             <span className={styles.ts}>
               {" "}· {new Date(lastImportAt).toLocaleString("pt-BR")}
