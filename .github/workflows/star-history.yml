@@ -1,0 +1,48 @@
+name: Star History
+
+on:
+  schedule:
+    # Segundas, 03:00 UTC
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/star-history.mjs
+      - .github/workflows/star-history.yml
+
+# O endpoint /stargazers exige contents:write desde a mudança de acesso a
+# starred data pelo GitHub — sem isso o script recebe 401/403.
+permissions:
+  contents: write
+
+concurrency:
+  group: star-history
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Gerar SVGs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/star-history.mjs
+
+      - name: Commitar se mudou
+        run: |
+          if git diff --quiet -- assets/img/star-history-light.svg assets/img/star-history-dark.svg; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/img/star-history-light.svg assets/img/star-history-dark.svg
+          git commit -m "chore: atualiza gráfico de star history"
+          git push

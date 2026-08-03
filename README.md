@@ -63,11 +63,11 @@ A forma mais fácil é pela **extensão do navegador** — importa suas notas e 
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=henriquegpb%2FGradesInteli&type=date&legend=top-left">
+<a href="https://github.com/henriquegpb/GradesInteli/stargazers">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=henriquegpb/GradesInteli&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=henriquegpb/GradesInteli&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=henriquegpb/GradesInteli&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="assets/img/star-history-dark.svg" />
+   <source media="(prefers-color-scheme: light)" srcset="assets/img/star-history-light.svg" />
+   <img alt="Stars ao longo do tempo" src="assets/img/star-history-light.svg" width="720" />
  </picture>
 </a>
 
