@@ -6,7 +6,9 @@
 
 (function () {
   const TAG = "__GRADESINTELI_USERDATA__";
-  const GRADES_URL = "https://gradesinteli.vercel.app";
+  // Usa o host canônico direto (o apex e o antigo *.vercel.app redirecionam
+  // para cá) — abrir a URL de redirect faria o content script perder a página.
+  const GRADES_URL = "https://www.gradesinteli.com";
 
   let hasData = false;
 

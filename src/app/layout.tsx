@@ -2,11 +2,35 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
+const SITE_URL = "https://www.gradesinteli.com";
+const TITLE = "GradesInteli — cálculo de notas do módulo";
+const DESCRIPTION =
+  "Importe suas notas do Adalove e veja exatamente quanto precisa tirar na prova para passar. Open source, sem login, roda 100% no seu browser.";
+
 export const metadata: Metadata = {
-  title: "Inteli Grades",
-  description: "Cálculo de notas do módulo — Inteli",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: "/favicon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: SITE_URL,
+    siteName: "GradesInteli",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "/favicon.png", width: 584, height: 584, alt: "GradesInteli" }],
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/favicon.png"],
   },
 };
 

@@ -74,7 +74,7 @@ export default function PrivacyPage() {
             presenças que a página já carregou.
           </li>
           <li>
-            <strong>gradesinteli.vercel.app</strong> — entregar esses dados ao
+            <strong>www.gradesinteli.com</strong> — entregar esses dados ao
             dashboard.
           </li>
           <li>

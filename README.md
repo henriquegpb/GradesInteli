@@ -43,7 +43,7 @@ A forma mais fácil é pela **extensão do navegador** — importa suas notas e 
 
 <br>
 
-1. Acesse o [site](https://gradesinteli.vercel.app)
+1. Acesse o [site](https://www.gradesinteli.com)
 2. No Adalove, vá em suas notas e salve a página completa (Ctrl+S / Cmd+S)
 3. Clique em "Importar Adalove" e selecione o arquivo `.html`
 4. Pronto — suas notas aparecem no dashboard

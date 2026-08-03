@@ -1,6 +1,6 @@
 # Adalove → GradesInteli (extensão)
 
-Importa suas notas e faltas do Adalove direto para o [GradesInteli](https://gradesinteli.vercel.app),
+Importa suas notas e faltas do Adalove direto para o [GradesInteli](https://www.gradesinteli.com),
 sem precisar salvar a página em HTML (CMD+S).
 
 ## Como funciona
@@ -33,7 +33,7 @@ guarda localmente e, ao clicar no botão, abre o GradesInteli já preenchido.
 |---|---|---|---|
 | `adalove-interceptor.js` | MAIN | adalove.inteli.edu.br | Captura a resposta `/userdata` via patch em fetch/XHR |
 | `adalove-content.js` | isolado | adalove.inteli.edu.br | Salva a captura e mostra o botão |
-| `grades-content.js` | isolado | gradesinteli.vercel.app | Entrega os dados à página via `postMessage` |
+| `grades-content.js` | isolado | www.gradesinteli.com | Entrega os dados à página via `postMessage` |
 
 O app escuta `window.postMessage({ type: "GRADESINTELI_IMPORT", payload })` em
 `src/hooks/useGradeDashboard.ts` e responde com `GRADESINTELI_IMPORT_OK`.
