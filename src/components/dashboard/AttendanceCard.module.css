@@ -146,7 +146,8 @@
 
 .bigRow {
   display: flex;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
 .bigStat {
@@ -154,6 +155,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.05rem;
+  min-width: 0;
+}
+
+/* O % começa um pouco mais à direita do que a metade do card — a coluna da
+   esquerda leva a maior fatia, que é onde a nota do 3º ano precisa caber.
+   Continua alinhado à esquerda, sem encostar na borda. */
+.bigStatRight {
+  flex: 0.7;
 }
 
 .bigValue {
@@ -169,6 +178,13 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+/* Nota do 3º ano colada no rótulo: explica o número sem disputar com ele. */
+.labelNote {
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.75;
 }
 
 .danger {

@@ -113,7 +113,6 @@ export default function AttendanceCard({
 
   // Quando os pesos vêm da API (horas de aula por chamada), o toggle manual do
   // 3º ano não tem função — a conta já sai igual à do Adalove.
-  const unidadeLabel = attendance.pesosAutomaticos ? "horas" : "unidades";
   const pesoControl = attendance.pesosAutomaticos ? (
     <span className={styles.ultimaLabel} title="Peso de cada chamada veio do Adalove (horas de aula)">
       pesos do Adalove
@@ -122,22 +121,34 @@ export default function AttendanceCard({
     peso2Toggle
   );
 
+  // No 3º ano a chamada das 10h–12h vale o dobro. O número grande continua sendo
+  // faltas — ninguém pensa em horas —, e a regra vira só uma nota que explica
+  // por que uma aula dessas derruba o saldo em 2. Com um peso só (1º e 2º ano)
+  // a nota não aparece.
+  const chamadaDupla = (attendance.faltasRestantesPorPeso?.length ?? 0) > 1;
+
   const evaluated = attendance.presentes + attendance.faltas + attendance.justificados;
   const danger = attendance.faltasRestantes <= 3;
   const critical = attendance.faltasRestantes === 0;
+  const saldoClass = critical ? styles.critical : danger ? styles.danger : "";
 
   return (
     <div className={`${styles.card} ${dragOver ? styles.cardDragOver : ""}`} {...dragProps}>
       <div className={styles.bigRow}>
         <div className={styles.bigStat}>
-          <span className={`${styles.bigValue} ${critical ? styles.critical : danger ? styles.danger : ""}`}>
+          <span className={`${styles.bigValue} ${saldoClass}`}>
             {fmtAttendanceUnits(attendance.faltasRestantes)}
           </span>
-          <span className={styles.bigLabel}>faltas restantes</span>
+          <span className={styles.bigLabel}>
+            faltas restantes
+            {chamadaDupla && (
+              <span className={styles.labelNote}> (aulas 10h–12h contam 2)</span>
+            )}
+          </span>
         </div>
-        <div className={styles.bigStat}>
+        <div className={`${styles.bigStat} ${styles.bigStatRight}`}>
           <span className={`${styles.bigValue} ${attendance.percentFaltas >= 15 ? styles.danger : ""}`}>
-            {attendance.percentFaltas.toFixed(1)}%
+            {attendance.percentFaltas.toFixed(2)}%
           </span>
           <span className={styles.bigLabel}>% atual</span>
         </div>
@@ -182,7 +193,7 @@ export default function AttendanceCard({
       </div>
 
       <div className={styles.meta}>
-        {fmtAttendanceUnits(evaluated)}/{fmtAttendanceUnits(attendance.totalUnits)} {unidadeLabel} · máx{" "}
+        {fmtAttendanceUnits(evaluated)}/{fmtAttendanceUnits(attendance.totalUnits)} unidades · máx{" "}
         {attendance.maxFaltasAllowed} faltas (20%)
       </div>
 

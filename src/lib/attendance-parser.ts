@@ -69,9 +69,13 @@ export function summarizeAttendanceRows(
   let justificados = 0;
   let futuros = 0;
 
+  // Pesos distintos em jogo — no 3º ano, 2 (aula) e 1 (dev/AE).
+  const pesosEmUso = new Set<number>();
+
   for (const row of rows) {
     row.presencas.forEach((p, i) => {
       const w = slotWeight(row, i, ultimaPresencaPeso2);
+      pesosEmUso.add(w);
       switch (p) {
         case "presente": presentes += w; break;
         case "falta": faltas += w; break;
@@ -87,6 +91,16 @@ export function summarizeAttendanceRows(
   const faltasRestantes = Math.max(0, maxFaltasAllowed - faltas);
   const percentFaltas = totalUnits > 0 ? (faltas / totalUnits) * 100 : 0;
 
+  // Com pesos diferentes, "X faltas restantes" é ambíguo: o saldo é em horas e
+  // cada tipo de chamada consome um tanto. Traduzimos o saldo em quantas
+  // chamadas de cada peso ainda cabem (são alternativas, não uma soma).
+  const faltasRestantesPorPeso =
+    pesosEmUso.size > 1
+      ? [...pesosEmUso]
+          .sort((a, b) => b - a)
+          .map((peso) => ({ peso, slots: Math.floor(faltasRestantes / peso) }))
+      : undefined;
+
   return {
     totalUnits,
     presentes,
@@ -97,5 +111,6 @@ export function summarizeAttendanceRows(
     faltasRestantes,
     percentFaltas,
     pesosAutomaticos,
+    faltasRestantesPorPeso,
   };
 }

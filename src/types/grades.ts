@@ -127,6 +127,10 @@ export interface AttendanceData {
   percentFaltas: number;
   // true quando os pesos vieram da API (em horas de aula) e não do toggle manual.
   pesosAutomaticos?: boolean;
+  // Quanto ainda dá pra faltar, traduzido em chamadas de cada peso. No 3º ano
+  // sai [{ peso: 2, slots: N }, { peso: 1, slots: M }] — N aulas OU M dev/AE.
+  // Só é preenchido quando existe mais de um peso em jogo.
+  faltasRestantesPorPeso?: { peso: number; slots: number }[];
 }
 
 export interface AppState {
