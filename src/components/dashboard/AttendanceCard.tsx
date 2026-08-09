@@ -111,6 +111,17 @@ export default function AttendanceCard({
     );
   }
 
+  // Quando os pesos vêm da API (horas de aula por chamada), o toggle manual do
+  // 3º ano não tem função — a conta já sai igual à do Adalove.
+  const unidadeLabel = attendance.pesosAutomaticos ? "horas" : "unidades";
+  const pesoControl = attendance.pesosAutomaticos ? (
+    <span className={styles.ultimaLabel} title="Peso de cada chamada veio do Adalove (horas de aula)">
+      pesos do Adalove
+    </span>
+  ) : (
+    peso2Toggle
+  );
+
   const evaluated = attendance.presentes + attendance.faltas + attendance.justificados;
   const danger = attendance.faltasRestantes <= 3;
   const critical = attendance.faltasRestantes === 0;
@@ -171,12 +182,12 @@ export default function AttendanceCard({
       </div>
 
       <div className={styles.meta}>
-        {fmtAttendanceUnits(evaluated)}/{fmtAttendanceUnits(attendance.totalUnits)} unidades · máx{" "}
+        {fmtAttendanceUnits(evaluated)}/{fmtAttendanceUnits(attendance.totalUnits)} {unidadeLabel} · máx{" "}
         {attendance.maxFaltasAllowed} faltas (20%)
       </div>
 
       <div className={styles.bottomRow}>
-        {peso2Toggle}
+        {pesoControl}
         <button className={styles.updateBtn} onClick={() => inputRef.current?.click()}>
           Atualizar Faltas
         </button>

@@ -110,6 +110,10 @@ export interface AttendanceRow {
   semana: string;
   dia: string;
   presencas: PresencaStatus[];
+  // Horas de aula de cada chamada (sectionHoursOne/Two/Three da API). No 3º ano
+  // vem [1, 1, 2] — a 3ª chamada pesa o dobro. Ausente no import de HTML, que
+  // não expõe essa informação; nesse caso cai no toggle manual "3º ano".
+  pesos?: number[];
 }
 
 export interface AttendanceData {
@@ -121,6 +125,8 @@ export interface AttendanceData {
   maxFaltasAllowed: number;
   faltasRestantes: number;
   percentFaltas: number;
+  // true quando os pesos vieram da API (em horas de aula) e não do toggle manual.
+  pesosAutomaticos?: boolean;
 }
 
 export interface AppState {

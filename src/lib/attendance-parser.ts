@@ -10,7 +10,17 @@ function classifyIcon(iconId: string): PresencaStatus {
   return "futuro";
 }
 
-function slotWeight(index: number, length: number, ultimaPeso2: boolean): number {
+// Peso de uma chamada. Quando a linha veio da API, ela traz as horas de aula de
+// cada chamada (`pesos`) e usamos isso — é exatamente a conta que o Adalove faz.
+// Sem essa informação (import de HTML), cai no toggle manual do 3º ano.
+function slotWeight(
+  row: AttendanceRow,
+  index: number,
+  ultimaPeso2: boolean
+): number {
+  const peso = row.pesos?.[index];
+  if (typeof peso === "number" && peso > 0) return peso;
+  const length = row.presencas.length;
   if (!ultimaPeso2 || length === 0) return 1;
   return index === length - 1 ? 2 : 1;
 }
@@ -60,9 +70,8 @@ export function summarizeAttendanceRows(
   let futuros = 0;
 
   for (const row of rows) {
-    const len = row.presencas.length;
     row.presencas.forEach((p, i) => {
-      const w = slotWeight(i, len, ultimaPresencaPeso2);
+      const w = slotWeight(row, i, ultimaPresencaPeso2);
       switch (p) {
         case "presente": presentes += w; break;
         case "falta": faltas += w; break;
@@ -72,6 +81,7 @@ export function summarizeAttendanceRows(
     });
   }
 
+  const pesosAutomaticos = rows.some((r) => (r.pesos?.length ?? 0) > 0);
   const totalUnits = presentes + faltas + justificados + futuros;
   const maxFaltasAllowed = Math.floor(totalUnits * 0.2);
   const faltasRestantes = Math.max(0, maxFaltasAllowed - faltas);
@@ -86,5 +96,6 @@ export function summarizeAttendanceRows(
     maxFaltasAllowed,
     faltasRestantes,
     percentFaltas,
+    pesosAutomaticos,
   };
 }

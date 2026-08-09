@@ -5,3 +5,4 @@ out/
 next-env.d.ts
 .DS_Store
 extension-prod.zip
+userdata.txt

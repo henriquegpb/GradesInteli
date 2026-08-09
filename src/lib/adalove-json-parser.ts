@@ -40,11 +40,24 @@ interface AdaloveApiStudent {
   avatar_filename: string | null;
 }
 
+interface AdaloveApiSection {
+  sectionCaption?: string;
+  // Horas de aula de cada chamada do dia. No 3º ano vem 1 / 1 / 2.
+  sectionHoursOne?: number | string | null;
+  sectionHoursTwo?: number | string | null;
+  sectionHoursThree?: number | string | null;
+}
+
 interface AdaloveApiResponse {
-  section?: { sectionCaption?: string };
+  section?: AdaloveApiSection;
   students?: AdaloveApiStudent[];
   activities?: AdaloveApiActivity[];
 }
+
+// Só encontros têm chamada: type 1 (Sprint Review/Planning, prova, workshop) e
+// type 2 (aulas/autoestudos). Os demais (11 = material, 21 = artefato, 31 =
+// avaliação geral) carregam attendance -1 mas não entram no cálculo de faltas.
+const ENCONTRO_TYPES = new Set([1, 2]);
 
 // Classificação por nome. O `type` numérico da API não separa perfeitamente
 // aulas e ponderadas: em payloads reais, `type: 11` aparece tanto em materiais
@@ -108,14 +121,30 @@ function hasAttendanceSlots(activity: AdaloveApiActivity): boolean {
   );
 }
 
+// Todos os encontros do módulo entram, inclusive os que ainda não aconteceram —
+// o denominador da % de faltas do Adalove é o módulo inteiro, não só o que já
+// passou. Encontros futuros entram como "futuro" e não contam como falta.
 function shouldImportAttendance(activity: AdaloveApiActivity): boolean {
-  if (!hasAttendanceSlots(activity)) return false;
-  const values = [activity.attendance1, activity.attendance2, activity.attendance3];
-  const hasRecordedAttendance = values.some((value) => Number(value) >= 0);
-  return hasRecordedAttendance || activity.type === 2;
+  return ENCONTRO_TYPES.has(activity.type) && hasAttendanceSlots(activity);
 }
 
-function parseAttendanceRows(activities: AdaloveApiActivity[]): AttendanceRow[] {
+// Horas de cada chamada, vindas da section. Ausentes ou inválidas => sem pesos,
+// e o resumo cai no comportamento antigo (1 por chamada / toggle manual).
+function parseSectionHours(section?: AdaloveApiSection): number[] | null {
+  const raw = [
+    section?.sectionHoursOne,
+    section?.sectionHoursTwo,
+    section?.sectionHoursThree,
+  ];
+  const hours = raw.map((v) => Number(v));
+  if (hours.some((h) => !Number.isFinite(h) || h <= 0)) return null;
+  return hours;
+}
+
+function parseAttendanceRows(
+  activities: AdaloveApiActivity[],
+  sectionHours: number[] | null
+): AttendanceRow[] {
   return activities
     .filter(shouldImportAttendance)
     .sort(
@@ -123,16 +152,20 @@ function parseAttendanceRows(activities: AdaloveApiActivity[]): AttendanceRow[] 
         weekNum(a.folderCaption) - weekNum(b.folderCaption) ||
         (a.sort ?? 0) - (b.sort ?? 0)
     )
-    .map((a) => ({
-      atividade: (a.caption || "").trim(),
-      semana: parseSemana(a.folderCaption),
-      dia: parseDia(a.date),
-      presencas: [a.attendance1, a.attendance2, a.attendance3].flatMap((value, i) =>
-        value === undefined || value === null
-          ? []
-          : [parseAttendanceValue(value, a, i + 1)]
-      ),
-    }))
+    .map((a) => {
+      const slots = [a.attendance1, a.attendance2, a.attendance3]
+        .map((value, i) => ({ value, i }))
+        .filter(({ value }) => value !== undefined && value !== null);
+
+      return {
+        atividade: (a.caption || "").trim(),
+        semana: parseSemana(a.folderCaption),
+        dia: parseDia(a.date),
+        presencas: slots.map(({ value, i }) => parseAttendanceValue(value, a, i + 1)),
+        // Alinhado 1:1 com `presencas` — chamadas ausentes não geram peso.
+        ...(sectionHours ? { pesos: slots.map(({ i }) => sectionHours[i]) } : {}),
+      };
+    })
     .filter((row) => row.atividade && row.presencas.length > 0);
 }
 
@@ -193,7 +226,7 @@ export function parseAdaloveJson(jsonText: string): ParsedAdalovePayload {
       nota: parseNota(a.gradeResult),
     }));
 
-  const attendanceRows = parseAttendanceRows(activities);
+  const attendanceRows = parseAttendanceRows(activities, parseSectionHours(data.section));
 
   return { studentName, activities: mapped, attendanceRows };
 }
