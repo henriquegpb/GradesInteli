@@ -1,0 +1,9 @@
+node_modules
+dist
+
+# Capturas reais da API do Adalove: trazem nomes de colegas, professores e
+# (nas páginas financeiras) dados pessoais. Nada disso vai para um repo público.
+# Fixtures para compartilhar passam antes por scripts/anonymize-fixture.mjs e
+# entram como *.sample.json, que é a única exceção abaixo.
+fixtures/*.json
+!fixtures/*.sample.json
