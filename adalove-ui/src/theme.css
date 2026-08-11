@@ -1,0 +1,545 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Tokens.
+
+   Cor vem do GradesInteli (src/app/globals.css) — é a marca. Estrutura e ritmo
+   vêm do nora/admin. Os dois já são dark, então não há conflito a resolver.
+
+   NOTA sobre shadow DOM: `@theme` compila para um bloco `:root`, que NÃO casa
+   dentro de um shadow root. `mount.tsx` reescreve `:root` → `:host` ao injetar.
+   No harness de dev (localhost, sem shadow root) o `:root` original é usado.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-bg: #0e0e10;
+  --color-surface: #16161a;
+  --color-surface-hover: #1c1c22;
+  --color-line: #2a2a30;
+  --color-line-soft: #22222a;
+
+  --color-fg: #e0e0e4;
+  --color-fg-soft: #a0a0aa;
+  --color-fg-muted: #5c5c66;
+
+  --color-accent: #6e7bf2;
+  --color-blue: #6e9bf2;
+  --color-green: #50c878;
+  --color-orange: #e8964a;
+  --color-red: #e85454;
+  --color-yellow: #d4b843;
+  --color-purple: #9b7bea;
+  --color-teal: #4abfbf;
+
+  /* Tríade de categoria — theme-invariant no GradesInteli, idem aqui. */
+  --color-ponderada: #ff6300;
+  --color-artefato: #00a995;
+  --color-prova: #f551ee;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Cascadia Code", monospace;
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+}
+
+/* Os nomes originais do GradesInteli, para que CSS/estilo inline portado do
+   site continue funcionando sem tradução. */
+:root {
+  --bg: #0e0e10;
+  --surface: #16161a;
+  --surface-hover: #1c1c22;
+  --border: #2a2a30;
+  --border-light: #22222a;
+  --text-primary: #e0e0e4;
+  --text-secondary: #a0a0aa;
+  --text-muted: #5c5c66;
+  --accent: #6e7bf2;
+  --color-ponderada: #ff6300;
+  --color-artefato: #00a995;
+  --color-prova: #f551ee;
+}
+
+/* Tema claro, portado de src/app/globals.css do site: mesmas cores, para o
+   GradesInteli e a overlay não divergirem. As variáveis são sobrescritas no
+   container, então tudo que usa `var(--color-*)` acompanha sem mais nada. */
+.adalove-ui-root[data-theme="light"] {
+  --color-bg: #f4f4f6;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0f0f3;
+  --color-line: #d8d8de;
+  --color-line-soft: #e8e8ee;
+
+  --color-fg: #1a1a1e;
+  --color-fg-soft: #4a4a54;
+  --color-fg-muted: #8a8a96;
+
+  --color-accent: #5560d9;
+  --color-blue: #4a7fd9;
+  --color-green: #2e9e5e;
+  --color-orange: #c07838;
+  --color-red: #c94444;
+  --color-yellow: #a8922e;
+  --color-purple: #7a5ec8;
+  --color-teal: #2e9e9e;
+
+  /* Nomes antigos, para o CSS portado do site. */
+  --bg: #f4f4f6;
+  --surface: #ffffff;
+  --surface-hover: #f0f0f3;
+  --border: #d8d8de;
+  --border-light: #e8e8ee;
+  --text-primary: #1a1a1e;
+  --text-secondary: #4a4a54;
+  --text-muted: #8a8a96;
+  --accent: #5560d9;
+}
+
+@layer base {
+  /* O container raiz da overlay. No shadow root isto veste o :host; no dev
+     harness, o #dev-root. */
+  .adalove-ui-root {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar fina — convenção do GradesInteli. */
+  .adalove-ui-root ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .adalove-ui-root ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .adalove-ui-root ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border-radius: 3px;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Toasts — portados do nora/web (app/styles/toast.css), com os tokens daqui.
+   A barra de tempo pausa no hover pelo CSS; o JS espelha essa pausa para o
+   descarte não acontecer enquanto a pessoa ainda está lendo. */
+@layer components {
+  @keyframes gi-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes gi-toast-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+  @keyframes gi-toast-timer {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
+
+  .gi-toast {
+    animation: gi-toast-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .gi-toast-exit {
+    animation: gi-toast-out 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .gi-toast-timer {
+    transform-origin: left;
+    animation: gi-toast-timer linear forwards;
+  }
+  .gi-toast:hover .gi-toast-timer {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gi-toast,
+    .gi-toast-exit,
+    .gi-toast-timer {
+      animation: none;
+    }
+  }
+}
+
+/* Botões de social do rodapé. A troca logo→flecha é uma transformação só, então
+   fica no CSS: as duas peças sobem juntas e o `overflow-hidden` do círculo
+   recorta. A cor da marca chega por `--brand`, setada inline em cada link. */
+/* Fora de `@layer`: uma regra sem camada vence qualquer utilitário do Tailwind,
+   e camada perde para camada por ordem, não por especificidade — dentro de
+   `components` o `border-line` do utilitário ganharia e a cor da marca nunca
+   apareceria. Aqui a posição também é só `transform`: misturar com a
+   propriedade `translate` (do `translate-y-full`) deixava a flecha fora do
+   círculo mesmo com o transform zerado. */
+.gi-social {
+  border-color: var(--color-line);
+  /* Cor do vazado dos logos (o "f" do Facebook, o triângulo do YouTube): é o
+     fundo do próprio círculo, então a marca continua legível em mono. */
+  --gi-knockout: var(--color-surface);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.gi-social-swap {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Curso maior que o círculo: com um deslocamento curto sobrava uma fatia do
+   logo aparecendo por cima da flecha. */
+.gi-social-arrow {
+  transform: translateY(260%);
+}
+.gi-social:hover .gi-social-swap:not(.gi-social-arrow),
+.gi-social:focus-visible .gi-social-swap:not(.gi-social-arrow) {
+  transform: translateY(-260%);
+}
+.gi-social:hover .gi-social-arrow,
+.gi-social:focus-visible .gi-social-arrow {
+  transform: translateY(0);
+  color: var(--brand);
+}
+.gi-social:hover,
+.gi-social:focus-visible {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent),
+    0 0 14px color-mix(in srgb, var(--brand) 55%, transparent);
+}
+
+/* Slider do simulador. O input tinha `appearance: none` mas nenhuma regra para
+   o polegar, então o Chrome desenhava o padrão dele dentro de uma caixa de 4px
+   — e a bolinha sobrava para fora. Agora a caixa tem altura suficiente para
+   contê-la, o trilho é pintado no ::-webkit-slider-runnable-track e o polegar
+   é centralizado nele por margin-top negativo. */
+.gi-range {
+  appearance: none;
+  width: 100%;
+  height: 1rem;
+  background: transparent;
+  cursor: pointer;
+}
+.gi-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-line);
+}
+.gi-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-accent);
+  transition: transform 0.15s;
+}
+.gi-range:hover::-webkit-slider-thumb,
+.gi-range:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.gi-range:focus-visible {
+  outline: none;
+}
+.gi-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-line);
+}
+.gi-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+/* O balão só existe enquanto aberto (senão criaria scroll horizontal), então a
+   entrada é animação e não transição — não há estado anterior de onde partir. */
+@keyframes gi-tip-in {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.gi-tip {
+  transform-origin: top;
+  animation: gi-tip-in 0.15s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gi-social,
+  .gi-social-swap {
+    transition: none;
+  }
+  .gi-tip {
+    animation: none;
+  }
+}
+
+/* HTML vindo da API do Adalove (descrição da atividade). O preflight do
+   Tailwind zera tudo, então os elementos do enunciado precisam ser vestidos
+   de volta — senão listas e títulos saem sem formatação nenhuma. */
+@layer components {
+  .adalove-prose :where(p, ul, ol, table, pre, blockquote) {
+    margin-block: 0.75em;
+  }
+  .adalove-prose :where(h1, h2, h3, h4) {
+    margin-block: 1.2em 0.5em;
+    font-weight: 500;
+    color: var(--color-fg);
+  }
+  .adalove-prose :where(h1) {
+    font-size: 1.05rem;
+  }
+  .adalove-prose :where(h2) {
+    font-size: 0.95rem;
+  }
+  .adalove-prose :where(h3, h4) {
+    font-size: 0.875rem;
+  }
+  .adalove-prose :where(ul) {
+    list-style: disc;
+    padding-inline-start: 1.4em;
+  }
+  .adalove-prose :where(ol) {
+    list-style: decimal;
+    padding-inline-start: 1.4em;
+  }
+  .adalove-prose :where(li) {
+    margin-block: 0.25em;
+  }
+  .adalove-prose :where(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .adalove-prose :where(strong, b) {
+    font-weight: 600;
+    color: var(--color-fg);
+  }
+  .adalove-prose :where(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+  }
+  .adalove-prose :where(code, pre) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+  .adalove-prose :where(pre) {
+    overflow-x: auto;
+    border-radius: var(--radius-control);
+    background: var(--color-bg);
+    padding: 0.75em;
+  }
+  .adalove-prose :where(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85em;
+  }
+  .adalove-prose :where(th, td) {
+    border: 1px solid var(--color-line);
+    padding: 0.4em 0.6em;
+    text-align: left;
+  }
+  .adalove-prose :where(blockquote) {
+    border-inline-start: 2px solid var(--color-line);
+    padding-inline-start: 0.8em;
+    color: var(--color-fg-muted);
+  }
+
+  /* Componentes próprios das páginas do Adalove (Grid, Card, Accordion…),
+     traduzidos para estas classes em lib/adalovePage.ts. */
+  .adalove-page .ad-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-block: 1rem;
+  }
+  @media (min-width: 768px) {
+    .adalove-page .ad-grid {
+      grid-template-columns: repeat(var(--ad-cols, 2), minmax(0, 1fr));
+    }
+  }
+  .adalove-page .ad-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 0.9rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-bg);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+  .adalove-page a.ad-card:hover {
+    border-color: var(--color-accent);
+  }
+  .adalove-page .ad-card.ad-center {
+    align-items: center;
+    text-align: center;
+  }
+  .adalove-page .ad-card :where(h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+    font-size: 0.8rem;
+  }
+  .adalove-page .ad-card :where(img) {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 0;
+  }
+  .adalove-page .ad-space {
+    height: calc(var(--ad-n, 1) * 0.4rem);
+  }
+  .adalove-page .ad-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+    color: var(--color-fg);
+    font-size: 0.8rem;
+    text-decoration: none;
+  }
+  .adalove-page .ad-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .adalove-page .ad-accordion {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    padding: 0.75rem 0.9rem;
+    margin-block: 0.5rem;
+  }
+  .adalove-page .ad-accordion > summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--color-fg);
+  }
+
+  /* Normas institucionais: 36 links de PDF em três seções. Como lista de
+     marcadores vira uma parede de texto azul; viram cartões em grade, com o
+     título quebrando em duas linhas quando precisa. */
+  .adalove-page .ad-card:has(.ad-doc) {
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+  .adalove-page ul:has(> li > .ad-doc) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin-block: 0.75rem 1.5rem;
+  }
+  .adalove-page li:has(> .ad-doc) {
+    margin: 0;
+  }
+  .adalove-page .ad-doc {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: 100%;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+    background: var(--color-bg);
+    color: var(--color-fg-soft);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      color 0.15s,
+      background 0.15s;
+  }
+  .adalove-page .ad-doc:hover {
+    border-color: var(--color-accent);
+    background: var(--color-surface-hover);
+    color: var(--color-fg);
+  }
+  /* Ícone de documento desenhado no ::before — evita 36 SVGs no HTML. */
+  .adalove-page .ad-doc::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 0.9rem;
+    height: 1.05rem;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    opacity: 0.45;
+    background:
+      linear-gradient(currentColor, currentColor) 0.18rem 0.3rem / 0.45rem 1px no-repeat,
+      linear-gradient(currentColor, currentColor) 0.18rem 0.5rem / 0.45rem 1px no-repeat,
+      linear-gradient(currentColor, currentColor) 0.18rem 0.7rem / 0.3rem 1px no-repeat;
+  }
+  .adalove-page .ad-doc:hover::before {
+    opacity: 1;
+  }
+
+  /* Cabeçalhos de seção (GERAL, GRADUAÇÃO, PÓS-GRADUAÇÃO) viram rótulos.
+     A classe vem de markSectionHeadings(), então vale em qualquer nível. */
+  .adalove-page :where(h1, h2, h3, h4, h5, h6).ad-section {
+    margin-block: 0 0.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-fg-muted);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Rótulo de botão dentro de um Card que já é link (calendário: "Download"). */
+  .adalove-page span.ad-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+    color: var(--color-fg);
+    font-size: 0.8rem;
+  }
+  .adalove-page a:hover span.ad-btn {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* GridItem tem que ser célula da grade, não caixa solta. */
+  .adalove-page .ad-grid-item {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .adalove-page .ad-grid-item > * {
+    min-width: 0;
+  }
+}

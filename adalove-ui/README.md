@@ -1,0 +1,130 @@
+# Adalove UI
+
+Uma segunda pele para o Adalove, renderizada dentro da própria página, ligada por um botão.
+
+É **aditivo**: o app Next em `../src`, o site em produção e o fluxo de importação atual da extensão
+não são tocados. A UI original do Adalove nunca é destruída — só escondida — então voltar é sempre
+um clique e nenhum bug daqui deixa o aluno sem plataforma.
+
+## Rodar
+
+```bash
+npm install
+npm run dev     # localhost:5173, HMR, contra um fixture gravado
+npm run build   # → ../extension/dist/adalove-ui.js  (IIFE único, sem code-splitting)
+npm run typecheck
+```
+
+95% do trabalho de UI acontece no `npm run dev`, sem Adalove e sem rede. O Adalove real só entra
+para validar o mount e a integração.
+
+Parâmetros do harness:
+
+| Param | Efeito |
+|---|---|
+| `?fixture=nome` | escolhe o arquivo de `fixtures/` (padrão: `henrique-2026-2A`) |
+| `?route=notas` | abre direto numa tela (`overview`, `atividades`, `notas`, `faltas`, `grupo`) |
+| `?open=3` | abre o modal do n-ésimo card |
+| `?fail=1` | faz o `persistStatus` falhar, para exercitar o rollback do kanban |
+
+## Como se conecta ao Adalove
+
+Toda a tela de Vida Acadêmica roda em três endpoints (extraídos do bundle do próprio Adalove):
+
+```
+GET  /sections/{sectionUuid}/userdata                  ← kanban, notas, faltas, grupo: tudo
+PUT  /student-activities/{uuid}/status  {sort, status} ← único write (arrastar card)
+```
+
+O token está em `localStorage["@buzz:token"]` na origem do Adalove. O content script roda no mundo
+ISOLADO **na mesma origem**, então lê direto: nada de ponte com o mundo MAIN, e **o token nunca sai
+do navegador**. Status: `1 = A fazer`, `2 = Fazendo`, `3 = Feito`.
+
+Se a chamada direta falhar, cai para o `lastCapture` que o `adalove-interceptor.js` já grava.
+
+## Estrutura
+
+```
+src/
+  mount.tsx      entry da extensão: shadow root + adoptedStyleSheets + botão de toggle
+  dev.tsx        entry do localhost
+  App.tsx        roteamento e estado; optimistic update do kanban
+  theme.css      Tailwind v4 com os tokens do GradesInteli
+  data/          client (API), viewmodel (JSON → telas), activityTypes (tabela oficial)
+  ui/            primitivas (Card, Button, Badge, Table, Tabs, Modal, …)
+  shell/         Sidebar + config de navegação
+  screens/       Overview, Atividades, Notas, Faltas, Grupo, ActivityModal
+  ai/            prompt.ts (puro), providers.ts, AskAiButton
+```
+
+**Cálculo de nota não é reimplementado aqui.** `data/viewmodel.ts` delega a
+`@/lib/adalove-json-parser`, `@/lib/grade-calculator` e `@/lib/attendance-parser` — os mesmos
+módulos que o site usa em produção. Duas implementações divergiriam em silêncio, e é aí que dói.
+
+Alias: `@/` aponta para `../src` (mesmo significado do tsconfig da raiz, para os módulos
+compartilhados importarem sem tradução) e `~/` para o código daqui.
+
+## Dois eixos de classificação
+
+Não confunda:
+
+- **`kind`** — o tipo oficial do Adalove, vindo do campo numérico `type` (Autoestudo,
+  Desenvolvimento de Projetos, Encontro de Instrução…). Define ícone e cabeçalho do modal.
+- **`category`** — a categoria de nota, inferida do título (Ponderada, Artefato, Prova, Grupo,
+  Aula). Define a cor e o bucket de peso.
+
+Uma atividade pode ser Autoestudo (`kind`) e Ponderada (`category`) ao mesmo tempo.
+
+## Modo de captura — levantar o contrato de uma página nova
+
+Para reconstruir uma tela do Adalove precisamos do payload que ela consome. Em vez
+de abrir o DevTools em cada página, a extensão grava sozinha:
+
+1. Abra o Adalove, console do navegador: `__gradesinteliCapture.on()`
+2. Navegue pelas páginas que quer reconstruir. Um badge amarelo no canto mostra
+   quantos endpoints já entraram.
+3. Clique em **Exportar** no badge → baixa um JSON com tudo.
+
+Cada resposta da `apiv2.inteli.edu.br` é gravada, **uma por endpoint**: a chave é
+`MÉTODO /caminho` com uuids e ids trocados por `:uuid`/`:id`, então a mesma rota
+chamada dez vezes não vira dez entradas. É o contrato que interessa, não o
+histórico. Corpos acima de 1,2MB entram sem body para não estourar a cota.
+
+Isso pega também os endpoints secundários que a página chama sem avisar — a Vida
+Acadêmica, por exemplo, usa três.
+
+Outros comandos: `await __gradesinteliCapture.list()`, `.off()`, `.clear()`.
+
+Depois, quebre o export em um fixture por endpoint:
+
+```bash
+node scripts/split-captures.mjs ../data/adalove-capturas-2026-08-11.json
+```
+
+As telas novas usam `useApi("/caminho")`, que resolve o fixture correspondente no
+dev e bate na apiv2 na extensão — o mapeamento caminho → arquivo é o mesmo dos
+dois lados (`fixtureNameFor` em `src/data/api.ts`).
+
+Implementação: [extension/adalove-capture.js](../extension/adalove-capture.js) observa
+no mundo MAIN e `src/capture.ts` guarda e exporta no isolado. O
+`adalove-interceptor.js`, que alimenta a importação de notas em produção, segue
+intocado.
+
+## Fixtures
+
+`fixtures/*.json` são capturas reais de `/userdata`. Um fixture só (3º ano) esconde bugs de outros
+anos — já houve um. Para pedir capturas a colegas sem vazar dados de terceiros:
+
+```bash
+node scripts/anonymize-fixture.mjs captura.json fixtures/turma-1ano.json
+```
+
+Troca nomes de alunos e professores por sintéticos, preservando uuids, grupos e pesos.
+
+## Shadow DOM: as duas armadilhas
+
+1. **`@theme` do Tailwind compila para `:root`, que não casa dentro de um shadow root.**
+   `mount.tsx` reescreve `:root` → `:host` ao injetar o CSS. No dev (sem shadow root) o `:root`
+   original vale, então a mesma folha serve aos dois.
+2. **`@font-face` declarado dentro do shadow root não carrega** — o registro de fontes é do
+   documento. `lib/fonts.ts` injeta no `document.head` apontando para `web_accessible_resources`.

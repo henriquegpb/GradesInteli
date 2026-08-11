@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adalove UI — dev</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Só o harness de dev.
+         O fundo vai no <html>: sem isso a raiz fica transparente e o overscroll
+         do macOS mostra a tela branca do navegador por baixo da página. Não é
+         overflow — é ausência de fundo na raiz. */
+      html {
+        background: #0e0e10;
+        /* Mata o rubber-band do macOS: sem isto a página quica além do fim do
+           conteúdo, que é o "scrollar para fora da tela". Não tem a ver com
+           overflow nem com altura — é o comportamento elástico do navegador. */
+        overscroll-behavior: none;
+      }
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dev-root"></div>
+    <script type="module" src="/src/dev.tsx"></script>
+  </body>
+</html>
