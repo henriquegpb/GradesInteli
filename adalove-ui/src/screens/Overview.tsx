@@ -1,0 +1,440 @@
+import { CalendarDays, ExternalLink, LayoutGrid, Table2, UserRoundX } from "lucide-react";
+import { useState } from "react";
+import { fmtNota } from "@/lib/format";
+import { CATEGORY_COLOR } from "~/data/activityTypes";
+import type {
+  MetricasModulo,
+  ParticipacaoLetra,
+  ParticipacaoMultipliers,
+  SimulacaoConfig,
+} from "@/types/grades";
+import type { NewsItem } from "~/data/news";
+import type { ActivityView, SectionView } from "~/data/viewmodel";
+import { SummaryButton } from "~/ai/SummaryButton";
+import { GithubStarButton, ThemeToggle, type Theme } from "~/shell/HeaderActions";
+import { Calendario } from "~/screens/Calendario";
+import { NotificationsButton } from "~/screens/Notificacoes";
+import { Faltas } from "~/screens/Faltas";
+import { Notas } from "~/screens/Notas";
+import { SectionCards } from "~/screens/SectionCards";
+import { Simulador } from "~/screens/Simulador";
+import { WeeksOverview } from "~/screens/WeeksOverview";
+import { Card, CardTitle } from "~/ui/Card";
+import { Tooltip } from "~/ui/Tooltip";
+import { Tabs } from "~/ui/Tabs";
+
+function MetricCard({
+  label,
+  value,
+  hint,
+  accent,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  accent?: string;
+}) {
+  return (
+    <Card
+      className="px-4 py-3"
+      style={accent ? { borderTop: `2px solid ${accent}` } : undefined}
+    >
+      <div className="text-[0.62rem] font-medium uppercase tracking-[0.04em] text-fg-muted">
+        {label}
+      </div>
+      <div className="mt-1 font-mono text-xl font-medium tracking-tight text-fg tabular">
+        {value}
+      </div>
+      {hint && <div className="mt-0.5 text-[0.62rem] text-fg-muted">{hint}</div>}
+    </Card>
+  );
+}
+
+function DualCard({
+  label,
+  accumulated,
+  average,
+  color,
+}: {
+  label: string;
+  accumulated: number;
+  average: number | null;
+  color: string;
+}) {
+  return (
+    <Card className="px-4 py-3" style={{ borderTop: `2px solid ${color}` }}>
+      <div className="text-[0.62rem] font-medium uppercase tracking-[0.04em] text-fg-muted">
+        {label}
+      </div>
+      <div className="mt-2 flex items-end gap-3">
+        <div className="min-w-0">
+          <div className="font-mono text-lg font-medium tracking-tight text-fg tabular">
+            {accumulated.toFixed(2)}
+          </div>
+          <div className="text-[0.55rem] uppercase tracking-[0.04em] text-fg-muted">
+            Acumulado
+          </div>
+        </div>
+        <div className="h-8 w-px shrink-0 bg-line" />
+        <div className="min-w-0">
+          <div className="font-mono text-lg font-medium tracking-tight text-fg tabular">
+            {fmtNota(average)}
+          </div>
+          <div className="text-[0.55rem] uppercase tracking-[0.04em] text-fg-muted">
+            Até o momento
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/** Donut em SVG puro — mesma construção do GradesInteli (r=42, stroke 16). */
+function DistributionDonut({ slices }: { slices: { label: string; value: number; color: string }[] }) {
+  const size = 110;
+  const stroke = 16;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const total = slices.reduce((sum, s) => sum + s.value, 0);
+
+  let offset = 0;
+  return (
+    <div className="flex items-center gap-4">
+      <div className="relative shrink-0" style={{ width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} aria-hidden>
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            stroke="var(--color-line-soft)"
+            strokeWidth={stroke}
+          />
+          {total > 0 &&
+            slices.map((s) => {
+              const length = (s.value / total) * circumference;
+              const dash = `${length} ${circumference - length}`;
+              const el = (
+                <circle
+                  key={s.label}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={r}
+                  fill="none"
+                  stroke={s.color}
+                  strokeWidth={stroke}
+                  strokeDasharray={dash}
+                  strokeDashoffset={-offset}
+                />
+              );
+              offset += length;
+              return el;
+            })}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {/* Pontos, não percentual: o módulo do fixture soma 102, então "% do
+              total" mostraria 102% e pareceria bug. A escala real é em pontos. */}
+          <span className="font-mono text-base font-medium text-fg tabular">
+            {Math.round(total * 100)}
+          </span>
+          <span className="text-[0.5rem] uppercase tracking-[0.04em] text-fg-muted">pontos</span>
+        </div>
+      </div>
+      <ul className="min-w-0 flex-1 space-y-1.5">
+        {slices.map((s) => (
+          <li key={s.label} className="flex items-center gap-2 text-xs">
+            <span
+              aria-hidden
+              className="size-2 shrink-0 rounded-full"
+              style={{ background: s.color }}
+            />
+            <span className="min-w-0 flex-1 truncate text-fg-soft">{s.label}</span>
+            <span className="shrink-0 font-mono text-fg tabular">{Math.round(s.value * 100)}</span>
+            <span className="w-10 shrink-0 text-right font-mono text-[0.62rem] text-fg-muted tabular">
+              {total > 0 ? `${((s.value / total) * 100).toFixed(0)}%` : "—"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ProgressBars({ view }: { view: SectionView }) {
+  const rows = Object.entries(view.metrics?.pesosPorTipo ?? {})
+    .filter(([, peso]) => peso > 0)
+    .map(([tipo, peso]) => {
+      const items = view.items.filter((i) => i.tipo === tipo);
+      const graded = items.filter((i) => i.nota !== null).length;
+      return {
+        tipo,
+        peso,
+        graded,
+        total: items.length,
+        ratio: items.length ? graded / items.length : 0,
+      };
+    });
+
+  return (
+    <ul className="space-y-2.5">
+      {rows.map((row) => (
+        <li key={row.tipo}>
+          <div className="flex items-baseline justify-between gap-2 text-xs">
+            <span className="truncate text-fg-soft">{row.tipo}</span>
+            <span className="shrink-0 font-mono text-[0.65rem] text-fg-muted tabular">
+              {row.graded}/{row.total}
+            </span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-[3px] bg-line-soft">
+            <div
+              className="h-full rounded-[3px] transition-[width] duration-500"
+              style={{
+                width: `${row.ratio * 100}%`,
+                background: CATEGORY_COLOR[row.tipo] ?? "var(--color-accent)",
+              }}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Formulário de revisão de faltas no portal de atendimento do Inteli. */
+const ATTENDANCE_REVIEW_URL = "https://help.inteli.edu.br/support/catalog/items/289";
+
+function AttendanceCard({ view }: { view: SectionView }) {
+  const a = view.attendance;
+  if (!a) {
+    return (
+      <Card className="p-4">
+        <CardTitle>Faltas</CardTitle>
+        <p className="mt-2 text-xs text-fg-muted">Sem dados de presença nesta turma.</p>
+      </Card>
+    );
+  }
+  const danger = a.percentFaltas >= 20;
+  const warn = a.percentFaltas >= 15;
+  return (
+    <Card
+      className="p-4"
+      style={{
+        borderTop: `2px solid ${
+          danger ? "var(--color-red)" : warn ? "var(--color-yellow)" : "var(--color-green)"
+        }`,
+      }}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <CardTitle>Faltas</CardTitle>
+        {/* O item 289 do catálogo é o formulário de revisão de faltas; a home do
+            portal fica como destino de reserva se ele sair do ar ou mudar. */}
+        <Tooltip label="Abrir chamado de revisão de faltas">
+          <a
+            href={ATTENDANCE_REVIEW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Solicitar revisão de faltas no portal de atendimento"
+            className="-mt-0.5 inline-flex h-7 shrink-0 items-center gap-1.5 rounded-control border border-line bg-surface px-2 text-[0.68rem] font-medium text-fg-soft transition-colors duration-150 hover:border-accent hover:text-fg"
+          >
+            Revisar
+            <ExternalLink size={11} aria-hidden />
+          </a>
+        </Tooltip>
+      </div>
+      <div className="mt-2 flex items-end gap-3">
+        <span className="font-mono text-2xl font-medium tracking-tight text-fg tabular">
+          {a.percentFaltas.toFixed(2)}%
+        </span>
+        <span className="pb-1 text-xs text-fg-muted">de {a.totalUnits} aulas</span>
+      </div>
+      <div className="mt-3 flex h-1.5 overflow-hidden rounded-[3px] bg-line">
+        <div
+          className="h-full bg-green"
+          style={{ width: `${(a.presentes / a.totalUnits) * 100}%` }}
+        />
+        <div
+          className="h-full bg-blue"
+          style={{ width: `${(a.justificados / a.totalUnits) * 100}%` }}
+        />
+        <div className="h-full bg-red" style={{ width: `${(a.faltas / a.totalUnits) * 100}%` }} />
+      </div>
+      <p className="mt-3 text-xs text-fg-soft">
+        Restam <span className="font-mono text-fg tabular">{a.faltasRestantes}</span> de{" "}
+        <span className="font-mono tabular">{a.maxFaltasAllowed}</span> faltas permitidas.
+      </p>
+    </Card>
+  );
+}
+
+type OverviewTab = "atividades" | "calendario" | "notas" | "faltas";
+
+export function Overview({
+  view,
+  onOpenWeek,
+  onOpenActivity,
+  onSeeStudents,
+  news,
+  newsLoading,
+  theme,
+  onTheme,
+  simulacao,
+  onSimulacao,
+  participacao,
+  onParticipacao,
+  multipliers,
+  onMultipliers,
+}: {
+  view: SectionView;
+  onOpenWeek?: (week: string) => void;
+  onOpenActivity: (activity: ActivityView) => void;
+  onSeeStudents?: () => void;
+  news: NewsItem[] | null;
+  newsLoading?: boolean;
+  theme: Theme;
+  onTheme: (t: Theme) => void;
+  simulacao: SimulacaoConfig;
+  onSimulacao: (s: SimulacaoConfig) => void;
+  participacao: ParticipacaoLetra;
+  onParticipacao: (p: ParticipacaoLetra) => void;
+  multipliers: ParticipacaoMultipliers;
+  onMultipliers: (m: ParticipacaoMultipliers) => void;
+}) {
+  const [tab, setTab] = useState<OverviewTab>("atividades");
+  const m = view.metrics;
+
+  if (!m) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-xl font-medium text-fg">Visão geral</h1>
+        <Card className="p-6">
+          <p className="text-sm text-fg-muted">
+            Nenhuma atividade avaliada nesta turma ainda. As abas Atividades e Faltas continuam
+            funcionando.
+          </p>
+        </Card>
+        <WeeksOverview view={view} onOpenWeek={onOpenWeek} />
+        <SectionCards
+          view={view}
+          news={news}
+          newsLoading={newsLoading}
+          onSeeStudents={onSeeStudents}
+        />
+      </div>
+    );
+  }
+
+  const slices = [
+    { label: "Ponderadas", value: m.pesosPorTipo.Ponderada ?? 0, color: CATEGORY_COLOR.Ponderada! },
+    { label: "Artefatos", value: m.pesosPorTipo.Artefato ?? 0, color: CATEGORY_COLOR.Artefato! },
+    { label: "Prova", value: m.pesosPorTipo.Prova ?? 0, color: CATEGORY_COLOR.Prova! },
+    { label: "Grupo", value: m.pesosPorTipo.Grupo ?? 0, color: CATEGORY_COLOR.Grupo! },
+  ].filter((s) => s.value > 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <h1 className="text-xl font-medium text-fg">Visão geral</h1>
+        <span className="font-mono text-xs text-fg-muted">
+          {view.section.caption}
+          {view.section.academicYear ? ` · ${view.section.academicYear}º ano` : ""}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <GithubStarButton />
+          <ThemeToggle theme={theme} onChange={onTheme} />
+          <NotificationsButton view={view} onOpenActivity={onOpenActivity} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <MetricCard
+          label="Total acumulado"
+          value={m.acumuladoTotal.toFixed(2)}
+          hint={`${Math.round(m.pontosAvaliados * 100)} de ${Math.round(
+            (m.pontosAvaliados + m.pontosNaoAvaliados) * 100,
+          )} pontos já avaliados`}
+          accent="var(--color-accent)"
+        />
+        <MetricCard
+          label="Média até o momento"
+          value={fmtNota(m.mediaTotalAteOMomento)}
+          hint={`${Math.round(m.pontosNaoAvaliados * 100)} pontos ainda por avaliar`}
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <DualCard
+          label="Ponderadas"
+          accumulated={m.acumuladoPonderadas}
+          average={m.mediaPonderadasAteOMomento}
+          color={CATEGORY_COLOR.Ponderada!}
+        />
+        <DualCard
+          label="Artefatos"
+          accumulated={m.acumuladoArtefatos}
+          average={m.mediaArtefatosAteOMomento}
+          color={CATEGORY_COLOR.Artefato!}
+        />
+        <DualCard
+          label="Prova"
+          accumulated={m.acumuladoProva}
+          average={m.mediaProvaAteOMomento}
+          color={CATEGORY_COLOR.Prova!}
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
+        <Card className="p-4">
+          <CardTitle>Distribuição do peso</CardTitle>
+          <div className="mt-3 grid gap-5 sm:grid-cols-[auto_1fr]">
+            <DistributionDonut slices={slices} />
+            <div className="min-w-0 border-line sm:border-l sm:pl-5">
+              <ProgressBars view={view} />
+            </div>
+          </div>
+        </Card>
+        <AttendanceCard view={view} />
+      </div>
+
+      <Simulador
+        metrics={m as MetricasModulo}
+        simulacao={simulacao}
+        onSimulacao={onSimulacao}
+        participacao={participacao}
+        onParticipacao={onParticipacao}
+        multipliers={multipliers}
+        onMultipliers={onMultipliers}
+      />
+
+      {/* Mesmo agrupamento da barra de abas do Adalove, na ordem que o aluno usa. */}
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        <Tabs
+          options={[
+            { label: "Minhas atividades", value: "atividades", icon: LayoutGrid },
+            { label: "Calendário", value: "calendario", icon: CalendarDays },
+            { label: "Notas", value: "notas", icon: Table2 },
+            { label: "Faltas", value: "faltas", icon: UserRoundX },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
+        <div className="ml-auto">
+          <SummaryButton view={view} />
+        </div>
+      </div>
+
+      {tab === "atividades" && <WeeksOverview view={view} onOpenWeek={onOpenWeek} />}
+      {tab === "calendario" && <Calendario view={view} onOpen={onOpenActivity} />}
+      {tab === "notas" && <Notas view={view} onOpen={onOpenActivity} showHeader={false} />}
+      {tab === "faltas" && <Faltas view={view} showHeader={false} />}
+
+      <hr className="border-0 border-t border-line" />
+
+      <SectionCards
+        view={view}
+        news={news}
+        newsLoading={newsLoading}
+        onSeeStudents={onSeeStudents}
+      />
+    </div>
+  );
+}
