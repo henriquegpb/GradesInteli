@@ -34,16 +34,6 @@
         "https://adalove.inteli.edu.br/*"
       ],
       "js": [
-        "adalove-capture.js"
-      ],
-      "run_at": "document_start",
-      "world": "MAIN"
-    },
-    {
-      "matches": [
-        "https://adalove.inteli.edu.br/*"
-      ],
-      "js": [
         "adalove-boot.js"
       ],
       "run_at": "document_start",

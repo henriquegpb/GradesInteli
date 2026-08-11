@@ -16,7 +16,6 @@ import {
   fetchUserdata,
   putActivityStatus,
 } from "~/data/client";
-import { initCapture } from "~/capture";
 import type { ApiClient } from "~/data/api";
 import type { RawUserdata } from "~/data/types";
 import { ensureFonts } from "~/lib/fonts";
@@ -49,7 +48,75 @@ function shadowScopedCss(css: string) {
   return css.replace(/:root\b/g, ":host");
 }
 
+/** `rem` resolve contra o <html> do DOCUMENTO, inclusive dentro de shadow root.
+ *  Se a página do Adalove encolhe a raiz, a UI inteira sai menor do que foi
+ *  desenhada — a sidebar de 16rem vira 160px em vez de 256px. Fixamos a raiz
+ *  enquanto a overlay está ativa e devolvemos o valor original ao sair.
+ *
+ *  Vai inline e com `!important` de propósito: uma regra de folha de estilo
+ *  perderia para um `!important` inline da própria página, que é justamente o
+ *  caso mais provável de dar errado. */
+let previousRootFontSize: string | null = null;
+let previousRootFontPriority = "";
+let previousRootBackground: string | null = null;
+let previousRootBackgroundPriority = "";
+let rootFontObserver: MutationObserver | null = null;
+
+const PINNED = "16px";
+
+function applyPin() {
+  const root = document.documentElement;
+  if (root.style.getPropertyValue("font-size") === PINNED) return;
+  root.style.setProperty("font-size", PINNED, "important");
+}
+
+function pinRootFontSize() {
+  const root = document.documentElement;
+  if (previousRootFontSize === null) {
+    // Guarda valor E prioridade: devolver "62.5%" sem o !important que a página
+    // tinha mudaria o resultado dela depois que a gente sai.
+    previousRootFontSize = root.style.getPropertyValue("font-size");
+    previousRootFontPriority = root.style.getPropertyPriority("font-size");
+  }
+  // O App também pinta o fundo da raiz (é o que aparece no overscroll), e sem
+  // guardar o valor a página ficava preta depois de voltar para a UI original.
+  if (previousRootBackground === null) {
+    previousRootBackground = root.style.getPropertyValue("background");
+    previousRootBackgroundPriority = root.style.getPropertyPriority("background");
+  }
+
+  applyPin();
+
+  // O Adalove é uma SPA: fixar uma vez não basta se ele reescrever o estilo da
+  // raiz depois (numa troca de rota, por exemplo). O observer reaplica — e sai
+  // cedo quando o valor já é o nosso, senão ele se dispararia em loop.
+  rootFontObserver?.disconnect();
+  rootFontObserver = new MutationObserver(applyPin);
+  rootFontObserver.observe(root, { attributes: true, attributeFilter: ["style"] });
+}
+
+function restoreRootFontSize() {
+  rootFontObserver?.disconnect();
+  rootFontObserver = null;
+  const root = document.documentElement;
+
+  if (previousRootFontSize !== null) {
+    if (previousRootFontSize)
+      root.style.setProperty("font-size", previousRootFontSize, previousRootFontPriority);
+    else root.style.removeProperty("font-size");
+    previousRootFontSize = null;
+  }
+
+  if (previousRootBackground !== null) {
+    if (previousRootBackground)
+      root.style.setProperty("background", previousRootBackground, previousRootBackgroundPriority);
+    else root.style.removeProperty("background");
+    previousRootBackground = null;
+  }
+}
+
 function hideOriginalUi() {
+  pinRootFontSize();
   if (document.getElementById(HIDE_STYLE_ID)) return;
   const style = document.createElement("style");
   style.id = HIDE_STYLE_ID;
@@ -59,12 +126,18 @@ function hideOriginalUi() {
   style.textContent = [
     "#root{display:none!important}",
     "html,body{overflow:visible!important;height:auto!important;max-height:none!important;margin:0!important;background:#0e0e10!important;overscroll-behavior:none!important}",
+    // O botão "Abrir no GradesInteli" é do fluxo antigo (adalove-content.js,
+    // que não pode ser tocado). Com a UI nova ativa ele não faz sentido, então
+    // some por CSS — e volta sozinho ao sair, porque o <style> é removido.
+    // Casa pelo z-index inline dele; o nosso próprio botão usa outro.
+    'button[style*="2147483647"]{display:none!important}',
   ].join("");
   (document.head ?? document.documentElement).appendChild(style);
 }
 
 function showOriginalUi() {
   document.getElementById(HIDE_STYLE_ID)?.remove();
+  restoreRootFontSize();
 }
 
 /** Fallback: a extensão já intercepta /userdata e guarda em `lastCapture`. Se a
@@ -196,8 +269,10 @@ function ensureToggleButton() {
   btn.textContent = "✦ UI nova";
   Object.assign(btn.style, {
     position: "fixed",
-    bottom: "64px",
-    left: "20px",
+    // Canto inferior direito: o botão do fluxo antigo mora embaixo à esquerda,
+    // e um ficava por cima do outro.
+    bottom: "20px",
+    right: "20px",
     zIndex: "2147483000",
     padding: "12px 24px",
     background: "#16161a",
@@ -271,7 +346,6 @@ function watchRoute() {
 async function boot() {
   // Captura roda em qualquer rota do Adalove: é justamente nas páginas que ainda
   // não reconstruímos que precisamos levantar o contrato.
-  await initCapture();
   await syncToRoute();
   watchRoute();
 }
