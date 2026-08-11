@@ -1,31 +1,72 @@
 {
   "manifest_version": 3,
   "name": "Adalove → GradesInteli",
-  "version": "1.0.2",
-  "description": "Importa suas notas do Adalove direto para o GradesInteli, sem precisar salvar a página em HTML.",
+  "version": "1.1.0",
+  "description": "Importa suas notas do Adalove para o GradesInteli e oferece uma UI alternativa para o Adalove.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://adalove.inteli.edu.br/*",
+    "https://apiv2.inteli.edu.br/*",
     "https://www.gradesinteli.com/*",
     "https://gradesinteli.com/*",
     "http://localhost/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://adalove.inteli.edu.br/*"],
-      "js": ["adalove-interceptor.js"],
+      "matches": [
+        "https://adalove.inteli.edu.br/*"
+      ],
+      "js": [
+        "adalove-interceptor.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://adalove.inteli.edu.br/*"],
-      "js": ["adalove-content.js"],
+      "matches": [
+        "https://adalove.inteli.edu.br/*"
+      ],
+      "js": [
+        "adalove-capture.js"
+      ],
       "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://adalove.inteli.edu.br/*"
+      ],
+      "js": [
+        "adalove-boot.js"
+      ],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    },
+    {
+      "matches": [
+        "https://adalove.inteli.edu.br/*"
+      ],
+      "js": [
+        "adalove-content.js"
+      ],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    },
+    {
+      "matches": [
+        "https://adalove.inteli.edu.br/*"
+      ],
+      "js": [
+        "dist/adalove-ui.js"
+      ],
+      "run_at": "document_idle",
       "world": "ISOLATED"
     },
     {
@@ -34,9 +75,21 @@
         "https://gradesinteli.com/*",
         "http://localhost/*"
       ],
-      "js": ["grades-content.js"],
+      "js": [
+        "grades-content.js"
+      ],
       "run_at": "document_idle",
       "world": "ISOLATED"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "fonts/*.woff2"
+      ],
+      "matches": [
+        "https://adalove.inteli.edu.br/*"
+      ]
     }
   ]
 }
