@@ -1,0 +1,99 @@
+import claudeRaw from "@logos/Claude.svg?raw";
+import facebookRaw from "@logos/Facebook.svg?raw";
+import geminiRaw from "@logos/Gemini.svg?raw";
+import githubRaw from "@logos/GitHub.svg?raw";
+import driveRaw from "@logos/GoogleDrive.svg?raw";
+import instagramRaw from "@logos/Instagram.svg?raw";
+import linkedinRaw from "@logos/LinkedIn.svg?raw";
+import openaiRaw from "@logos/OpenAI.svg?raw";
+import youtubeRaw from "@logos/Youtube.svg?raw";
+import { cn } from "~/lib/cn";
+
+// Os logos entram INLINE, não como <img src="data:…">: a CSP da página do
+// Adalove pode barrar `img-src data:`, e SVG no DOM não passa por essa regra.
+//
+// Cada arquivo vem com width/height próprios (o do OpenAI tem 800px), então
+// removemos os dois e deixamos o tamanho para o wrapper.
+//
+// Pegadinha: o GoogleDrive.svg não declara `viewBox`. Sem ele, trocar
+// width/height por 100% não escala nada — o desenho fica no sistema de
+// coordenadas original e some. Por isso derivamos o viewBox do tamanho
+// declarado quando ele não existe.
+function normalize(svg: string): string {
+  return svg.replace(/<svg([^>]*)>/, (_, attrs: string) => {
+    const width = /\swidth="([\d.]+)/.exec(attrs)?.[1];
+    const height = /\sheight="([\d.]+)/.exec(attrs)?.[1];
+    const stripped = attrs.replace(/\s(width|height)="[^"]*"/g, "");
+    const viewBox =
+      /\sviewBox="/.test(stripped) || !width || !height
+        ? ""
+        : ` viewBox="0 0 ${width} ${height}"`;
+    return `<svg${stripped}${viewBox} width="100%" height="100%">`;
+  });
+}
+
+const SVGS = {
+  claude: normalize(claudeRaw),
+  openai: normalize(openaiRaw),
+  gemini: normalize(geminiRaw),
+  drive: normalize(driveRaw),
+  github: normalize(githubRaw),
+  facebook: normalize(facebookRaw),
+  instagram: normalize(instagramRaw),
+  linkedin: normalize(linkedinRaw),
+  youtube: normalize(youtubeRaw),
+} as const;
+
+export type LogoName = keyof typeof SVGS;
+
+const WHITE = /^(#fff|#ffffff|white)$/i;
+
+/** Deixa o logo seguir a cor do botão, para funcionar nos dois temas.
+ *
+ *  A parte difícil é o branco. No Facebook e no YouTube ele é vazado — o "f" e o
+ *  triângulo são branco sobre a marca, e virar tudo `currentColor` daria um
+ *  borrão sólido. Já no GitHub o branco É o gato: vazar ali apagaria o logo.
+ *
+ *  A regra que separa os dois casos sai do próprio arquivo: se existe algum fill
+ *  que não é branco nem `none`, então o branco é vazado e recebe a cor do fundo
+ *  do círculo; se o branco é a única cor, ele é a marca e vira `currentColor`.
+ *
+ *  Cobre tanto `fill="…"` (atributo) quanto `fill:…` (CSS), porque os arquivos
+ *  vêm de fontes diferentes e usam as duas formas. */
+function monochrome(svg: string): string {
+  const declared = [...svg.matchAll(/fill(?:="|:)\s*([^";]+)/gi)].map((m) => m[1]!.trim());
+  const hasBody = declared.some((f) => f !== "none" && !WHITE.test(f));
+
+  const map = (value: string): string => {
+    const v = value.trim();
+    if (v === "none") return "none";
+    if (hasBody && WHITE.test(v)) return "var(--gi-knockout, currentColor)";
+    return "currentColor";
+  };
+
+  return svg
+    .replace(/fill="([^"]*)"/g, (_, v: string) => `fill="${map(v)}"`)
+    .replace(/fill:\s*([^;"}]+)/g, (_, v: string) => `fill:${map(v)}`);
+}
+
+export function Logo({
+  name,
+  size = 14,
+  mono = false,
+  className,
+}: {
+  name: LogoName;
+  size?: number;
+  mono?: boolean;
+  className?: string;
+}) {
+  const svg = mono ? monochrome(SVGS[name]) : SVGS[name];
+  return (
+    <span
+      aria-hidden
+      className={cn("inline-flex shrink-0 items-center justify-center", className)}
+      style={{ width: size, height: size }}
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
