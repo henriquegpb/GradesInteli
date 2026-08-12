@@ -23,7 +23,7 @@ export function ActivityCardBody({ activity }: { activity: ActivityView }) {
           className="mt-0.5 shrink-0"
           style={{ color: activity.kind.color }}
         />
-        <span className="min-w-0 flex-1 text-xs leading-snug text-fg">{activity.caption}</span>
+        <span className="min-w-0 flex-1 text-sm leading-snug text-fg">{activity.caption}</span>
         {activity.favorite && (
           <Star size={12} aria-hidden className="mt-0.5 shrink-0 fill-yellow text-yellow" />
         )}
@@ -76,8 +76,10 @@ export function ActivityCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        "group relative rounded-card border border-line bg-surface transition-colors duration-150",
-        "hover:border-accent/50",
+        // Sem contorno: o card se separa do fundo pela superfície, não por linha.
+        // O hover então tem que vir do fundo — sem ele o card ficaria inerte.
+        "group relative rounded-card bg-surface transition-colors duration-150",
+        "hover:bg-surface-hover",
         // Fantasma no lugar de origem enquanto o overlay segue o cursor.
         isDragging && "opacity-30",
       )}

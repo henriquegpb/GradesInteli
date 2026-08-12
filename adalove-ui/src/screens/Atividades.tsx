@@ -436,7 +436,7 @@ export function Atividades({
               perde badges no caminho. */}
           <DragOverlay dropAnimation={null}>
             {dragging && (
-              <div className="rounded-card border border-accent bg-surface p-3 shadow-2xl">
+              <div className="rounded-card bg-surface-hover p-3 shadow-2xl">
                 <ActivityCardBody activity={dragging} />
               </div>
             )}
