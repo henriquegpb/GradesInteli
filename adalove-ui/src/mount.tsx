@@ -48,6 +48,28 @@ function shadowScopedCss(css: string) {
   return css.replace(/:root\b/g, ":host");
 }
 
+const PROPS_STYLE_ID = "gi-tw-properties";
+
+/** `@property` só registra a partir de folha do DOCUMENTO: dentro de shadow root
+ *  a regra é ignorada. E o Tailwind v4 escreve os utilitários em cima desses
+ *  registros — `border-*` sai como `border-style: var(--tw-border-style)`. Sem o
+ *  registro a variável não existe, o valor fica inválido no cálculo e a borda
+ *  vira `none`: o app inteiro perde as linhas (grade do calendário, anel dos
+ *  badges, barra colorida das aulas), e com ela sombra, transform e gradiente,
+ *  que dependem dos mesmos registros.
+ *
+ *  Então as ~40 regras `@property` vão também para o head. Elas só declaram
+ *  custom properties `--tw-*` com `inherits: false`, nada que a página use. */
+function registerCustomProperties(css: string) {
+  if (document.getElementById(PROPS_STYLE_ID)) return;
+  const rules = css.match(/@property\s+--[\w-]+\s*\{[^}]*\}/g);
+  if (!rules) return;
+  const style = document.createElement("style");
+  style.id = PROPS_STYLE_ID;
+  style.textContent = rules.join("");
+  (document.head ?? document.documentElement).appendChild(style);
+}
+
 /** `rem` resolve contra o <html> do DOCUMENTO, inclusive dentro de shadow root.
  *  Se a página do Adalove encolhe a raiz, a UI inteira sai menor do que foi
  *  desenhada — a sidebar de 16rem vira 160px em vez de 256px. Fixamos a raiz
@@ -211,6 +233,7 @@ export async function mountOverlay() {
   document.body.appendChild(host);
 
   const shadow = host.attachShadow({ mode: "open" });
+  registerCustomProperties(cssText);
   const sheet = new CSSStyleSheet();
   sheet.replaceSync(shadowScopedCss(cssText));
   shadow.adoptedStyleSheets = [sheet];
@@ -253,6 +276,7 @@ export function unmountOverlay() {
   root = null;
   host?.remove();
   host = null;
+  document.getElementById(PROPS_STYLE_ID)?.remove();
   showOriginalUi();
 }
 
