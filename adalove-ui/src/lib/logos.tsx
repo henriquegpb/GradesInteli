@@ -2,8 +2,10 @@ import claudeRaw from "@logos/Claude.svg?raw";
 import facebookRaw from "@logos/Facebook.svg?raw";
 import geminiRaw from "@logos/Gemini.svg?raw";
 import githubRaw from "@logos/GitHub.svg?raw";
+import gitlabRaw from "@logos/GitLab.svg?raw";
 import driveRaw from "@logos/GoogleDrive.svg?raw";
 import instagramRaw from "@logos/Instagram.svg?raw";
+import symbolInline from "@logos/InteliSymbolWhite.png?inline";
 import linkedinRaw from "@logos/LinkedIn.svg?raw";
 import openaiRaw from "@logos/OpenAI.svg?raw";
 import youtubeRaw from "@logos/Youtube.svg?raw";
@@ -38,6 +40,7 @@ const SVGS = {
   gemini: normalize(geminiRaw),
   drive: normalize(driveRaw),
   github: normalize(githubRaw),
+  gitlab: normalize(gitlabRaw),
   facebook: normalize(facebookRaw),
   instagram: normalize(instagramRaw),
   linkedin: normalize(linkedinRaw),
@@ -74,6 +77,33 @@ function monochrome(svg: string): string {
   return svg
     .replace(/fill="([^"]*)"/g, (_, v: string) => `fill="${map(v)}"`)
     .replace(/fill:\s*([^;"}]+)/g, (_, v: string) => `fill:${map(v)}`);
+}
+
+/** O símbolo do Inteli só existe em PNG — não tem fill para trocar como nos
+ *  SVGs. Então o desenho entra como MÁSCARA, que usa só o canal alpha, e a cor
+ *  vem do fundo (`bg-current`): branco no tema escuro, como pedido, e escuro no
+ *  claro. Pintar direto o PNG branco daria o mesmo resultado no escuro, mas ele
+ *  desapareceria no tema claro — de máscara, a mesma arte serve nos dois.
+ *
+ *  A imagem vem de web_accessible_resources quando estamos na extensão: um
+ *  `data:` URI em `mask-image` cai sob `img-src` na CSP da página do Adalove, que
+ *  pode barrar. No harness de dev não existe chrome.runtime, e aí o data: URI
+ *  embutido no bundle serve — a página é nossa e não tem CSP no caminho. */
+function symbolUrl(): string {
+  return typeof chrome !== "undefined" && chrome.runtime?.getURL
+    ? chrome.runtime.getURL("logos/InteliSymbolWhite.png")
+    : symbolInline;
+}
+
+export function InteliSymbol({ size = 22, className }: { size?: number; className?: string }) {
+  const mask = `url("${symbolUrl()}") center / contain no-repeat`;
+  return (
+    <span
+      aria-hidden
+      className={cn("inline-block shrink-0 bg-current", className)}
+      style={{ width: size, height: size, mask, WebkitMask: mask }}
+    />
+  );
 }
 
 export function Logo({

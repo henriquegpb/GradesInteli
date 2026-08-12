@@ -10,6 +10,28 @@ export type Theme = "dark" | "light";
 const BUTTON =
   "relative inline-flex size-9 items-center justify-center rounded-control border border-line bg-surface text-fg-soft transition-colors duration-150 hover:border-accent hover:text-fg";
 
+/** O GitLab do Inteli — é onde os artefatos das sprints são entregues, então é
+ *  atalho de uso diário e fica junto do GitHub, não no rodapé. */
+export const INTELI_GITLAB_URL = "https://git.inteli.edu.br/";
+
+/** Mono como o do GitHub, para a fileira não ter um ícone colorido só; a marca
+ *  aparece na borda do hover. */
+export function GitlabButton() {
+  return (
+    <Tooltip label="GitLab do Inteli">
+      <a
+        href={INTELI_GITLAB_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Abrir o GitLab do Inteli"
+        className={cn(BUTTON, "hover:border-orange/60")}
+      >
+        <Logo name="gitlab" size={16} mono />
+      </a>
+    </Tooltip>
+  );
+}
+
 /** Só o mark do GitHub e uma estrela, sem rótulo: mora numa fileira de ícones. */
 export function GithubStarButton() {
   return (

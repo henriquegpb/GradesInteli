@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Adalove → GradesInteli",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Importa suas notas do Adalove para o GradesInteli e oferece uma UI alternativa para o Adalove.",
   "icons": {
     "16": "icons/icon16.png",
@@ -75,7 +75,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "fonts/*.woff2"
+        "fonts/*.woff2",
+        "logos/*.png"
       ],
       "matches": [
         "https://adalove.inteli.edu.br/*"
