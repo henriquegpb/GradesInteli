@@ -1,8 +1,12 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "~/lib/cn";
 
-/** Receita do GradesInteli: surface + 1px border + raio 8px. Padding é do caller. */
-export const CARD_CLASS = "rounded-card border border-line bg-surface";
+/** Receita do GradesInteli: surface + 1px border + raio 8px. Padding é do caller.
+ *
+ *  `gi-card` é o gancho do modo Super Tech (theme.css), que troca o contorno pela
+ *  luz interna. Fica na classe base para que todo card entre no modo de uma vez —
+ *  card novo não precisa lembrar de nada. */
+export const CARD_CLASS = "gi-card rounded-card border border-line bg-surface";
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={cn(CARD_CLASS, className)} {...props} />;

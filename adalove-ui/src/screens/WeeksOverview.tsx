@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { STATUS_DOING, STATUS_DONE, STATUS_LABEL, STATUS_TODO } from "~/data/types";
 import type { SectionView, WeekGroup } from "~/data/viewmodel";
 import { cn } from "~/lib/cn";
@@ -42,11 +43,13 @@ function WeekCard({ week, onOpen }: { week: WeekGroup; onOpen?: (week: string) =
               className="flex h-full flex-1 flex-col justify-end rounded-[4px] bg-line-soft"
             >
               <div
-                className="rounded-[4px] transition-[height] duration-500"
-                style={{
-                  height: `${Math.max((count / max) * 100, count > 0 ? 6 : 0)}%`,
-                  background: column.color,
-                }}
+                className="gi-glow rounded-[4px] transition-[height] duration-500"
+                style={
+                  {
+                    height: `${Math.max((count / max) * 100, count > 0 ? 6 : 0)}%`,
+                    "--gi-glow": column.color,
+                  } as CSSProperties
+                }
               />
             </div>
           );

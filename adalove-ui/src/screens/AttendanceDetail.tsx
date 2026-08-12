@@ -1,7 +1,8 @@
 import { Check, X } from "lucide-react";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { PresencaStatus } from "@/types/grades";
 import type { ActivityView, AttendanceSlotView } from "~/data/viewmodel";
+import { cn } from "~/lib/cn";
 import { formatDate } from "~/lib/date";
 import { Modal } from "~/ui/Modal";
 
@@ -133,13 +134,18 @@ export function AttendanceDetail({ slots }: { slots: AttendanceSlotView[] }) {
                       onMouseEnter={() => setHovered(slot.slot)}
                       onMouseLeave={() => setHovered(null)}
                       aria-label={`Presença ${slot.slot}, de ${label(span.start)} a ${label(span.end)}: ${s.label}`}
-                      className="absolute inset-y-0 rounded"
-                      style={{
-                        left: `${((span.start - from) / total) * 100}%`,
-                        width: `${((span.end - span.start) / total) * 100}%`,
-                        background: slot.status === "futuro" ? "transparent" : s.color,
-                        border: slot.status === "futuro" ? `1px dashed ${s.color}` : undefined,
-                      }}
+                      // `gi-glow` só na faixa que aconteceu: a de "a ocorrer" é
+                      // contorno tracejado vazio, e brilho ali sugeriria dado.
+                      className={cn("absolute inset-y-0 rounded", slot.status !== "futuro" && "gi-glow")}
+                      style={
+                        {
+                          left: `${((span.start - from) / total) * 100}%`,
+                          width: `${((span.end - span.start) / total) * 100}%`,
+                          ...(slot.status === "futuro"
+                            ? { border: `1px dashed ${s.color}` }
+                            : { "--gi-glow": s.color }),
+                        } as CSSProperties
+                      }
                     />
 
                     {/* Balão na cor da faixa, para não haver dúvida de qual delas

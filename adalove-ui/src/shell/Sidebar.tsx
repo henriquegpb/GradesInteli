@@ -168,7 +168,9 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "sticky top-0 flex h-screen shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-line bg-surface transition-[width] duration-150",
+        // `gi-sidebar` é o gancho do modo Super Tech (theme.css): lá ela escurece
+        // e ganha luz interna na esquerda, no topo e embaixo.
+        "gi-sidebar sticky top-0 flex h-screen shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-line bg-surface transition-[width] duration-150",
         open ? "w-64 p-3" : "w-16 p-3",
       )}
     >

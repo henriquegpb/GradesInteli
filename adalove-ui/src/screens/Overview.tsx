@@ -31,8 +31,10 @@ import { Tabs } from "~/ui/Tabs";
 // O hover é um cinza um pouco mais claro que a linha do card, não o accent: o
 // accent competia com a barra colorida de categoria no topo de cada card.
 // O foco continua no accent — ali o destaque forte é o ponto.
+// `gi-shortcut` é o gancho do Super Tech: lá o contorno do card não existe, então
+// o hover tem que vir da luz interna (theme.css) em vez da borda.
 const SHORTCUT_CLASS =
-  "cursor-pointer transition-colors duration-150 hover:border-fg-muted/50 focus-visible:border-accent focus-visible:outline-none";
+  "gi-shortcut cursor-pointer transition-colors duration-150 hover:border-fg-muted/50 focus-visible:border-accent focus-visible:outline-none";
 
 /** Atalho como `div[role=button]` e não `<button>`: o card de Faltas tem um link
  *  dentro ("Revisar"), e link dentro de botão é HTML inválido. O teclado entra à
@@ -319,6 +321,8 @@ export function Overview({
   newsLoading,
   theme,
   onTheme,
+  superTech,
+  onSuperTech,
   simulacao,
   onSimulacao,
   participacao,
@@ -334,6 +338,8 @@ export function Overview({
   newsLoading?: boolean;
   theme: Theme;
   onTheme: (t: Theme) => void;
+  superTech: boolean;
+  onSuperTech: (on: boolean) => void;
   simulacao: SimulacaoConfig;
   onSimulacao: (s: SimulacaoConfig) => void;
   participacao: ParticipacaoLetra;
@@ -396,7 +402,12 @@ export function Overview({
         <div className="ml-auto flex items-center gap-2">
           <GitlabButton />
           <GithubStarButton />
-          <ThemeToggle theme={theme} onChange={onTheme} />
+          <ThemeToggle
+            theme={theme}
+            onChange={onTheme}
+            superTech={superTech}
+            onSuperTech={onSuperTech}
+          />
           <NotificationsButton view={view} onOpenActivity={onOpenActivity} />
         </div>
       </div>

@@ -72,6 +72,9 @@ function Workspace({
     DEFAULT_PARTICIPACAO_MULTIPLIERS,
   );
   const [theme, setTheme] = useState<Theme>("dark");
+  // Super Tech é uma variação do escuro, não um terceiro tema: no claro ele nem
+  // aparece no menu, e o estado fica guardado esperando a volta ao escuro.
+  const [superTech, setSuperTech] = useState(false);
   const [newsLoading, setNewsLoading] = useState(!!fetchNews);
   const toast = useToast();
 
@@ -89,43 +92,68 @@ function Workspace({
     };
   }, [fetchNews]);
 
-  // A simulação é preferência do aluno: sobrevive a recarregar a página.
+  // Preferências do aluno (tema, Super Tech, simulação) sobrevivem a recarregar a
+  // página e a sair e voltar da UI nova — ficam em chrome.storage.local, que é do
+  // navegador da pessoa e não expira como sessão.
+  //
+  // Tudo é lido numa passada só e só então `prefsLoaded` abre a escrita. Sem esse
+  // portão, o efeito de salvar rodava no primeiro render com os PADRÕES e, se a
+  // overlay fosse desmontada antes da leitura voltar (trocar para a UI original,
+  // mudar de rota), o padrão sobrescrevia a preferência de verdade.
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+
   useEffect(() => {
-    void getPref("simulador").then((raw) => {
-      if (!raw) return;
-      try {
-        const saved = JSON.parse(raw) as {
-          simulacao?: SimulacaoConfig;
-          participacao?: ParticipacaoLetra;
-          multipliers?: ParticipacaoMultipliers;
-        };
-        if (saved.simulacao) setSimulacao({ ...DEFAULT_SIMULACAO, ...saved.simulacao });
-        if (saved.participacao) setParticipacao(saved.participacao);
-        if (saved.multipliers) {
-          setMultipliers({ ...DEFAULT_PARTICIPACAO_MULTIPLIERS, ...saved.multipliers });
+    let alive = true;
+    void Promise.all([getPref("theme"), getPref("superTech"), getPref("simulador")]).then(
+      ([storedTheme, storedSuperTech, storedSimulador]) => {
+        if (!alive) return;
+
+        if (storedTheme === "light" || storedTheme === "dark") setTheme(storedTheme);
+        setSuperTech(storedSuperTech === "on");
+
+        if (storedSimulador) {
+          try {
+            const saved = JSON.parse(storedSimulador) as {
+              simulacao?: SimulacaoConfig;
+              participacao?: ParticipacaoLetra;
+              multipliers?: ParticipacaoMultipliers;
+            };
+            if (saved.simulacao) setSimulacao({ ...DEFAULT_SIMULACAO, ...saved.simulacao });
+            if (saved.participacao) setParticipacao(saved.participacao);
+            if (saved.multipliers) {
+              setMultipliers({ ...DEFAULT_PARTICIPACAO_MULTIPLIERS, ...saved.multipliers });
+            }
+          } catch {
+            /* preferência corrompida: segue com o padrão */
+          }
         }
-      } catch {
-        /* preferência corrompida: segue com o padrão */
-      }
-    });
+
+        setPrefsLoaded(true);
+      },
+    );
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useEffect(() => {
+    if (!prefsLoaded) return;
     void setPref("simulador", JSON.stringify({ simulacao, participacao, multipliers }));
-  }, [simulacao, participacao, multipliers]);
+  }, [prefsLoaded, simulacao, participacao, multipliers]);
+
+  const superTechOn = theme === "dark" && superTech;
 
   useEffect(() => {
-    void getPref("theme").then((v) => {
-      if (v === "light" || v === "dark") setTheme(v);
-    });
-  }, []);
-
-  // O fundo da raiz também acompanha: é ele que aparece no overscroll, e no
-  // claro uma faixa preta embaixo saltaria aos olhos.
-  useEffect(() => {
-    void setPref("theme", theme);
-    document.documentElement.style.background = theme === "light" ? "#f4f4f6" : "#0e0e10";
-  }, [theme]);
+    if (prefsLoaded) {
+      void setPref("theme", theme);
+      void setPref("superTech", superTech ? "on" : "off");
+    }
+    // O fundo da raiz acompanha o modo mesmo antes de carregar: é ele que aparece
+    // no overscroll, e um #0e0e10 atrás de uma página #08080a apareceria como
+    // faixa mais clara.
+    document.documentElement.style.background =
+      theme === "light" ? "#f4f4f6" : superTechOn ? "#08080a" : "#0e0e10";
+  }, [prefsLoaded, theme, superTech, superTechOn]);
 
   const openWeek = useCallback((value: string) => {
     setWeek(value);
@@ -201,7 +229,11 @@ function Workspace({
   );
 
   return (
-    <div data-theme={theme} className="adalove-ui-root flex min-h-screen w-full bg-bg text-fg">
+    <div
+      data-theme={theme}
+      data-super-tech={superTechOn ? "on" : undefined}
+      className="adalove-ui-root flex min-h-screen w-full bg-bg text-fg"
+    >
       <Sidebar
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
@@ -226,6 +258,8 @@ function Workspace({
             onSeeStudents={() => setRoute("grupo")}
             theme={theme}
             onTheme={setTheme}
+            superTech={superTech}
+            onSuperTech={setSuperTech}
             simulacao={simulacao}
             onSimulacao={setSimulacao}
             participacao={participacao}
