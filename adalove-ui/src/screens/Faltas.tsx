@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { fmtAttendanceUnits } from "@/lib/format";
 import type { PresencaStatus } from "@/types/grades";
-import type { SectionView } from "~/data/viewmodel";
+import type { ActivityView, SectionView } from "~/data/viewmodel";
 import { cn } from "~/lib/cn";
+import { formatDate } from "~/lib/date";
+import { AttendanceModal } from "~/screens/AttendanceDetail";
 import { Card, CardTitle } from "~/ui/Card";
 import { Table, TableContainer, Td, Th } from "~/ui/Table";
 
@@ -36,6 +39,15 @@ export function Faltas({
   showHeader?: boolean;
 }) {
   const a = view.attendance;
+
+  // O modal de presença é assunto desta tela, então o estado mora aqui — o App
+  // não precisa saber que a tabela abre alguma coisa.
+  const [detail, setDetail] = useState<ActivityView | null>(null);
+
+  // A tabela sai das atividades e não de `attendanceRows` porque a linha precisa
+  // carregar o encontro inteiro para abrir o modal. O conjunto é o mesmo: só
+  // encontro tem chamada, e o resumo acima continua vindo de `attendanceRows`.
+  const encontros = view.activities.filter((x) => x.attendance.length > 0);
 
   if (!a) {
     return (
@@ -135,20 +147,35 @@ export function Faltas({
             </tr>
           </thead>
           <tbody>
-            {view.attendanceRows.map((row, i) => {
-              const hasFalta = row.presencas.includes("falta");
+            {encontros.map((activity) => {
+              const hasFalta = activity.attendance.some((s) => s.status === "falta");
               return (
                 <tr
-                  key={`${row.atividade}-${i}`}
-                  className={cn("transition-colors hover:bg-surface-hover", hasFalta && "bg-red/5")}
+                  key={activity.id}
+                  // Linha clicável abre o encontro: é onde estão o horário de cada
+                  // chamada e o motivo de um abono, que não cabem na tabela.
+                  onClick={() => setDetail(activity)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
+                    setDetail(activity);
+                  }}
+                  className={cn(
+                    "cursor-pointer transition-colors hover:bg-surface-hover",
+                    hasFalta && "bg-red/5",
+                    "focus-visible:bg-surface-hover focus-visible:outline-none",
+                  )}
                 >
-                  <Td className="text-xs">{row.atividade}</Td>
-                  <Td className="font-mono text-xs text-fg-muted tabular">{row.semana}</Td>
-                  <Td className="font-mono text-xs text-fg-muted tabular">{row.dia}</Td>
+                  <Td className="text-xs">{activity.caption}</Td>
+                  <Td className="font-mono text-xs text-fg-muted tabular">{activity.week}</Td>
+                  <Td className="font-mono text-xs text-fg-muted tabular">
+                    {formatDate(activity.date) ?? "—"}
+                  </Td>
                   <Td>
                     <span className="flex items-center gap-1.5">
-                      {row.presencas.map((p, j) => (
-                        <Dot key={j} status={p} />
+                      {activity.attendance.map((slot) => (
+                        <Dot key={slot.slot} status={slot.status} />
                       ))}
                     </span>
                   </Td>
@@ -158,6 +185,8 @@ export function Faltas({
           </tbody>
         </Table>
       </TableContainer>
+
+      <AttendanceModal activity={detail} onClose={() => setDetail(null)} />
     </div>
   );
 }

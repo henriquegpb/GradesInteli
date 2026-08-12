@@ -8,11 +8,18 @@ import type {
   AttendanceRow,
   ItemNota,
   MetricasModulo,
+  PresencaStatus,
   SimulacaoConfig,
   TipoAtividade,
 } from "@/types/grades";
 import { kindOf, type ActivityKind } from "~/data/activityTypes";
-import type { ActivityStatus, RawActivity, RawStudent, RawUserdata } from "~/data/types";
+import type {
+  ActivityStatus,
+  RawActivity,
+  RawSection,
+  RawStudent,
+  RawUserdata,
+} from "~/data/types";
 
 // Duas passadas sobre o MESMO payload:
 //
@@ -21,6 +28,23 @@ import type { ActivityStatus, RawActivity, RawStudent, RawUserdata } from "~/dat
 //    bug dói e onde duas implementações divergiriam em silêncio.
 //  • kanban/tabela/modal → mapeamento próprio, sem o filtro de gradeWeight > 0,
 //    porque o kanban precisa das 200 atividades e não só das 29 avaliadas.
+
+/** Uma chamada do encontro, como o Adalove nomeia ("Presença 1/2/3"). */
+export interface AttendanceSlotView {
+  slot: number;
+  status: PresencaStatus;
+  /** Horário nominal da chamada ("07:52"), da section — não é o horário em que a
+   *  pessoa entrou, que o /userdata não traz. */
+  time: string | null;
+  /** Horas-aula que a chamada vale (no 3º ano: 1 / 1 / 2). */
+  hours: number | null;
+  /** Minutos de tolerância para o check-in. */
+  tolerance: number | null;
+  /** Janela da chamada em minutos desde a meia-noite — o mesmo intervalo que o
+   *  gráfico do Adalove desenha. Nulos quando a section não tem horário. */
+  startsAt: number | null;
+  endsAt: number | null;
+}
 
 export interface ActivityView {
   id: string;
@@ -57,6 +81,8 @@ export interface ActivityView {
   required: boolean;
   isExam: boolean;
   url: string | null;
+  /** Chamadas do encontro, em ordem. Vazio em atividade sem chamada. */
+  attendance: AttendanceSlotView[];
 }
 
 export interface WeekGroup {
@@ -141,7 +167,118 @@ function stripLeadingTitle(text: string, caption: string): string {
   return rest.length < 20 ? "" : rest;
 }
 
-function toActivityView(a: RawActivity): ActivityView {
+// ---- chamadas de um encontro ----------------------------------------------
+//
+// Espelha `parseAttendanceRows` de @/lib/adalove-json-parser, que segue sendo a
+// fonte de verdade do RESUMO (percentual, faltas restantes). Aqui a mesma
+// classificação é refeita por atividade, porque o resumo é agregado e não diz
+// qual chamada de qual encontro caiu — que é justamente o que o modal mostra.
+// Se a regra mudar lá, tem que mudar aqui.
+
+/** Tipos de atividade que têm chamada (aula e orientação). */
+const ENCONTRO_TYPES = new Set([1, 2]);
+
+function hasAllowance(a: RawActivity, slot: number): boolean {
+  const period = a.absencePeriod;
+  // Abono sem período declarado vale para o encontro inteiro.
+  const matches = period == null || period === "" || Number(period) === slot;
+  return Boolean(
+    matches &&
+      (a.absenceAllowanceUuid ||
+        a.absenceAllowanceType ||
+        a.absenceAllowanceTypeName ||
+        a.absenceAllowanceReason ||
+        a.ticketNumber),
+  );
+}
+
+/** `> 0` presente, `0` falta (ou justificada, se houver abono), `< 0` ainda não
+ *  aconteceu — a chamada existe na grade mas não foi feita. */
+function attendanceStatus(
+  value: number | null,
+  a: RawActivity,
+  slot: number,
+): PresencaStatus {
+  const n = Number(value);
+  if (Number.isNaN(n) || n < 0) return "futuro";
+  if (n > 0) return "presente";
+  return hasAllowance(a, slot) ? "justificado" : "falta";
+}
+
+/** "07:52:00" → minutos desde a meia-noite. */
+function timeToMinutes(time: string | null | undefined): number | null {
+  const m = /^(\d{1,2}):(\d{2})/.exec(time ?? "");
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+}
+
+/** Janela de uma chamada, derivada do horário (`H`), da tolerância (`T`) e das
+ *  horas-aula da section — a mesma que o gráfico do Adalove desenha.
+ *
+ *  A regra saiu de um encontro real conferido minuto a minuto
+ *  (H1 07:52 T1 12 | H2 10:00 T2 8 | H3 12:10 T3 10 →
+ *   08:04–08:52 · 09:00–09:52 · 10:10–12:00):
+ *
+ *    chamada 1:  [H + T, H + horas*60]
+ *    chamadas 2+: [H - horas*60, H - T]
+ *
+ *  A assimetria é do domínio, não erro de conta: a primeira chamada é tirada na
+ *  ENTRADA do dia, então a aula começa depois dela mais a tolerância; as outras
+ *  são tiradas no FIM do próprio período, então a aula termina antes delas menos
+ *  a tolerância. Qualquer regra única erra uma das pontas. */
+function attendanceWindow(
+  slot: number,
+  at: number | null,
+  hours: number | null,
+  tolerance: number | null,
+): { startsAt: number | null; endsAt: number | null } {
+  if (at === null) return { startsAt: null, endsAt: null };
+  const span = (hours ?? 1) * 60;
+  const tol = tolerance ?? 0;
+  return slot === 1
+    ? { startsAt: at + tol, endsAt: at + span }
+    : { startsAt: at - span, endsAt: at - tol };
+}
+
+function attendanceSlots(a: RawActivity, section: RawSection | undefined): AttendanceSlotView[] {
+  if (a.type == null || !ENCONTRO_TYPES.has(a.type)) return [];
+
+  const values = [a.attendance1, a.attendance2, a.attendance3];
+  const times = [
+    section?.sectionAttendanceTimeOne,
+    section?.sectionAttendanceTimeTwo,
+    section?.sectionAttendanceTimeThree,
+  ];
+  const hours = [
+    section?.sectionHoursOne,
+    section?.sectionHoursTwo,
+    section?.sectionHoursThree,
+  ];
+  const tolerances = [
+    section?.sectionToleranceOne,
+    section?.sectionToleranceTwo,
+    section?.sectionToleranceThree,
+  ];
+
+  return values
+    .map((value, i) => ({ value, i }))
+    .filter(({ value }) => value !== undefined && value !== null)
+    .map(({ value, i }) => {
+      const slot = i + 1;
+      const hour = typeof hours[i] === "number" ? hours[i]! : null;
+      const tolerance = typeof tolerances[i] === "number" ? tolerances[i]! : null;
+      return {
+        slot,
+        status: attendanceStatus(value, a, slot),
+        // "07:52:00" → "07:52". O segundo nunca é usado na grade.
+        time: (times[i] ?? "").slice(0, 5) || null,
+        hours: hour,
+        tolerance,
+        ...attendanceWindow(slot, timeToMinutes(times[i]), hour, tolerance),
+      };
+    });
+}
+
+function toActivityView(a: RawActivity, section?: RawSection): ActivityView {
   const caption = (a.caption || "").trim();
   const text = a.description ? htmlToText(a.description) : "";
 
@@ -178,6 +315,7 @@ function toActivityView(a: RawActivity): ActivityView {
     required: a.required === 1,
     isExam: a.exam === 1,
     url: a.basicActivityURL,
+    attendance: attendanceSlots(a, section),
   };
 }
 
@@ -188,7 +326,7 @@ export function buildSectionView(
   const rawActivities = Array.isArray(raw.activities) ? raw.activities : [];
 
   const activities = rawActivities
-    .map(toActivityView)
+    .map((a) => toActivityView(a, raw.section))
     .sort((a, b) => a.weekNum - b.weekNum || a.sort - b.sort);
 
   // ---- notas e faltas: reusa a implementação do site -----------------------

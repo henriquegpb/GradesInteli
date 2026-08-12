@@ -67,6 +67,12 @@ export interface RawActivity {
   attendance3: number | null;
   absenceAllowanceType: number | null;
   absenceAllowanceTypeName: string | null;
+  /** Abono: a chamada abonada (1/2/3) e a papelada que comprova. Nulos quando
+   *  não há abono — é o que separa falta de falta justificada. */
+  absencePeriod?: string | number | null;
+  absenceAllowanceUuid?: string | null;
+  absenceAllowanceReason?: string | null;
+  ticketNumber?: string | number | null;
 }
 
 export interface RawStudent {
@@ -86,6 +92,13 @@ export interface RawSection {
   sectionHoursOne: number | null;
   sectionHoursTwo: number | null;
   sectionHoursThree: number | null;
+  /** Horário nominal de cada chamada ("07:52:00") e a tolerância em minutos. */
+  sectionAttendanceTimeOne?: string | null;
+  sectionAttendanceTimeTwo?: string | null;
+  sectionAttendanceTimeThree?: string | null;
+  sectionToleranceOne?: number | null;
+  sectionToleranceTwo?: number | null;
+  sectionToleranceThree?: number | null;
   advisorName?: string | null;
   projectCaption?: string | null;
   startDate?: string | null;

@@ -2,6 +2,7 @@ import { CalendarClock, ChevronDown, ExternalLink, Star, UserRound, Users, Video
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { fmtNota } from "@/lib/format";
 import { AskAiButtons } from "~/ai/AskAiButton";
+import { AttendanceDetail } from "~/screens/AttendanceDetail";
 import { CATEGORY_COLOR } from "~/data/activityTypes";
 import { useApi } from "~/data/api";
 import { STATUS_LABEL, type ActivityStatus } from "~/data/types";
@@ -362,6 +363,10 @@ export function ActivityModal({
             </span>
           )}
         </div>
+
+        {/* Fora das abas de propósito: quem abre um encontro pela tela de Faltas
+            está procurando exatamente isto, e não deveria ter que caçar aba. */}
+        <AttendanceDetail slots={activity.attendance} />
 
         <Tabs options={visibleTabs} value={tab} onChange={setTab} />
 
