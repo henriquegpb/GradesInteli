@@ -136,7 +136,15 @@ async function adaloveFetch<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     throw new Error(`Adalove respondeu ${res.status} em ${path}`);
   }
-  return (await res.json()) as T;
+
+  // As escritas do Adalove respondem sem corpo: `PUT /notifications` devolve 204
+  // e `POST /sections/{uuid}/absences-limit` devolve 200 com corpo vazio. Um
+  // `res.json()` direto lança SyntaxError aí — e quem chamou leria isso como
+  // falha da escrita, mesmo com o servidor já tendo aceitado (era o que fazia o
+  // "marcar todas como lidas" mostrar erro e desmarcar o sino de volta).
+  if (res.status === 204) return null as T;
+  const text = await res.text();
+  return (text ? (JSON.parse(text) as T) : (null as T));
 }
 
 /** GET genérico para as telas novas. */
