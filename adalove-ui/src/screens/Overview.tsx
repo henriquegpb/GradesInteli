@@ -1,5 +1,5 @@
 import { CalendarDays, ExternalLink, LayoutGrid, Table2, UserRoundX } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { fmtNota } from "@/lib/format";
 import { CATEGORY_COLOR } from "~/data/activityTypes";
 import type {
@@ -11,7 +11,10 @@ import type {
 import type { NewsItem } from "~/data/news";
 import type { ActivityView, SectionView } from "~/data/viewmodel";
 import { SummaryButton } from "~/ai/SummaryButton";
-import { GithubStarButton, ThemeToggle, type Theme } from "~/shell/HeaderActions";
+import { cn } from "~/lib/cn";
+import { InteliSymbol } from "~/lib/logos";
+import { GitlabButton, GithubStarButton, ThemeToggle, type Theme } from "~/shell/HeaderActions";
+import { ModuleProgress } from "~/shell/ModuleProgress";
 import { Calendario } from "~/screens/Calendario";
 import { NotificationsButton } from "~/screens/Notificacoes";
 import { Faltas } from "~/screens/Faltas";
@@ -23,21 +26,50 @@ import { Card, CardTitle } from "~/ui/Card";
 import { Tooltip } from "~/ui/Tooltip";
 import { Tabs } from "~/ui/Tabs";
 
+// Os cards do topo são atalhos para a aba que detalha o número deles: nota vai
+// para Notas, falta vai para Faltas. É o gesto que o aluno já tenta.
+// O hover é um cinza um pouco mais claro que a linha do card, não o accent: o
+// accent competia com a barra colorida de categoria no topo de cada card.
+// O foco continua no accent — ali o destaque forte é o ponto.
+const SHORTCUT_CLASS =
+  "cursor-pointer transition-colors duration-150 hover:border-fg-muted/50 focus-visible:border-accent focus-visible:outline-none";
+
+/** Atalho como `div[role=button]` e não `<button>`: o card de Faltas tem um link
+ *  dentro ("Revisar"), e link dentro de botão é HTML inválido. O teclado entra à
+ *  mão porque `div` não responde a Enter/Espaço sozinha. */
+function shortcut(label: string, onOpen?: () => void) {
+  if (!onOpen) return {};
+  return {
+    onClick: onOpen,
+    role: "button",
+    tabIndex: 0,
+    "aria-label": `Ver ${label} na aba ${label === "Faltas" ? "Faltas" : "Notas"}`,
+    onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      onOpen();
+    },
+  } as const;
+}
+
 function MetricCard({
   label,
   value,
   hint,
   accent,
+  onOpen,
 }: {
   label: string;
   value: string;
   hint?: string;
   accent?: string;
+  onOpen?: () => void;
 }) {
   return (
     <Card
-      className="px-4 py-3"
+      className={cn("px-4 py-3", onOpen && SHORTCUT_CLASS)}
       style={accent ? { borderTop: `2px solid ${accent}` } : undefined}
+      {...shortcut(label, onOpen)}
     >
       <div className="text-[0.62rem] font-medium uppercase tracking-[0.04em] text-fg-muted">
         {label}
@@ -55,14 +87,20 @@ function DualCard({
   accumulated,
   average,
   color,
+  onOpen,
 }: {
   label: string;
   accumulated: number;
   average: number | null;
   color: string;
+  onOpen?: () => void;
 }) {
   return (
-    <Card className="px-4 py-3" style={{ borderTop: `2px solid ${color}` }}>
+    <Card
+      className={cn("px-4 py-3", onOpen && SHORTCUT_CLASS)}
+      style={{ borderTop: `2px solid ${color}` }}
+      {...shortcut(label, onOpen)}
+    >
       <div className="text-[0.62rem] font-medium uppercase tracking-[0.04em] text-fg-muted">
         {label}
       </div>
@@ -203,7 +241,7 @@ function ProgressBars({ view }: { view: SectionView }) {
 /** Formulário de revisão de faltas no portal de atendimento do Inteli. */
 const ATTENDANCE_REVIEW_URL = "https://help.inteli.edu.br/support/catalog/items/289";
 
-function AttendanceCard({ view }: { view: SectionView }) {
+function AttendanceCard({ view, onOpen }: { view: SectionView; onOpen?: () => void }) {
   const a = view.attendance;
   if (!a) {
     return (
@@ -217,12 +255,13 @@ function AttendanceCard({ view }: { view: SectionView }) {
   const warn = a.percentFaltas >= 15;
   return (
     <Card
-      className="p-4"
+      className={cn("p-4", onOpen && SHORTCUT_CLASS)}
       style={{
         borderTop: `2px solid ${
           danger ? "var(--color-red)" : warn ? "var(--color-yellow)" : "var(--color-green)"
         }`,
       }}
+      {...shortcut("Faltas", onOpen)}
     >
       <div className="flex items-start justify-between gap-2">
         <CardTitle>Faltas</CardTitle>
@@ -234,6 +273,9 @@ function AttendanceCard({ view }: { view: SectionView }) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Solicitar revisão de faltas no portal de atendimento"
+            // O card virou atalho para a aba Faltas; sem isto, clicar em
+            // "Revisar" abriria o portal E trocaria a aba por baixo.
+            onClick={(e) => e.stopPropagation()}
             className="-mt-0.5 inline-flex h-7 shrink-0 items-center gap-1.5 rounded-control border border-line bg-surface px-2 text-[0.68rem] font-medium text-fg-soft transition-colors duration-150 hover:border-accent hover:text-fg"
           >
             Revisar
@@ -300,12 +342,25 @@ export function Overview({
   onMultipliers: (m: ParticipacaoMultipliers) => void;
 }) {
   const [tab, setTab] = useState<OverviewTab>("atividades");
+  const tabsRef = useRef<HTMLDivElement>(null);
   const m = view.metrics;
+
+  // Trocar a aba não basta: a barra de abas fica bem abaixo dos cards, então sem
+  // rolar até ela o clique pareceria não ter feito nada.
+  function openTab(next: OverviewTab) {
+    setTab(next);
+    tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  const openNotas = () => openTab("notas");
+  const openFaltas = () => openTab("faltas");
 
   if (!m) {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-medium text-fg">Visão geral</h1>
+        <h1 className="flex items-center gap-2 text-xl font-medium text-fg">
+          <InteliSymbol size={22} />
+          Adalove
+        </h1>
         <Card className="p-6">
           <p className="text-sm text-fg-muted">
             Nenhuma atividade avaliada nesta turma ainda. As abas Atividades e Faltas continuam
@@ -333,12 +388,13 @@ export function Overview({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h1 className="text-xl font-medium text-fg">Visão geral</h1>
-        <span className="font-mono text-xs text-fg-muted">
-          {view.section.caption}
-          {view.section.academicYear ? ` · ${view.section.academicYear}º ano` : ""}
-        </span>
+        <h1 className="flex items-center gap-2 text-xl font-medium text-fg">
+          <InteliSymbol size={22} />
+          Adalove
+        </h1>
+        <ModuleProgress view={view} />
         <div className="ml-auto flex items-center gap-2">
+          <GitlabButton />
           <GithubStarButton />
           <ThemeToggle theme={theme} onChange={onTheme} />
           <NotificationsButton view={view} onOpenActivity={onOpenActivity} />
@@ -353,11 +409,13 @@ export function Overview({
             (m.pontosAvaliados + m.pontosNaoAvaliados) * 100,
           )} pontos já avaliados`}
           accent="var(--color-accent)"
+          onOpen={openNotas}
         />
         <MetricCard
           label="Média até o momento"
           value={fmtNota(m.mediaTotalAteOMomento)}
           hint={`${Math.round(m.pontosNaoAvaliados * 100)} pontos ainda por avaliar`}
+          onOpen={openNotas}
         />
       </div>
 
@@ -367,23 +425,26 @@ export function Overview({
           accumulated={m.acumuladoPonderadas}
           average={m.mediaPonderadasAteOMomento}
           color={CATEGORY_COLOR.Ponderada!}
+          onOpen={openNotas}
         />
         <DualCard
           label="Artefatos"
           accumulated={m.acumuladoArtefatos}
           average={m.mediaArtefatosAteOMomento}
           color={CATEGORY_COLOR.Artefato!}
+          onOpen={openNotas}
         />
         <DualCard
           label="Prova"
           accumulated={m.acumuladoProva}
           average={m.mediaProvaAteOMomento}
           color={CATEGORY_COLOR.Prova!}
+          onOpen={openNotas}
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
-        <Card className="p-4">
+        <Card className={cn("p-4", SHORTCUT_CLASS)} {...shortcut("Distribuição do peso", openNotas)}>
           <CardTitle>Distribuição do peso</CardTitle>
           <div className="mt-3 grid gap-5 sm:grid-cols-[auto_1fr]">
             <DistributionDonut slices={slices} />
@@ -392,7 +453,7 @@ export function Overview({
             </div>
           </div>
         </Card>
-        <AttendanceCard view={view} />
+        <AttendanceCard view={view} onOpen={openFaltas} />
       </div>
 
       <Simulador
@@ -406,7 +467,7 @@ export function Overview({
       />
 
       {/* Mesmo agrupamento da barra de abas do Adalove, na ordem que o aluno usa. */}
-      <div className="flex flex-wrap items-center gap-3 pt-1">
+      <div ref={tabsRef} className="flex flex-wrap items-center gap-3 pt-1">
         <Tabs
           options={[
             { label: "Minhas atividades", value: "atividades", icon: LayoutGrid },
