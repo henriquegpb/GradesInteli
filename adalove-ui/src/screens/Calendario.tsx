@@ -22,9 +22,10 @@ const UNDATED_CAP = 4;
 const CATEGORY_ORDER: Record<string, number> = {
   Ponderada: 0,
   Artefato: 1,
-  Prova: 2,
-  Grupo: 3,
-  Aula: 4,
+  Autoavaliação: 2,
+  Prova: 3,
+  Grupo: 4,
+  Aula: 5,
 };
 
 /** `sort` é estável, então dentro de cada categoria a ordem original

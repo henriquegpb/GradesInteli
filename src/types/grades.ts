@@ -2,6 +2,7 @@ export type TipoAtividade =
   | "Aula"
   | "Ponderada"
   | "Artefato"
+  | "Autoavaliação"
   | "Grupo"
   | "Prova"
   | "";
@@ -9,6 +10,7 @@ export type TipoAtividade =
 export const TIPOS_VALIDOS: TipoAtividade[] = [
   "Ponderada",
   "Artefato",
+  "Autoavaliação",
   "Aula",
   "Grupo",
   "Prova",
@@ -77,12 +79,14 @@ export const DEFAULT_PARTICIPACAO_MULTIPLIERS: ParticipacaoMultipliers = {
 export interface MetricasModulo {
   acumuladoPonderadas: number;
   acumuladoArtefatos: number;
+  acumuladoAutoavaliacao: number;
   acumuladoAulas: number;
   acumuladoGrupo: number;
   acumuladoProva: number;
   acumuladoTotal: number;
   mediaPonderadasAteOMomento: number | null;
   mediaArtefatosAteOMomento: number | null;
+  mediaAutoavaliacaoAteOMomento: number | null;
   mediaAulasAteOMomento: number | null;
   mediaGrupoAteOMomento: number | null;
   mediaProvaAteOMomento: number | null;
@@ -127,6 +131,10 @@ export interface AttendanceData {
   percentFaltas: number;
   // true quando os pesos vieram da API (em horas de aula) e não do toggle manual.
   pesosAutomaticos?: boolean;
+  // Horas-aula de cada chamada quando TODAS pesam igual (2/2/2 no 2º ano → 2);
+  // null com pesos diferentes (1/1/2 no 3º ano). Os totais acima são sempre em
+  // horas-aula: é este campo que permite exibi-los em chamadas.
+  pesoUniforme?: number | null;
   // Quanto ainda dá pra faltar, traduzido em chamadas de cada peso. No 3º ano
   // sai [{ peso: 2, slots: N }, { peso: 1, slots: M }] — N aulas OU M dev/AE.
   // Só é preenchido quando existe mais de um peso em jogo.

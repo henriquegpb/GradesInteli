@@ -114,10 +114,14 @@ export function calcularMetricas(
 ): MetricasModulo {
   const acPonderadas = acumuladoPorTipo(items, "Ponderada");
   const acArtefatos = acumuladoPorTipo(items, "Artefato");
+  const acAutoavaliacao = acumuladoPorTipo(items, "Autoavaliação");
   const acAulas = acumuladoPorTipo(items, "Aula");
   const acGrupo = acumuladoPorTipo(items, "Grupo");
   const acProva = acumuladoPorTipo(items, "Prova");
-  const acTotal = acPonderadas + acArtefatos + acAulas + acGrupo + acProva;
+  // Soma sobre TODOS os itens, e não sobre os baldes acima: uma categoria nova
+  // que aparecesse num payload (foi o caso da Autoavaliação, do 2º ano) sairia
+  // silenciosamente do total se o total fosse a soma dos tipos conhecidos.
+  const acTotal = items.reduce((acc, item) => acc + item.peso * (item.nota ?? 0), 0);
 
   const provaItems = items.filter((i) => i.tipo === "Prova");
   const provaFeita = provaItems.length > 0 && provaItems.every(isEvaluated);
@@ -167,12 +171,14 @@ export function calcularMetricas(
   return {
     acumuladoPonderadas: acPonderadas,
     acumuladoArtefatos: acArtefatos,
+    acumuladoAutoavaliacao: acAutoavaliacao,
     acumuladoAulas: acAulas,
     acumuladoGrupo: acGrupo,
     acumuladoProva: acProva,
     acumuladoTotal: acTotal,
     mediaPonderadasAteOMomento: mediaPonderadaAteOMomento(items, "Ponderada"),
     mediaArtefatosAteOMomento: mediaPonderadaAteOMomento(items, "Artefato"),
+    mediaAutoavaliacaoAteOMomento: mediaPonderadaAteOMomento(items, "Autoavaliação"),
     mediaAulasAteOMomento: mediaPonderadaAteOMomento(items, "Aula"),
     mediaGrupoAteOMomento: mediaPonderadaAteOMomento(items, "Grupo"),
     mediaProvaAteOMomento: mediaPonderadaAteOMomento(items, "Prova"),

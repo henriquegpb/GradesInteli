@@ -385,6 +385,33 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            {/* Autoavaliação existe em GRAD SI (Autoavaliação + Avaliação em
+                pares) e não em GRAD CC: sem peso, o card não aparece. */}
+            {(metricas.pesosPorTipo["Autoavaliação"] ?? 0) > 0 && (
+              <div
+                className={`${styles.dualCard} gh-card`}
+                style={{ borderTopColor: "var(--color-autoavaliacao)" }}
+              >
+                <span className={styles.dualLabel}>Autoavaliação</span>
+                <div className={styles.dualBody}>
+                  <div className={styles.dualCol}>
+                    <span className={styles.dualSubLabel}>Acumulado</span>
+                    <span className={styles.dualValue}>
+                      {fmtNota(metricas.acumuladoAutoavaliacao, 3)}
+                    </span>
+                  </div>
+                  <div className={styles.dualDivider} />
+                  <div className={styles.dualCol}>
+                    <span className={styles.dualSubLabel}>Até o momento</span>
+                    <span className={styles.dualValue}>
+                      {metricas.mediaAutoavaliacaoAteOMomento !== null
+                        ? fmtNota(metricas.mediaAutoavaliacaoAteOMomento)
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className={`${styles.dualCard} gh-card`} style={{ borderTopColor: "var(--color-prova)" }}>
               <span className={styles.dualLabel}>Prova</span>
               <div className={styles.dualBody}>

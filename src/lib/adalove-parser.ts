@@ -25,6 +25,9 @@ function inferTipoFromText(text: string, pontos = 0): TipoAtividade {
   const normalized = text.toLowerCase();
   if (/\bprova\b|prova do m[oó]dulo/.test(normalized)) return "Prova";
   if (/artefato|\bart\.?\s*\d/.test(normalized)) return "Artefato";
+  // Aqui só o nome está disponível (o HTML não traz o `type` da API, que é como
+  // o import direto identifica a categoria).
+  if (/autoavalia|avalia[cç][aã]o em pares/.test(normalized)) return "Autoavaliação";
   if (/em grupo|trabalho em grupo/.test(normalized)) return "Grupo";
   if (/ponderad/.test(normalized)) return "Ponderada";
   if (pontos > 0) return "Ponderada";

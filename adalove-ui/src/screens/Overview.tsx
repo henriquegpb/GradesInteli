@@ -1,5 +1,6 @@
 import { CalendarDays, ExternalLink, LayoutGrid, Table2, UserRoundX } from "lucide-react";
 import { useRef, useState, type KeyboardEvent } from "react";
+import { attendanceUnits } from "@/lib/attendance-parser";
 import { fmtNota } from "@/lib/format";
 import { CATEGORY_COLOR } from "~/data/activityTypes";
 import type {
@@ -255,6 +256,8 @@ function AttendanceCard({ view, onOpen }: { view: SectionView; onOpen?: () => vo
   }
   const danger = a.percentFaltas >= 20;
   const warn = a.percentFaltas >= 15;
+  // Totais em horas-aula; `u` traduz para chamadas quando a turma tem peso único.
+  const u = attendanceUnits(a);
   return (
     <Card
       className={cn("p-4", onOpen && SHORTCUT_CLASS)}
@@ -289,7 +292,9 @@ function AttendanceCard({ view, onOpen }: { view: SectionView; onOpen?: () => vo
         <span className="font-mono text-2xl font-medium tracking-tight text-fg tabular">
           {a.percentFaltas.toFixed(2)}%
         </span>
-        <span className="pb-1 text-xs text-fg-muted">de {a.totalUnits} aulas</span>
+        <span className="pb-1 text-xs text-fg-muted">
+          de {u.fmt(a.totalUnits)} {u.unidade}
+        </span>
       </div>
       <div className="mt-3 flex h-1.5 overflow-hidden rounded-[3px] bg-line">
         <div
@@ -303,8 +308,8 @@ function AttendanceCard({ view, onOpen }: { view: SectionView; onOpen?: () => vo
         <div className="h-full bg-red" style={{ width: `${(a.faltas / a.totalUnits) * 100}%` }} />
       </div>
       <p className="mt-3 text-xs text-fg-soft">
-        Restam <span className="font-mono text-fg tabular">{a.faltasRestantes}</span> de{" "}
-        <span className="font-mono tabular">{a.maxFaltasAllowed}</span> faltas permitidas.
+        Restam <span className="font-mono text-fg tabular">{u.fmt(a.faltasRestantes)}</span> de{" "}
+        <span className="font-mono tabular">{u.fmt(a.maxFaltasAllowed)}</span> faltas permitidas.
       </p>
     </Card>
   );
@@ -387,6 +392,11 @@ export function Overview({
   const slices = [
     { label: "Ponderadas", value: m.pesosPorTipo.Ponderada ?? 0, color: CATEGORY_COLOR.Ponderada! },
     { label: "Artefatos", value: m.pesosPorTipo.Artefato ?? 0, color: CATEGORY_COLOR.Artefato! },
+    {
+      label: "Autoavaliação",
+      value: m.pesosPorTipo["Autoavaliação"] ?? 0,
+      color: CATEGORY_COLOR["Autoavaliação"]!,
+    },
     { label: "Prova", value: m.pesosPorTipo.Prova ?? 0, color: CATEGORY_COLOR.Prova! },
     { label: "Grupo", value: m.pesosPorTipo.Grupo ?? 0, color: CATEGORY_COLOR.Grupo! },
   ].filter((s) => s.value > 0);
@@ -445,6 +455,17 @@ export function Overview({
           color={CATEGORY_COLOR.Artefato!}
           onOpen={openNotas}
         />
+        {/* Só as turmas que têm a categoria (2º ano) veem o card: em GRAD CC o
+            peso é zero e sobraria um card vazio na grade. */}
+        {(m.pesosPorTipo["Autoavaliação"] ?? 0) > 0 && (
+          <DualCard
+            label="Autoavaliação"
+            accumulated={m.acumuladoAutoavaliacao}
+            average={m.mediaAutoavaliacaoAteOMomento}
+            color={CATEGORY_COLOR["Autoavaliação"]!}
+            onOpen={openNotas}
+          />
+        )}
         <DualCard
           label="Prova"
           accumulated={m.acumuladoProva}

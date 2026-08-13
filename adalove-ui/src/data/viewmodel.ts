@@ -122,11 +122,18 @@ export interface SectionView {
   };
 }
 
-/** Mesma cascata do parser do site, aplicada a TODAS as atividades. */
+/** Mesma cascata do parser do site, aplicada a TODAS as atividades — inclusive a
+ *  precedência do `type` sobre o nome (ver `inferTipo` em adalove-json-parser). */
+const ARTEFATO_TYPES = new Set([21, 92]);
+const AUTOAVALIACAO_TYPES = new Set([31]);
+
 function inferCategory(a: RawActivity): TipoAtividade {
   const caption = (a.caption || "").toLowerCase();
   if (a.exam === 1 || /prova|exame/.test(caption)) return "Prova";
+  if (a.type != null && ARTEFATO_TYPES.has(a.type)) return "Artefato";
+  if (a.type != null && AUTOAVALIACAO_TYPES.has(a.type)) return "Autoavaliação";
   if (/artefato|art\.\s?\d/.test(caption)) return "Artefato";
+  if (/autoavalia|avalia[cç][aã]o em pares/.test(caption)) return "Autoavaliação";
   if (/em grupo/.test(caption)) return "Grupo";
   if (/ponderad/.test(caption)) return "Ponderada";
   if ((a.gradeWeight ?? 0) > 0) return "Ponderada";

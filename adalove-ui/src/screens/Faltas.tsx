@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fmtAttendanceUnits } from "@/lib/format";
+import { attendanceUnits } from "@/lib/attendance-parser";
 import type { PresencaStatus } from "@/types/grades";
 import type { ActivityView, SectionView } from "~/data/viewmodel";
 import { cn } from "~/lib/cn";
@@ -64,6 +64,11 @@ export function Faltas({
   const warn = a.percentFaltas >= 15;
   const accent = danger ? "var(--color-red)" : warn ? "var(--color-yellow)" : "var(--color-green)";
 
+  // Os totais são em horas-aula (a conta do Adalove). Numa turma de peso único
+  // `u` devolve chamadas; com pesos diferentes fica em horas e quem explica o
+  // saldo é o card "por peso de aula" abaixo.
+  const u = attendanceUnits(a);
+
   return (
     <div className="space-y-4">
       {showHeader && <h1 className="text-xl font-medium text-fg">Faltas</h1>}
@@ -83,10 +88,10 @@ export function Faltas({
             Faltas restantes
           </div>
           <div className="mt-1 font-mono text-xl font-medium text-fg tabular">
-            {fmtAttendanceUnits(a.faltasRestantes)}
+            {u.fmt(a.faltasRestantes)}
           </div>
           <div className="mt-0.5 text-[0.62rem] text-fg-muted">
-            de {fmtAttendanceUnits(a.maxFaltasAllowed)} permitidas
+            de {u.fmt(a.maxFaltasAllowed)} permitidas
           </div>
         </Card>
         <Card className="px-4 py-3">
@@ -94,21 +99,25 @@ export function Faltas({
             Faltas registradas
           </div>
           <div className="mt-1 font-mono text-xl font-medium text-fg tabular">
-            {fmtAttendanceUnits(a.faltas)}
+            {u.fmt(a.faltas)}
           </div>
           <div className="mt-0.5 text-[0.62rem] text-fg-muted">
-            {fmtAttendanceUnits(a.justificados)} justificadas
+            {u.fmt(a.justificados)} justificadas
           </div>
         </Card>
         <Card className="px-4 py-3">
           <div className="text-[0.62rem] font-medium uppercase tracking-[0.04em] text-fg-muted">
-            Total de aulas
+            Total de {u.unidade}
           </div>
           <div className="mt-1 font-mono text-xl font-medium text-fg tabular">
-            {fmtAttendanceUnits(a.totalUnits)}
+            {u.fmt(a.totalUnits)}
           </div>
           <div className="mt-0.5 text-[0.62rem] text-fg-muted">
-            {a.pesosAutomaticos ? "pesos da API" : "peso 1 por chamada"}
+            {u.peso
+              ? `${u.peso}h de aula por chamada`
+              : a.pesosAutomaticos
+                ? "pesos do Adalove, em horas-aula"
+                : "peso 1 por chamada"}
           </div>
         </Card>
       </div>

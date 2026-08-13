@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, useCallback } from "react";
 import type { AttendanceData } from "@/types/grades";
-import { fmtAttendanceUnits } from "@/lib/format";
+import { attendanceUnits } from "@/lib/attendance-parser";
 import styles from "./AttendanceCard.module.css";
 
 interface Props {
@@ -127,8 +127,13 @@ export default function AttendanceCard({
   // a nota não aparece.
   const chamadaDupla = (attendance.faltasRestantesPorPeso?.length ?? 0) > 1;
 
+  // Os totais vêm em horas-aula (é a conta do Adalove). `u` traduz para chamadas
+  // quando a turma tem peso único — sem isso, uma turma de 2h por chamada via
+  // todo número dobrado ("56 faltas restantes" para 28 chamadas).
+  const u = attendanceUnits(attendance);
+
   const evaluated = attendance.presentes + attendance.faltas + attendance.justificados;
-  const danger = attendance.faltasRestantes <= 3;
+  const danger = u.valor(attendance.faltasRestantes) <= 3;
   const critical = attendance.faltasRestantes === 0;
   const saldoClass = critical ? styles.critical : danger ? styles.danger : "";
 
@@ -137,7 +142,7 @@ export default function AttendanceCard({
       <div className={styles.bigRow}>
         <div className={styles.bigStat}>
           <span className={`${styles.bigValue} ${saldoClass}`}>
-            {fmtAttendanceUnits(attendance.faltasRestantes)}
+            {u.fmt(attendance.faltasRestantes)}
           </span>
           <span className={styles.bigLabel}>
             faltas restantes
@@ -173,28 +178,28 @@ export default function AttendanceCard({
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotPresente}`} />
           <span className={styles.detailLabel}>Presente</span>
-          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.presentes)}</span>
+          <span className={styles.detailValue}>{u.fmt(attendance.presentes)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotJustificado}`} />
           <span className={styles.detailLabel}>Justificado</span>
-          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.justificados)}</span>
+          <span className={styles.detailValue}>{u.fmt(attendance.justificados)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotFalta}`} />
           <span className={styles.detailLabel}>Faltas</span>
-          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.faltas)}</span>
+          <span className={styles.detailValue}>{u.fmt(attendance.faltas)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={`${styles.dot} ${styles.dotFuturo}`} />
           <span className={styles.detailLabel}>A avaliar</span>
-          <span className={styles.detailValue}>{fmtAttendanceUnits(attendance.futuros)}</span>
+          <span className={styles.detailValue}>{u.fmt(attendance.futuros)}</span>
         </div>
       </div>
 
       <div className={styles.meta}>
-        {fmtAttendanceUnits(evaluated)}/{fmtAttendanceUnits(attendance.totalUnits)} unidades · máx{" "}
-        {attendance.maxFaltasAllowed} faltas (20%)
+        {u.fmt(evaluated)}/{u.fmt(attendance.totalUnits)} {u.unidade} · máx{" "}
+        {u.fmt(attendance.maxFaltasAllowed)} faltas (20%)
       </div>
 
       <div className={styles.bottomRow}>

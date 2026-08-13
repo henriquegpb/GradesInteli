@@ -59,15 +59,36 @@ interface AdaloveApiResponse {
 // avaliação geral) carregam attendance -1 mas não entram no cálculo de faltas.
 const ENCONTRO_TYPES = new Set([1, 2]);
 
-// Classificação por nome. O `type` numérico da API não separa perfeitamente
-// aulas e ponderadas: em payloads reais, `type: 11` aparece tanto em materiais
-// sem peso quanto em atividades ponderadas. Como aulas/autoestudos com peso 0
-// são filtrados antes do cálculo, atividade avaliada sem outro sinal explícito
-// deve cair como Ponderada, não Aula.
+// Classificação. O `type` numérico manda, porque é o campo em que o Adalove
+// guarda a natureza da atividade: 21 "Desenvolvimento de Projetos" e 92
+// "Projeto" são os artefatos do módulo, quaisquer que sejam os títulos.
+//
+// Isso é o que faz turmas fora do CC funcionarem. Em GRAD CC os artefatos vêm
+// batizados "Artefato 01: …" e o nome bastava; em GRAD SI os MESMOS `type: 21`
+// se chamam "Entendimento do Negócio", "Testes Unitários", "Estratégia de Cut
+// Over" — sem a palavra artefato em nenhum. Pelo nome, os 40% de artefatos do
+// módulo caíam inteiros em Ponderada.
+//
+// O nome fica como desempate para o que o `type` não separa: `type: 11`
+// (Autoestudo) cobre tanto material sem peso quanto ponderada avaliada, então
+// atividade com peso e sem outro sinal é Ponderada, não Aula.
+const ARTEFATO_TYPES = new Set([21, 92]);
+
+// `type: 31` ("Avaliação e Pesquisa") é a Autoavaliação do módulo: "Autoavaliação"
+// e "Avaliação em pares" valem nota em GRAD SI (3% + 2%) e são a categoria que o
+// Adalove pinta de verde. Não existia aqui, então esses pontos entravam como
+// ponderada e sujavam a média de ponderadas.
+const AUTOAVALIACAO_TYPES = new Set([31]);
+
 function inferTipo(activity: AdaloveApiActivity): TipoAtividade {
   const c = (activity.caption || "").toLowerCase();
+  if (activity.exam === 1 || /\bprova\b|prova do m[oó]dulo/.test(c)) return "Prova";
+  if (typeof activity.type === "number" && ARTEFATO_TYPES.has(activity.type)) return "Artefato";
+  if (typeof activity.type === "number" && AUTOAVALIACAO_TYPES.has(activity.type)) {
+    return "Autoavaliação";
+  }
+  if (/autoavalia|avalia[cç][aã]o em pares/.test(c)) return "Autoavaliação";
   // "Artefato 1", "Art. 1", "Art.1", "Art 1 [WAD]"
-  if (/\bprova\b|prova do m[oó]dulo/.test(c) || activity.exam === 1) return "Prova";
   if (/artefato|\bart\.?\s*\d/.test(c)) return "Artefato";
   if (/em grupo|trabalho em grupo/.test(c)) return "Grupo";
   if (/ponderad/.test(c)) return "Ponderada";

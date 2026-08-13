@@ -23,6 +23,7 @@
   --color-ponderada: #FF6300;
   --color-artefato: #00A995;
   --color-prova: #F551EE;
+  --color-autoavaliacao: #7FA96A;
 
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Cascadia Code", monospace;
@@ -51,6 +52,7 @@
   --color-ponderada: #FF6300;
   --color-artefato: #00A995;
   --color-prova: #F551EE;
+  --color-autoavaliacao: #7FA96A;
 }
 
 *,

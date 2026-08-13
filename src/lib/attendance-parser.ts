@@ -1,3 +1,4 @@
+import { fmtAttendanceUnits } from "@/lib/format";
 import type { PresencaStatus, AttendanceRow, AttendanceData } from "@/types/grades";
 
 export type { PresencaStatus, AttendanceRow };
@@ -86,6 +87,10 @@ export function summarizeAttendanceRows(
   }
 
   const pesosAutomaticos = rows.some((r) => (r.pesos?.length ?? 0) > 0);
+  // Peso único da turma, quando toda chamada pesa igual (GRAD SI, 2º ano:
+  // 2/2/2). É o que permite mostrar CHAMADAS em vez de horas-aula — sem isso,
+  // uma turma de 2h por chamada vê todo número dobrado.
+  const pesoUniforme = pesosEmUso.size === 1 ? [...pesosEmUso][0]! : null;
   const totalUnits = presentes + faltas + justificados + futuros;
   const maxFaltasAllowed = Math.floor(totalUnits * 0.2);
   const faltasRestantes = Math.max(0, maxFaltasAllowed - faltas);
@@ -111,6 +116,40 @@ export function summarizeAttendanceRows(
     faltasRestantes,
     percentFaltas,
     pesosAutomaticos,
+    pesoUniforme,
     faltasRestantesPorPeso,
+  };
+}
+
+/** Como apresentar os totais de presença.
+ *
+ *  O cálculo é todo em HORAS-AULA, porque é a conta que o Adalove faz: o
+ *  `absencesCount` que ele devolve é a soma das horas de todas as chamadas do
+ *  módulo (188 numa turma 1/1/2 com 47 encontros, 282 numa 2/2/2), e a % de
+ *  faltas sai dessa razão. Mas ninguém conta falta em hora — se cada chamada
+ *  vale 2h, "56 faltas permitidas" são 28 chamadas, e era esse o número
+ *  dobrado que aparecia nas turmas de 2º ano.
+ *
+ *  Com peso uniforme, converte para chamadas. Com pesos diferentes (3º ano,
+ *  1/1/2) não existe conversão única: aí fica em horas e quem explica o saldo é
+ *  `faltasRestantesPorPeso`. */
+export interface AttendanceUnits {
+  unidade: "chamadas" | "horas";
+  /** Horas-aula de cada chamada, quando dá para converter. */
+  peso: number | null;
+  valor: (hours: number) => number;
+  fmt: (hours: number) => string;
+}
+
+export function attendanceUnits(a: AttendanceData): AttendanceUnits {
+  const peso = a.pesoUniforme ?? null;
+  if (!peso || peso <= 0) {
+    return { unidade: "horas", peso: null, valor: (h) => h, fmt: fmtAttendanceUnits };
+  }
+  return {
+    unidade: "chamadas",
+    peso,
+    valor: (h) => h / peso,
+    fmt: (h) => fmtAttendanceUnits(h / peso),
   };
 }

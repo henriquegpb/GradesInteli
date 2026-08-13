@@ -4,6 +4,7 @@ import styles from "./DistributionChart.module.css";
 const TYPE_COLORS: Record<string, string> = {
   Ponderada: "var(--color-ponderada)",
   Artefato: "var(--color-artefato)",
+  Autoavaliação: "var(--color-autoavaliacao)",
   Prova: "var(--color-prova)",
   Aula: "var(--purple)",
   Grupo: "var(--teal)",
