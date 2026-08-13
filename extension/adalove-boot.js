@@ -11,10 +11,35 @@
 (function () {
   const STYLE_ID = "gi-hide-root";
 
-  // Mesma porteira do mount.tsx: fora da Vida Acadêmica a UI deles tem que
-  // aparecer. Esconder o #root numa rota que não cobrimos daria tela em branco.
-  var path = location.pathname;
-  if (path !== "/" && path.indexOf("/academic-life") !== 0) return;
+  // Mesma porteira do mount.tsx (adalove-ui/src/shell/routes.ts, que é a fonte
+  // da verdade): fora das telas que reconstruímos a UI deles tem que aparecer.
+  // Esconder o #root numa rota que não cobrimos daria tela em branco. A lista
+  // vive duplicada aqui de propósito — este arquivo roda em document_start, sem
+  // bundler, e precisa decidir antes de qualquer import.
+  var OVERLAY_PATHS = [
+    "/",
+    "/academic-life",
+    "/profile",
+    "/feed",
+    "/financial",
+    "/menu",
+    "/student-record",
+    "/careers",
+    "/exchange-program",
+    "/mock-tests",
+    "/service-channels",
+    "/pages/calendar",
+    "/pages/library",
+    "/pages/institutional-norms",
+    "/pages/tools",
+  ];
+
+  var path = location.pathname.replace(/\/+$/, "") || "/";
+  var covered =
+    OVERLAY_PATHS.indexOf(path) >= 0 ||
+    path.indexOf("/academic-life/") === 0 ||
+    path.indexOf("/exchange-program/") === 0;
+  if (!covered) return;
 
   chrome.storage.local.get("uiMode", (res) => {
     if (!res || res.uiMode !== "new") return;

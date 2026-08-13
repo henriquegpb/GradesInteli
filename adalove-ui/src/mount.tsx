@@ -20,6 +20,8 @@ import type { ApiClient } from "~/data/api";
 import type { RawUserdata } from "~/data/types";
 import { ensureFonts } from "~/lib/fonts";
 import cssText from "~/theme.css?inline";
+import { historyDirty } from "~/shell/history";
+import { canonicalPath, isOverlayPath } from "~/shell/routes";
 import { SkeletonShell } from "~/ui/Skeleton";
 
 /** Na extensão as telas novas batem direto na apiv2, com o token da página. */
@@ -30,12 +32,6 @@ const API: ApiClient = {
 
 const HOST_ID = "gradesinteli-adalove-ui";
 
-/** A overlay substitui só a Vida Acadêmica. Nas demais rotas do Adalove
- *  (financeiro, feed, perfil…) a UI original tem que aparecer normalmente —
- *  senão os links da sidebar levariam a páginas cobertas pela nossa tela. */
-function isOverlayRoute(pathname = location.pathname) {
-  return pathname === "/" || pathname.startsWith("/academic-life");
-}
 const HIDE_STYLE_ID = "gi-hide-root";
 const UI_MODE_KEY = "uiMode";
 
@@ -293,26 +289,27 @@ function ensureToggleButton() {
   btn.textContent = "✦ UI nova";
   Object.assign(btn.style, {
     position: "fixed",
-    // Canto inferior direito: o botão do fluxo antigo mora embaixo à esquerda,
+    // Canto inferior esquerdo: o botão do fluxo antigo mora embaixo à direita,
     // e um ficava por cima do outro.
     bottom: "20px",
-    right: "20px",
+    left: "20px",
     zIndex: "2147483000",
     padding: "12px 24px",
-    background: "#16161a",
-    color: "#e0e0e4",
-    border: "1px solid #6e7bf2",
+    // Mesmo visual do botão "Abrir no GradesInteli": roxo cheio, texto branco.
+    background: "#6366f1",
+    color: "#fff",
+    border: "none",
     borderRadius: "10px",
     fontSize: "14px",
     fontWeight: "600",
     fontFamily: "system-ui, -apple-system, sans-serif",
     cursor: "pointer",
     boxShadow: "0 4px 16px rgba(0,0,0,.35)",
-    opacity: "0.75",
-    transition: "opacity .15s",
+    transition: "filter .15s",
   } satisfies Partial<CSSStyleDeclaration>);
-  btn.addEventListener("mouseenter", () => (btn.style.opacity = "1"));
-  btn.addEventListener("mouseleave", () => (btn.style.opacity = "0.75"));
+  // Opaco sempre: transparência deixava o fundo do Adalove atravessar o roxo.
+  btn.addEventListener("mouseenter", () => (btn.style.filter = "brightness(1.1)"));
+  btn.addEventListener("mouseleave", () => (btn.style.filter = ""));
   btn.addEventListener("click", () => void setUiMode("new"));
   document.body.appendChild(btn);
 }
@@ -327,11 +324,24 @@ export async function setUiMode(mode: "new" | "original") {
   if (mode === "new") {
     setToggleVisible(false);
     void mountOverlay();
-  } else {
-    unmountOverlay();
-    ensureToggleButton();
-    setToggleVisible(true);
+    return;
   }
+
+  // Se navegamos por dentro da overlay, o react-router do Adalove ficou onde
+  // estava (ele não escuta `pushState`): mostrar a UI original agora daria a
+  // página de outro endereço, e num sub-caminho nosso ele nem tem tela. Um
+  // carregamento de verdade no endereço equivalente entrega a página certa.
+  //
+  // Fora disso o caminho antigo continua: desmontar é instantâneo e não recarrega
+  // nada — a UI deles nunca foi destruída, só escondida.
+  if (historyDirty()) {
+    location.assign(canonicalPath());
+    return;
+  }
+
+  unmountOverlay();
+  ensureToggleButton();
+  setToggleVisible(true);
 }
 
 // A preferência é o que faz o produto ser usado: sem ela, o aluno reescolhe a
@@ -340,7 +350,7 @@ async function syncToRoute() {
   const res = await chrome.storage.local.get(UI_MODE_KEY);
   const wantsOverlay = res?.[UI_MODE_KEY] === "new";
 
-  if (wantsOverlay && isOverlayRoute()) {
+  if (wantsOverlay && isOverlayPath()) {
     setToggleVisible(false);
     void mountOverlay();
     return;
@@ -349,8 +359,8 @@ async function syncToRoute() {
   // Fora do território da overlay (ou com a UI original escolhida), devolvemos
   // a página deles intacta. O esconde-root do adalove-boot.js sai aqui.
   unmountOverlay();
-  if (!wantsOverlay && isOverlayRoute()) ensureToggleButton();
-  setToggleVisible(!wantsOverlay && isOverlayRoute());
+  if (!wantsOverlay && isOverlayPath()) ensureToggleButton();
+  setToggleVisible(!wantsOverlay && isOverlayPath());
 }
 
 // O Adalove é uma SPA: a rota muda por pushState, que o mundo isolado não

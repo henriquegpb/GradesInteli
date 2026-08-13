@@ -27,6 +27,36 @@ Parâmetros do harness:
 | `?open=3` | abre o modal do n-ésimo card |
 | `?fail=1` | faz o `persistStatus` falhar, para exercitar o rollback do kanban |
 
+## Rotas
+
+Cada tela nossa mora na **mesma URL** que a página equivalente do Adalove — os caminhos saem do
+`GET /users/menus` dele. Trocar de tela empurra o endereço (`history.pushState`), então voltar e
+avançar do navegador andam pelas telas, F5 recarrega onde a pessoa estava e o link é
+compartilhável. O mapa é `src/shell/routes.ts`:
+
+| Tela | URL |
+|---|---|
+| `overview` | `/academic-life` (e `/`) |
+| `atividades` / `grupo` | `/academic-life/atividades` / `/academic-life/grupo` (sintéticos: não existem no Adalove) |
+| `perfil` | `/profile` |
+| `noticias` | `/feed` |
+| `financeiro` | `/financial` |
+| `cardapio` | `/menu` |
+| `historico` | `/student-record` |
+| `carreiras` | `/careers` |
+| `intercambio` | `/exchange-program/partners` (e `/notices`) |
+| `simulados` | `/mock-tests` |
+| `atendimento` | `/service-channels` |
+| `pagina:*` | `/pages/calendar`, `/pages/library`, `/pages/institutional-norms`, `/pages/tools` |
+
+Endereço fora do mapa (`/checkin`, `/notifications`, `/surveys`) é do Adalove: a overlay desmonta e
+a página deles aparece. A mesma lista está duplicada em `../extension/adalove-boot.js`, que roda em
+`document_start` sem bundler — `routes.ts` é a fonte da verdade.
+
+O react-router do Adalove não escuta `pushState`. Então, se houve navegação nossa, voltar para a UI
+original faz um carregamento de verdade no endereço equivalente (`canonicalPath`), em vez de
+mostrar a página deles desencontrada da URL.
+
 ## Como se conecta ao Adalove
 
 Toda a tela de Vida Acadêmica roda em três endpoints (extraídos do bundle do próprio Adalove):
@@ -52,7 +82,7 @@ src/
   theme.css      Tailwind v4 com os tokens do GradesInteli
   data/          client (API), viewmodel (JSON → telas), activityTypes (tabela oficial)
   ui/            primitivas (Card, Button, Badge, Table, Tabs, Modal, …)
-  shell/         Sidebar + config de navegação
+  shell/         Sidebar, mapa de rotas (routes.ts) e navegação por URL (history.ts)
   screens/       Overview, Atividades, Notas, Faltas, Grupo, ActivityModal
   ai/            prompt.ts (puro), providers.ts, AskAiButton
 ```

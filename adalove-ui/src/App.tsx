@@ -30,6 +30,8 @@ import { Overview } from "~/screens/Overview";
 import { Footer } from "~/shell/Footer";
 import { Sidebar } from "~/shell/Sidebar";
 import type { RouteId } from "~/shell/nav";
+import { onHistoryRoute, pushRoute } from "~/shell/history";
+import { routeForPath } from "~/shell/routes";
 import { ToastProvider, useToast } from "~/ui/Toast";
 
 export interface AppProps {
@@ -42,7 +44,8 @@ export interface AppProps {
     status: ActivityStatus,
     sort: number,
   ) => Promise<unknown>;
-  /** Tela inicial. O harness de dev usa `?route=` para abrir direto numa tela. */
+  /** Tela inicial, quando explícita: o harness de dev usa `?route=`. Na extensão
+   *  fica ausente e quem manda é a URL (`~/shell/routes`). */
   initialRoute?: RouteId;
   /** Notícias do Adalove. Ausente no dev: o card mostra o estado vazio. */
   fetchNews?: () => Promise<unknown>;
@@ -61,7 +64,12 @@ function Workspace({
   user = null,
 }: AppProps) {
   const [raw, setRaw] = useState(initialRaw);
-  const [route, setRoute] = useState<RouteId>(initialRoute ?? "overview");
+  // A tela sai da URL: abrir /financial já entra no Financeiro, e F5 volta para
+  // onde a pessoa estava. `initialRoute` (harness de dev) tem precedência porque
+  // lá o endereço é sempre `/`.
+  const [route, setRouteState] = useState<RouteId>(
+    () => initialRoute ?? routeForPath() ?? "overview",
+  );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selected, setSelected] = useState<ActivityView | null>(null);
   const [week, setWeek] = useState("all");
@@ -155,10 +163,22 @@ function Workspace({
       theme === "light" ? "#f4f4f6" : superTechOn ? "#08080a" : "#0e0e10";
   }, [prefsLoaded, theme, superTech, superTechOn]);
 
-  const openWeek = useCallback((value: string) => {
-    setWeek(value);
-    setRoute("atividades");
+  /** Trocar de tela é uma navegação: o endereço muda junto e entra no histórico,
+   *  então voltar/avançar do navegador andam pelas telas. */
+  const setRoute = useCallback((next: RouteId) => {
+    setRouteState(next);
+    pushRoute(next);
   }, []);
+
+  useEffect(() => onHistoryRoute(setRouteState), []);
+
+  const openWeek = useCallback(
+    (value: string) => {
+      setWeek(value);
+      setRoute("atividades");
+    },
+    [setRoute],
+  );
 
   // Mesma conta do site: a meta é dividida pelo multiplicador de participação
   // antes do cálculo, para "objetivo 7 com participação A" exigir menos.
