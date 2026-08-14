@@ -47,4 +47,15 @@ jobs:
             exit 0
           fi
           git commit -m "chore: atualiza gráfico de star history"
-          git push
+          # A main pode ter andado entre o checkout e agora — é o que acontece
+          # quando alguém empurra commits com o workflow rodando, e a push volta
+          # como `[rejected] (fetch first)`. Rebase e tenta de novo.
+          #
+          # `-X theirs` em rebase são os commits sendo REAPLICADOS, ou seja, os
+          # nossos: se o remoto também mexeu nos SVGs, o gerado agora é que vale.
+          for _ in 1 2 3; do
+            git push && exit 0
+            git fetch origin main
+            git rebase -X theirs origin/main
+          done
+          exit 1
