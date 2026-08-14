@@ -100,8 +100,11 @@ Não confunda:
 
 - **`kind`** — o tipo oficial do Adalove, vindo do campo numérico `type` (Autoestudo,
   Desenvolvimento de Projetos, Encontro de Instrução…). Define ícone e cabeçalho do modal.
-- **`category`** — a categoria de nota, inferida do título (Ponderada, Artefato, Prova, Grupo,
-  Aula). Define a cor e o bucket de peso.
+- **`category`** — a categoria de nota (Ponderada, Artefato, Autoavaliação, Prova, Grupo, Aula).
+  Define a cor e o bucket de peso. Sai do `type` quando ele é conclusivo (21/92 = Artefato,
+  31 = Autoavaliação) e do título quando não é — `type: 11` cobre tanto material sem peso quanto
+  ponderada avaliada. Pelo título sozinho, os artefatos de GRAD SI ("Testes Unitários",
+  "Estratégia de Cut Over") caíam inteiros em Ponderada.
 
 Uma atividade pode ser Autoestudo (`kind`) e Ponderada (`category`) ao mesmo tempo.
 
