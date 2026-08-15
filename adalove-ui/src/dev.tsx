@@ -152,6 +152,14 @@ async function boot() {
             throw new Error("falha simulada");
           }
         }}
+        // Mesma ideia para o autosave da resposta: exercita "Salvando…/Salvo"
+        // sem rede, e `?fail=1` exercita o "Não salvo".
+        persistAnswer={async () => {
+          await new Promise((r) => setTimeout(r, 400));
+          if (new URLSearchParams(location.search).has("fail")) {
+            throw new Error("falha simulada");
+          }
+        }}
       />
     </StrictMode>,
   );

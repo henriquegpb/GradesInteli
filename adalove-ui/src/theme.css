@@ -177,6 +177,12 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* `user-select` é herdada, e herança ATRAVESSA o shadow root: um
+       `user-select: none` no body do Adalove chegaria aqui dentro e, no Chrome,
+       impede até o cursor de entrar num campo editável. Reafirmamos na raiz para
+       a overlay não depender do CSS da página que ela cobre. */
+    user-select: text;
+    -webkit-user-select: text;
   }
 
   /* Scrollbar fina — convenção do GradesInteli. */

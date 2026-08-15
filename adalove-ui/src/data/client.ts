@@ -204,7 +204,7 @@ export async function downloadBankSlip(bankSlipId: string | number, filename: st
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-/** O único write do v1 — o mesmo que a UI original dispara ao arrastar um card. */
+/** Arrastar um card — o mesmo write que a UI original dispara. */
 export function putActivityStatus(
   studentActivityUuid: string,
   status: ActivityStatus,
@@ -213,5 +213,29 @@ export function putActivityStatus(
   return adaloveFetch(`/student-activities/${studentActivityUuid}/status`, {
     method: "PUT",
     body: JSON.stringify({ sort, status: String(status) }),
+  });
+}
+
+/** Limite do Adalove para a resposta, do bundle deles: acima disso a API recusa
+ *  e o front avisa "Sua resposta ultrapassou o limite de 8000 caracteres". */
+export const ANSWER_MAX_CHARS = 8000;
+
+/** Salva a resposta da atividade. O endpoint é genérico — o corpo é um mapa
+ *  `{ campo: valor }` e a UI original o usa para vários campos do cartão
+ *  (resposta, anotações, tags, nota pessoal). Aqui só a resposta escreve.
+ *
+ *  `PUT /student-activities/{uuid}/autosave  {"activityStudyAnswer": "<html>"}`
+ *
+ *  O campo é `activityStudyAnswer`, e NÃO `studyAnswer` como vem no /userdata:
+ *  a API responde 400 com o nome de leitura. O de escrita saiu do bundle deles
+ *  (`Y({target:{value, name:"activityStudyAnswer"}})`) — os outros campos do
+ *  mesmo endpoint seguem o mesmo prefixo (`activityNotes`, `activityRating`). */
+export function putActivityAnswer(
+  studentActivityUuid: string,
+  answerHtml: string,
+): Promise<unknown> {
+  return adaloveFetch(`/student-activities/${studentActivityUuid}/autosave`, {
+    method: "PUT",
+    body: JSON.stringify({ activityStudyAnswer: answerHtml }),
   });
 }

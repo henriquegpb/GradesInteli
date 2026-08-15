@@ -51,7 +51,12 @@
     // sobrar um segundo contexto de rolagem por trás da nossa página.
     style.textContent =
       "#root{display:none!important}" +
-      "html,body{overflow:visible!important;height:auto!important;max-height:none!important;margin:0!important;background:#0e0e10!important;overscroll-behavior:none!important}";
+      "html,body{overflow:visible!important;height:auto!important;max-height:none!important;margin:0!important;background:#0e0e10!important;overscroll-behavior:none!important}" +
+      // O botão "Abrir no GradesInteli" (adalove-content.js) é do fluxo da UI
+      // original. Ele nasce aqui no document_start junto conosco, então a regra
+      // precisa existir desde já — senão ele pisca na tela até o mount.tsx
+      // reescrever este <style>. Casa pelo z-index inline dele.
+      'button[style*="2147483647"]{display:none!important}';
     // Em document_start o <html> já existe; o <head> pode ainda não existir.
     (document.head || document.documentElement).appendChild(style);
   });

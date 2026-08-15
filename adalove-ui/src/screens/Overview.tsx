@@ -26,33 +26,13 @@ import { WeeksOverview } from "~/screens/WeeksOverview";
 import { Card, CardTitle } from "~/ui/Card";
 import { Tooltip } from "~/ui/Tooltip";
 import { Tabs } from "~/ui/Tabs";
+import { SHORTCUT_CLASS, shortcut as cardShortcut } from "~/ui/shortcut";
 
 // Os cards do topo são atalhos para a aba que detalha o número deles: nota vai
-// para Notas, falta vai para Faltas. É o gesto que o aluno já tenta.
-// O hover é um cinza um pouco mais claro que a linha do card, não o accent: o
-// accent competia com a barra colorida de categoria no topo de cada card.
-// O foco continua no accent — ali o destaque forte é o ponto.
-// `gi-shortcut` é o gancho do Super Tech: lá o contorno do card não existe, então
-// o hover tem que vir da luz interna (theme.css) em vez da borda.
-const SHORTCUT_CLASS =
-  "gi-shortcut cursor-pointer transition-colors duration-150 hover:border-fg-muted/50 focus-visible:border-accent focus-visible:outline-none";
-
-/** Atalho como `div[role=button]` e não `<button>`: o card de Faltas tem um link
- *  dentro ("Revisar"), e link dentro de botão é HTML inválido. O teclado entra à
- *  mão porque `div` não responde a Enter/Espaço sozinha. */
+// para Notas, falta vai para Faltas. É o gesto que o aluno já tenta. A mecânica
+// (classe + teclado) mora em ~/ui/shortcut, compartilhada com os cards da turma.
 function shortcut(label: string, onOpen?: () => void) {
-  if (!onOpen) return {};
-  return {
-    onClick: onOpen,
-    role: "button",
-    tabIndex: 0,
-    "aria-label": `Ver ${label} na aba ${label === "Faltas" ? "Faltas" : "Notas"}`,
-    onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      e.preventDefault();
-      onOpen();
-    },
-  } as const;
+  return cardShortcut(`Ver ${label} na aba ${label === "Faltas" ? "Faltas" : "Notas"}`, onOpen);
 }
 
 function MetricCard({

@@ -44,6 +44,8 @@ export interface AppProps {
     status: ActivityStatus,
     sort: number,
   ) => Promise<unknown>;
+  /** Persiste a resposta da atividade. Se ausente, a resposta fica só de leitura. */
+  persistAnswer?: (studentActivityUuid: string, answerHtml: string) => Promise<unknown>;
   /** Tela inicial, quando explícita: o harness de dev usa `?route=`. Na extensão
    *  fica ausente e quem manda é a URL (`~/shell/routes`). */
   initialRoute?: RouteId;
@@ -59,6 +61,7 @@ function Workspace({
   raw: initialRaw,
   onExit,
   persistStatus,
+  persistAnswer,
   initialRoute,
   fetchNews,
   user = null,
@@ -248,6 +251,25 @@ function Workspace({
     [persistStatus, setActivityStatus, toast],
   );
 
+  /** Ao contrário do kanban, a resposta NÃO é otimista: o texto já está na tela
+   *  (é o que a pessoa acabou de digitar), então antecipar não ganha nada, e
+   *  gravar antes da confirmação faria o editor exibir "Salvo" para um texto que
+   *  o Adalove pode ter recusado. Só depois do PUT o `raw` acompanha — assim
+   *  reabrir o cartão mostra o que está lá de verdade. */
+  const handleAnswer = useCallback(
+    async (activity: ActivityView, html: string) => {
+      if (!persistAnswer) return;
+      await persistAnswer(activity.id, html);
+      setRaw((current) => ({
+        ...current,
+        activities: current.activities.map((a) =>
+          a.studentActivityUuid === activity.id ? { ...a, studyAnswer: html } : a,
+        ),
+      }));
+    },
+    [persistAnswer],
+  );
+
   return (
     <div
       data-theme={theme}
@@ -332,6 +354,7 @@ function Workspace({
         view={view}
         onClose={() => setSelected(null)}
         onMove={persistStatus ? handleMove : undefined}
+        onAnswer={persistAnswer ? handleAnswer : undefined}
       />
     </div>
   );

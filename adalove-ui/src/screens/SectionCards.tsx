@@ -2,15 +2,20 @@ import { ArrowUpRight, Check, Copy, Newspaper, Users } from "lucide-react";
 import { useState } from "react";
 import { relativeTime, type NewsItem } from "~/data/news";
 import type { SectionView } from "~/data/viewmodel";
+import { cn } from "~/lib/cn";
 import { Logo } from "~/lib/logos";
 import { copyText } from "~/lib/prefs";
+import { SHORTCUT_CLASS, shortcut, stopCardClick } from "~/ui/shortcut";
 import { Button } from "~/ui/Button";
 import { Card, CardTitle } from "~/ui/Card";
 import { Skeleton } from "~/ui/Skeleton";
 
 function ProjectCard({ view, onSeeAll }: { view: SectionView; onSeeAll?: () => void }) {
   return (
-    <Card className="flex flex-col p-4">
+    <Card
+      className={cn("flex flex-col p-4", onSeeAll && SHORTCUT_CLASS)}
+      {...shortcut("Ver todos os estudantes da turma", onSeeAll)}
+    >
       <CardTitle>Turma</CardTitle>
       <div className="mt-3 flex items-start gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-control border border-line bg-bg">
@@ -61,7 +66,15 @@ function DriveCard({ view }: { view: SectionView }) {
   }
 
   return (
-    <Card className="flex flex-col p-4">
+    <Card
+      className={cn("flex flex-col p-4", url && SHORTCUT_CLASS)}
+      // A ação principal do card é abrir a pasta; o botão de copiar continua
+      // sendo dele, e por isso corta a propagação do clique logo abaixo.
+      {...shortcut(
+        "Abrir a pasta de materiais da turma",
+        url ? () => window.open(url, "_blank", "noopener,noreferrer") : undefined,
+      )}
+    >
       <CardTitle>Materiais da turma</CardTitle>
       <div className="mt-3 flex items-start gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-control border border-line bg-bg">
@@ -76,10 +89,13 @@ function DriveCard({ view }: { view: SectionView }) {
       <div className="mt-auto flex items-center gap-2 pt-4">
         {url ? (
           <>
+            {/* Sem `stopPropagation` o clique no link abriria a pasta duas
+                vezes: uma pela âncora e outra pelo atalho do card. */}
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={stopCardClick}
               className="inline-flex h-8 items-center gap-1.5 rounded-control border border-line bg-surface px-2.5 text-xs font-medium text-fg transition-colors duration-150 hover:border-accent hover:text-accent"
             >
               Abrir pasta
@@ -89,7 +105,10 @@ function DriveCard({ view }: { view: SectionView }) {
               type="button"
               title="Copiar link"
               aria-label="Copiar link"
-              onClick={() => void copy()}
+              onClick={(e) => {
+                stopCardClick(e);
+                void copy();
+              }}
               className="inline-flex size-8 items-center justify-center rounded-control border border-line bg-surface text-fg-soft transition-colors duration-150 hover:border-accent hover:text-accent"
             >
               {copied ? (

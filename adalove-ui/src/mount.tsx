@@ -14,6 +14,7 @@ import {
   currentUser,
   fetchNews,
   fetchUserdata,
+  putActivityAnswer,
   putActivityStatus,
 } from "~/data/client";
 import type { ApiClient } from "~/data/api";
@@ -135,8 +136,15 @@ function restoreRootFontSize() {
 
 function hideOriginalUi() {
   pinRootFontSize();
-  if (document.getElementById(HIDE_STYLE_ID)) return;
-  const style = document.createElement("style");
+
+  // Sempre reescreve o conteúdo, mesmo com o <style> já no ar. O
+  // adalove-boot.js cria esse MESMO id em document_start (para não piscar a tela
+  // do Adalove antes da overlay montar) com um subconjunto das regras; se aqui a
+  // gente desistisse por já existir, a regra que esconde o botão do fluxo antigo
+  // nunca entraria — era assim que ele reaparecia por cima da UI nova.
+  const style =
+    (document.getElementById(HIDE_STYLE_ID) as HTMLStyleElement | null) ??
+    document.createElement("style");
   style.id = HIDE_STYLE_ID;
   // Além de esconder a UI deles, soltamos html/body: o Adalove trava altura e
   // overflow para o próprio layout, e com isso sobrava um segundo contexto de
@@ -144,13 +152,14 @@ function hideOriginalUi() {
   style.textContent = [
     "#root{display:none!important}",
     "html,body{overflow:visible!important;height:auto!important;max-height:none!important;margin:0!important;background:#0e0e10!important;overscroll-behavior:none!important}",
-    // O botão "Abrir no GradesInteli" é do fluxo antigo (adalove-content.js,
-    // que não pode ser tocado). Com a UI nova ativa ele não faz sentido, então
-    // some por CSS — e volta sozinho ao sair, porque o <style> é removido.
+    // O botão "Abrir no GradesInteli" é do fluxo antigo (adalove-content.js).
+    // Com a UI nova ativa ele não faz sentido — a importação de notas é para
+    // quem está na UI original —, então some por CSS e volta sozinho ao sair,
+    // porque o <style> é removido inteiro.
     // Casa pelo z-index inline dele; o nosso próprio botão usa outro.
     'button[style*="2147483647"]{display:none!important}',
   ].join("");
-  (document.head ?? document.documentElement).appendChild(style);
+  if (!style.isConnected) (document.head ?? document.documentElement).appendChild(style);
 }
 
 function showOriginalUi() {
@@ -250,6 +259,7 @@ export async function mountOverlay() {
         raw={raw}
         onExit={() => void setUiMode("original")}
         persistStatus={putActivityStatus}
+        persistAnswer={putActivityAnswer}
         fetchNews={fetchNews}
         user={currentUser()}
         api={API}
