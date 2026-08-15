@@ -10,6 +10,7 @@ import linkedinRaw from "@logos/LinkedIn.svg?raw";
 import openaiRaw from "@logos/OpenAI.svg?raw";
 import youtubeRaw from "@logos/Youtube.svg?raw";
 import { cn } from "~/lib/cn";
+import { ext } from "~/lib/ext";
 
 // Os logos entram INLINE, não como <img src="data:…">: a CSP da página do
 // Adalove pode barrar `img-src data:`, e SVG no DOM não passa por essa regra.
@@ -87,12 +88,10 @@ function monochrome(svg: string): string {
  *
  *  A imagem vem de web_accessible_resources quando estamos na extensão: um
  *  `data:` URI em `mask-image` cai sob `img-src` na CSP da página do Adalove, que
- *  pode barrar. No harness de dev não existe chrome.runtime, e aí o data: URI
+ *  pode barrar. No harness de dev não existe a extensão, e aí o data: URI
  *  embutido no bundle serve — a página é nossa e não tem CSP no caminho. */
 function symbolUrl(): string {
-  return typeof chrome !== "undefined" && chrome.runtime?.getURL
-    ? chrome.runtime.getURL("logos/InteliSymbolWhite.png")
-    : symbolInline;
+  return ext?.runtime?.getURL ? ext.runtime.getURL("logos/InteliSymbolWhite.png") : symbolInline;
 }
 
 export function InteliSymbol({ size = 22, className }: { size?: number; className?: string }) {

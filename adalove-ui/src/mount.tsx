@@ -20,6 +20,7 @@ import {
 import type { ApiClient } from "~/data/api";
 import type { RawUserdata } from "~/data/types";
 import { ensureFonts } from "~/lib/fonts";
+import { ext } from "~/lib/ext";
 import cssText from "~/theme.css?inline";
 import { historyDirty } from "~/shell/history";
 import { canonicalPath, isOverlayPath } from "~/shell/routes";
@@ -172,7 +173,7 @@ function showOriginalUi() {
  *  que o próprio Adalove fez ainda serve. */
 async function lastCapture(): Promise<RawUserdata | null> {
   try {
-    const res = (await chrome.storage.local.get("lastCapture")) as {
+    const res = (await ext!.storage.local.get("lastCapture")) as {
       lastCapture?: { json?: unknown };
     };
     const json = res.lastCapture?.json;
@@ -330,7 +331,7 @@ function setToggleVisible(visible: boolean) {
 }
 
 export async function setUiMode(mode: "new" | "original") {
-  await chrome.storage.local.set({ [UI_MODE_KEY]: mode });
+  await ext!.storage.local.set({ [UI_MODE_KEY]: mode });
   if (mode === "new") {
     setToggleVisible(false);
     void mountOverlay();
@@ -357,7 +358,7 @@ export async function setUiMode(mode: "new" | "original") {
 // A preferência é o que faz o produto ser usado: sem ela, o aluno reescolhe a
 // cada page load e desiste na terceira vez.
 async function syncToRoute() {
-  const res = await chrome.storage.local.get(UI_MODE_KEY);
+  const res = await ext!.storage.local.get(UI_MODE_KEY);
   const wantsOverlay = res?.[UI_MODE_KEY] === "new";
 
   if (wantsOverlay && isOverlayPath()) {

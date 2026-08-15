@@ -4,6 +4,8 @@
 // Dedupar por endpoint é o que mantém isso utilizável: a mesma página chama o
 // mesmo endpoint várias vezes, e o que queremos é o contrato, não o histórico.
 
+import { ext } from "~/lib/ext";
+
 const TAG = "__GRADESINTELI_CAPTURE__";
 const MODE_KEY = "captureMode";
 const STORE_KEY = "captures";
@@ -110,7 +112,7 @@ function renderBadge() {
 
 async function persist() {
   try {
-    await chrome.storage.local.set({ [STORE_KEY]: [...captures.values()] });
+    await ext!.storage.local.set({ [STORE_KEY]: [...captures.values()] });
   } catch {
     /* cota cheia: seguimos com o que está em memória */
   }
@@ -160,13 +162,13 @@ export async function exportCaptures() {
 
 export async function setCaptureMode(on: boolean) {
   enabled = on;
-  await chrome.storage.local.set({ [MODE_KEY]: on });
+  await ext!.storage.local.set({ [MODE_KEY]: on });
   renderBadge();
 }
 
 export async function clearCaptures() {
   captures.clear();
-  await chrome.storage.local.remove(STORE_KEY);
+  await ext!.storage.local.remove(STORE_KEY);
   renderBadge();
 }
 
@@ -226,7 +228,7 @@ export async function initCapture() {
     record(data.method ?? "GET", data.url, data.status ?? 0, data.body);
   });
 
-  const stored = (await chrome.storage.local.get([MODE_KEY, STORE_KEY])) as {
+  const stored = (await ext!.storage.local.get([MODE_KEY, STORE_KEY])) as {
     captureMode?: boolean;
     captures?: Capture[];
   };

@@ -1,14 +1,14 @@
-// Preferências pequenas e locais. Usa chrome.storage quando existe (dentro da
-// extensão) e cai para localStorage no harness de dev, sem o caller precisar saber.
+// Preferências pequenas e locais. Usa o storage da extensão quando existe e cai
+// para localStorage no harness de dev, sem o caller precisar saber.
 
 const PREFIX = "gi-adalove-ui:";
+import { ext } from "~/lib/ext";
 
-const hasChromeStorage = () =>
-  typeof chrome !== "undefined" && !!chrome.storage?.local;
+
 
 export async function getPref(key: string): Promise<string | null> {
-  if (hasChromeStorage()) {
-    const res = await chrome.storage.local.get(PREFIX + key);
+  if (ext) {
+    const res = await ext.storage.local.get(PREFIX + key);
     const value = res[PREFIX + key];
     return typeof value === "string" ? value : null;
   }
@@ -20,8 +20,8 @@ export async function getPref(key: string): Promise<string | null> {
 }
 
 export async function setPref(key: string, value: string): Promise<void> {
-  if (hasChromeStorage()) {
-    await chrome.storage.local.set({ [PREFIX + key]: value });
+  if (ext) {
+    await ext.storage.local.set({ [PREFIX + key]: value });
     return;
   }
   try {

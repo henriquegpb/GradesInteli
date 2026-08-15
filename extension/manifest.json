@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Adalove Modern UI",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Importa suas notas do Adalove para o GradesInteli e oferece uma UI alternativa para o Adalove.",
   "icons": {
     "16": "icons/icon16.png",
@@ -24,10 +24,10 @@
         "https://adalove.inteli.edu.br/*"
       ],
       "js": [
-        "adalove-interceptor.js"
+        "adalove-inject.js"
       ],
       "run_at": "document_start",
-      "world": "MAIN"
+      "world": "ISOLATED"
     },
     {
       "matches": [
@@ -75,6 +75,7 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "adalove-interceptor.js",
         "fonts/*.woff2",
         "logos/*.png"
       ],
@@ -82,5 +83,14 @@
         "https://adalove.inteli.edu.br/*"
       ]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "adalove-modern-ui@gradesinteli.com",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
 }

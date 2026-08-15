@@ -47,7 +47,8 @@ No Adalove logado aparecem dois botões nos cantos de baixo:
 
 | Arquivo | Mundo | Onde roda | Papel |
 |---|---|---|---|
-| `adalove-interceptor.js` | MAIN | adalove.inteli.edu.br | Captura a resposta `/userdata` via patch em fetch/XHR |
+| `adalove-inject.js` | isolado | adalove.inteli.edu.br | Injeta o interceptor no contexto da página |
+| `adalove-interceptor.js` | página | adalove.inteli.edu.br | Captura a resposta `/userdata` via patch em fetch/XHR |
 | `adalove-boot.js` | isolado | adalove.inteli.edu.br | `document_start`: esconde a UI deles antes do React montar, se a preferência é a UI nova |
 | `adalove-content.js` | isolado | adalove.inteli.edu.br | Salva a captura e mostra o botão de importar |
 | `dist/adalove-ui.js` | isolado | adalove.inteli.edu.br | A interface nova (shadow root) e o botão que liga ela |
@@ -61,6 +62,21 @@ O `adalove-boot.js` carrega uma cópia da lista de rotas cobertas pela overlay
 (`adalove-ui/src/shell/routes.ts` é a fonte da verdade): ele roda antes de
 qualquer bundler e precisa decidir na hora se esconde o `#root` — numa rota que
 não cobrimos, esconder daria tela branca.
+
+## Firefox
+
+O mesmo pacote roda nos dois: o manifest não tem nada específico de Chrome.
+
+Duas coisas foram feitas para isso. O Firefox [não implementa](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts)
+`"world": "MAIN"`, então o interceptor deixou de ser declarado assim e passou a
+ser injetado como `<script src>` pelo `adalove-inject.js` — o que funciona nos
+dois navegadores, e por isso não existe um manifest por navegador. E o código TS
+usa `browser` quando ele existe (`src/lib/ext.ts`): no Firefox o `chrome` é um
+alias de CALLBACKS, então `await chrome.storage.local.get(k)` resolveria para
+`undefined` em silêncio.
+
+Para testar: `about:debugging` → **Este Firefox** → **Carregar extensão
+temporária** → escolha o `manifest.json` desta pasta.
 
 ## Desenvolvimento local
 

@@ -3,6 +3,8 @@
 // para arquivos empacotados na extensão (web_accessible_resources) — nada de
 // buscar em CDN, que a CSP da página bloquearia.
 
+import { ext } from "~/lib/ext";
+
 const STYLE_ID = "gi-adalove-fonts";
 
 const FACES: { family: string; weight: number; file: string }[] = [
@@ -15,7 +17,9 @@ const FACES: { family: string; weight: number; file: string }[] = [
 
 export function ensureFonts() {
   if (document.getElementById(STYLE_ID)) return;
-  if (typeof chrome === "undefined" || !chrome.runtime?.getURL) return;
+  // Capturado numa const: dentro do template o TS não estreita `ext?.`.
+  const getURL = ext?.runtime?.getURL;
+  if (!getURL) return;
 
   const css = FACES.map(
     ({ family, weight, file }) => `@font-face{
@@ -23,7 +27,7 @@ export function ensureFonts() {
   font-style:normal;
   font-weight:${weight};
   font-display:swap;
-  src:url("${chrome.runtime.getURL(file)}") format("woff2");
+  src:url("${getURL(file)}") format("woff2");
 }`,
   ).join("\n");
 
