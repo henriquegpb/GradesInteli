@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Adalove Modern UI",
   "version": "1.3.0",
-  "description": "Importa suas notas do Adalove para o GradesInteli e oferece uma UI alternativa para o Adalove.",
+  "description": "Interface moderna para o Adalove: notas, faltas, simulador de médias, atividades e turmas passadas num painel só.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

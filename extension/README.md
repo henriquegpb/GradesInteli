@@ -20,7 +20,10 @@ A interface nova usa a mesma sessão: o content script roda no mundo ISOLADO **n
 origem do Adalove**, então lê o token do `localStorage` dele e chama a apiv2
 direto. A UI original nunca é destruída, só escondida por CSS.
 
-- Não mexe no seu token nem faz login por você.
+- O login é o do Adalove. A tela de entrada é nossa, mas e-mail e senha vão
+  direto para o Cognito da Inteli (o mesmo serviço que a página deles chama) e
+  nada é guardado além da sessão que o próprio Adalove guardaria. Entrar com o
+  Google aciona o botão original deles, sem intermediário.
 - Não envia nada para servidores de terceiros — os dados vão direto do seu
   navegador (Adalove → GradesInteli) via `chrome.storage` local + `postMessage`.
 
