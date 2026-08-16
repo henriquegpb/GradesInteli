@@ -6,7 +6,7 @@ import {
   type ParticipacaoMultipliers,
   type SimulacaoConfig,
 } from "@/types/grades";
-import { ApiProvider, type ApiClient } from "~/data/api";
+import { ApiProvider, useApiClient, type ApiClient } from "~/data/api";
 import type { AdaloveUser } from "~/data/client";
 import { normalizeNews, type NewsItem } from "~/data/news";
 import { getPref, setPref } from "~/lib/prefs";
@@ -53,6 +53,8 @@ export interface AppProps {
   fetchNews?: () => Promise<unknown>;
   /** Usuário logado, lido do localStorage do Adalove. */
   user?: AdaloveUser | null;
+  /** Encerra a sessão do Adalove. Ausente no harness de dev. */
+  onLogout?: () => void;
   /** Cliente das telas novas: rede na extensão, fixture no harness de dev. */
   api: ApiClient;
 }
@@ -65,6 +67,7 @@ function Workspace({
   initialRoute,
   fetchNews,
   user = null,
+  onLogout,
 }: AppProps) {
   const [raw, setRaw] = useState(initialRaw);
   // A tela sai da URL: abrir /financial já entra no Financeiro, e F5 volta para
@@ -87,7 +90,11 @@ function Workspace({
   // aparece no menu, e o estado fica guardado esperando a volta ao escuro.
   const [superTech, setSuperTech] = useState(false);
   const [newsLoading, setNewsLoading] = useState(!!fetchNews);
+  // Turma cujo /userdata está sendo baixado. Só uma por vez: duas respostas
+  // chegando fora de ordem deixariam a tela na turma errada.
+  const [switchingSection, setSwitchingSection] = useState<string | null>(null);
   const toast = useToast();
+  const client = useApiClient();
 
   // Notícias são acessório: se a chamada falhar, o card mostra vazio e o resto
   // do dashboard segue normal — não vale um erro na tela inteira.
@@ -174,6 +181,41 @@ function Workspace({
   }, []);
 
   useEffect(() => onHistoryRoute(setRouteState), []);
+
+  /** Troca a turma carregada — inclusive para uma já encerrada, que é como se
+   *  consultam as notas e as faltas dos módulos passados.
+   *
+   *  O `raw` inteiro é substituído, então tudo que deriva dele (notas, kanban,
+   *  faltas, simulador) passa a falar da turma escolhida. O que estava aberto em
+   *  cima da turma anterior sai junto: o cartão selecionado não existe na nova, e
+   *  a semana filtrada tem outro significado lá.
+   *
+   *  A troca NÃO toca no `@buzz:currentSection` do Adalove: a turma da UI deles
+   *  continua a que era, e um F5 volta para ela. Consultar módulo passado é
+   *  visita, não mudança de endereço. */
+  const selectSection = useCallback(
+    (uuid: string) => {
+      if (!client || switchingSection || uuid === raw.section?.sectionUuid) return;
+
+      setSwitchingSection(uuid);
+      client
+        .get<RawUserdata>(`/sections/${uuid}/userdata`)
+        .then((next) => {
+          setRaw(next);
+          setSelected(null);
+          setWeek("all");
+        })
+        .catch((error: unknown) => {
+          toast.error(
+            error instanceof Error
+              ? `Não consegui abrir a turma: ${error.message}`
+              : "Não consegui abrir a turma.",
+          );
+        })
+        .finally(() => setSwitchingSection(null));
+    },
+    [client, switchingSection, raw.section?.sectionUuid, toast],
+  );
 
   const openWeek = useCallback(
     (value: string) => {
@@ -284,6 +326,7 @@ function Workspace({
         user={user ?? { name: view.studentName, email: null, uuid: null, avatar: null }}
         sectionCaption={view.section.caption}
         onExit={onExit}
+        onLogout={onLogout}
       />
 
       <main className="flex min-w-0 flex-1 flex-col px-4 py-6 lg:px-6">
@@ -310,6 +353,8 @@ function Workspace({
             onMultipliers={setMultipliers}
             news={news}
             newsLoading={newsLoading}
+            onSelectSection={selectSection}
+            switchingSection={switchingSection}
           />
         )}
         {route === "atividades" && (

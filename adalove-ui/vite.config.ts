@@ -17,6 +17,7 @@ export default defineConfig({
       "~": here("./src"),
       "@": here("../src"),
       "@logos": here("../public/logos"),
+      "@assets": here("../assets"),
     },
   },
   server: {

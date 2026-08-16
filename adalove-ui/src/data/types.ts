@@ -85,6 +85,9 @@ export interface RawStudent {
 }
 
 export interface RawSection {
+  /** Mesma chave que o `uuid` de `GET /sections` — é por ela que o seletor de
+   *  turmas sabe qual linha está aberta. */
+  sectionUuid?: string | null;
   sectionCaption: string | null;
   sectionType: string | null;
   sectionAcademicYear: string | null;

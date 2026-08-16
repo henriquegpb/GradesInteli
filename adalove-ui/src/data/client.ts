@@ -99,6 +99,46 @@ export function getToken(): string | null {
   return readLocal(TOKEN_KEY);
 }
 
+/** O que o logout do Adalove NÃO apaga. A lista é literalmente a deles (o
+ *  `logout` do bundle guarda estes valores, chama `localStorage.clear()` e os
+ *  devolve): preferência de menu, idioma, tour, tema e — o que mais importa
+ *  aqui — a turma corrente, que é o que a Vida Acadêmica abre no próximo login.
+ *  Zerar essas chaves faria "Sair" apagar mais coisa que o botão original. */
+const KEEP_ON_LOGOUT = new Set([
+  "@buzz:menu",
+  "@buzz:menu-orientation",
+  "@buzz:version",
+  "@buzz:tour",
+  "@buzz:uh",
+  "@buzz:currentSection",
+  "@buzz:currentSectionMBA",
+  "@buzz:sso",
+  "@buzz:bootcamp_type",
+  "@buzz:source",
+  "i18nextLng",
+  "mode",
+]);
+
+/** Apaga a sessão do Adalove: token, MFA, usuário, avatar e o cache de tokens do
+ *  Cognito (`CognitoIdentityServiceProvider.*`), que é onde mora a credencial de
+ *  verdade — sem tirar esse cache, a UI original se reautenticaria sozinha e
+ *  "Sair" não teria saído de nada.
+ *
+ *  Quem chama recarrega em seguida: sem token a overlay não monta (mount.tsx
+ *  checa antes) e a tela de login aparece. */
+export function clearSession() {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (KEEP_ON_LOGOUT.has(key)) continue;
+      if (key.startsWith("@buzz:") || key.startsWith("CognitoIdentityServiceProvider.")) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {
+    /* storage bloqueado: o recarregamento ainda leva para o login */
+  }
+}
+
 /** O Adalove guarda a turma ora como uuid cru, ora como objeto. Aceita os dois. */
 export function currentSectionUuid(): string | null {
   const direct = readLocal(SECTION_KEY);
@@ -111,6 +151,25 @@ export function currentSectionUuid(): string | null {
     if (typeof v === "string" && v) return v;
   }
   return null;
+}
+
+/** Turma a carregar. Normalmente é a que o Adalove guardou; num primeiro acesso
+ *  (ou depois de um login feito pela nossa tela, num navegador que nunca abriu a
+ *  Vida Acadêmica) essa chave não existe ainda, e aí a lista de turmas responde:
+ *  a aberta é a corrente, e a mais recente serve de desempate. */
+export async function resolveSectionUuid(): Promise<string | null> {
+  const stored = currentSectionUuid();
+  if (stored) return stored;
+
+  try {
+    const rows = await adaloveGet<{ uuid: string; status?: string; date?: string }[]>("/sections");
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    const open = rows.find((s) => (s.status ?? "").toLowerCase() === "open");
+    const newest = [...rows].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))[0];
+    return open?.uuid ?? newest?.uuid ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function adaloveFetch<T>(path: string, init?: RequestInit): Promise<T> {

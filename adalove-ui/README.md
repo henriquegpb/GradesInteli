@@ -80,10 +80,11 @@ src/
   dev.tsx        entry do localhost
   App.tsx        roteamento e estado; optimistic update do kanban
   theme.css      Tailwind v4 com os tokens do GradesInteli
-  data/          client (API), viewmodel (JSON → telas), activityTypes (tabela oficial)
+  data/          client (API), auth (login/logout no Cognito), viewmodel (JSON → telas),
+                 activityTypes (tabela oficial)
   ui/            primitivas (Card, Button, Badge, Table, Tabs, Modal, …)
   shell/         Sidebar, mapa de rotas (routes.ts) e navegação por URL (history.ts)
-  screens/       Overview, Atividades, Notas, Faltas, Grupo, ActivityModal
+  screens/       Login, Overview, Atividades, Notas, Faltas, Grupo, ActivityModal
   ai/            prompt.ts (puro), providers.ts, AskAiButton
 ```
 

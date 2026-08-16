@@ -1,6 +1,7 @@
 import claudeRaw from "@logos/Claude.svg?raw";
 import facebookRaw from "@logos/Facebook.svg?raw";
 import geminiRaw from "@logos/Gemini.svg?raw";
+import googleRaw from "@assets/img/Google.svg?raw";
 import githubRaw from "@logos/GitHub.svg?raw";
 import gitlabRaw from "@logos/GitLab.svg?raw";
 import driveRaw from "@logos/GoogleDrive.svg?raw";
@@ -40,6 +41,7 @@ const SVGS = {
   openai: normalize(openaiRaw),
   gemini: normalize(geminiRaw),
   drive: normalize(driveRaw),
+  google: normalize(googleRaw),
   github: normalize(githubRaw),
   gitlab: normalize(gitlabRaw),
   facebook: normalize(facebookRaw),

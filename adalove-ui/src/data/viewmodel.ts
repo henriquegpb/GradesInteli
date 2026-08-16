@@ -95,6 +95,8 @@ export interface WeekGroup {
 export interface SectionView {
   studentName: string | null;
   section: {
+    /** Turma carregada. Casa com o `uuid` das linhas de `GET /sections`. */
+    uuid: string | null;
     caption: string;
     academicYear: string | null;
     type: string | null;
@@ -392,6 +394,7 @@ export function buildSectionView(
   return {
     studentName: me?.name?.trim() ?? null,
     section: {
+      uuid: (raw.section?.sectionUuid as string | null) ?? null,
       caption: raw.section?.sectionCaption ?? "Turma",
       academicYear: raw.section?.sectionAcademicYear ?? null,
       type: raw.section?.sectionType ?? null,

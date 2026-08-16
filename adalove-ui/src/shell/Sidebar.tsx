@@ -1,11 +1,13 @@
 import {
   ChevronsUpDown,
   ExternalLink as ExternalLinkIcon,
+  LogOut,
   PanelLeftClose,
   Plus,
   Undo2,
+  User,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AdaloveUser } from "~/data/client";
 import { cn } from "~/lib/cn";
 import { Avatar } from "~/ui/Avatar";
@@ -49,6 +51,7 @@ export function Sidebar({
   user,
   sectionCaption,
   onExit,
+  onLogout,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -57,8 +60,14 @@ export function Sidebar({
   user: AdaloveUser | null;
   sectionCaption: string;
   onExit?: () => void;
+  /** Encerra a sessão do Adalove. Ausente no harness de dev. */
+  onLogout?: () => void;
 }) {
   const [moreOpen, setMoreOpen] = useState(() => SECONDARY_ITEMS.some((i) => i.id === route));
+  const [userMenu, setUserMenu] = useState(false);
+  const userRef = useRef<HTMLDivElement>(null);
+  const userBtnRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
   const shakeRef = useRef<Animation | null>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -137,6 +146,44 @@ export function Sidebar({
     );
   };
 
+  // `composedPath` é o que enxerga através do shadow root — `event.target`
+  // sozinho seria sempre o host da overlay.
+  useEffect(() => {
+    if (!userMenu) return;
+    const onDown = (e: MouseEvent) => {
+      if (userRef.current && !e.composedPath().includes(userRef.current)) setUserMenu(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setUserMenu(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [userMenu]);
+
+  // Recolhida, a sidebar tem 4rem e `overflow-y-auto` — e um contêiner de
+  // rolagem RECORTA o que sai dele, então um menu `absolute` ao lado da coluna
+  // simplesmente não aparecia. `fixed`, medido do botão, escapa do recorte.
+  //
+  // Não precisa acompanhar a rolagem: a sidebar é `sticky top-0`, então o botão
+  // fica parado na tela. Só o redimensionamento move as coisas de lugar.
+  useLayoutEffect(() => {
+    if (!userMenu || open) {
+      setMenuPos(null);
+      return;
+    }
+    const place = () => {
+      const rect = userBtnRef.current?.getBoundingClientRect();
+      if (rect) setMenuPos({ top: rect.top, left: rect.right + 8 });
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [userMenu, open]);
+
   const firstName = user?.name?.trim().split(/\s+/)[0] ?? null;
 
   const renderItem = (item: NavItem) => {
@@ -170,21 +217,32 @@ export function Sidebar({
       className={cn(
         // `gi-sidebar` é o gancho do modo Super Tech (theme.css): lá ela escurece
         // e ganha luz interna na esquerda, no topo e embaixo.
-        "gi-sidebar sticky top-0 flex h-screen shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-line bg-surface transition-[width] duration-150",
+        // `z-40`: item de flex com z-index automático pinta como bloco em linha,
+        // ou seja, na ordem do documento — o <main> vinha depois e passava por
+        // cima do menu da conta. Fica abaixo do modal (z-70) e do toast (z-100).
+        "gi-sidebar sticky top-0 z-40 flex h-screen shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-line bg-surface transition-[width] duration-150",
         open ? "w-64 p-3" : "w-16 p-3",
       )}
     >
-      {/* Linha do usuário: abre o perfil. */}
-      <div className={cn("mb-4 flex items-center gap-1", open ? "" : "justify-center")}>
+      {/* Linha do usuário: abre o menu da conta (perfil e sair). O ChevronsUpDown
+          sempre prometeu um menu — antes ele ia direto para o perfil, então a
+          única saída da sessão era voltar para a UI original e sair por lá. */}
+      <div
+        ref={userRef}
+        className={cn("relative mb-4 flex items-center gap-1", open ? "" : "justify-center")}
+      >
         <button
+          ref={userBtnRef}
           type="button"
-          onClick={() => onRoute("perfil")}
+          onClick={() => setUserMenu((v) => !v)}
           title={open ? undefined : (user?.name ?? "Perfil")}
+          aria-expanded={userMenu}
+          aria-haspopup="menu"
           aria-current={route === "perfil" ? "page" : undefined}
           className={cn(
             "flex min-w-0 items-center rounded-control transition-colors duration-150",
             open ? "flex-1 gap-2.5 p-1.5 hover:bg-surface-hover" : "p-0",
-            route === "perfil" && open && "bg-surface-hover",
+            ((route === "perfil" && open) || (userMenu && open)) && "bg-surface-hover",
           )}
         >
           <Avatar user={user} size={open ? 34 : 32} />
@@ -202,6 +260,45 @@ export function Sidebar({
             </>
           )}
         </button>
+
+        {userMenu && (open || menuPos) && (
+          <div
+            role="menu"
+            style={open ? undefined : { top: menuPos!.top, left: menuPos!.left }}
+            className={cn(
+              "z-50 overflow-hidden rounded-card border border-line bg-surface p-1 shadow-2xl",
+              open ? "absolute left-0 right-0 top-full mt-1" : "fixed w-56",
+            )}
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setUserMenu(false);
+                onRoute("perfil");
+              }}
+              className="flex w-full items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm text-fg-soft transition-colors duration-150 hover:bg-surface-hover hover:text-fg"
+            >
+              <User size={15} aria-hidden className="opacity-60" />
+              Perfil
+            </button>
+
+            {onLogout && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setUserMenu(false);
+                  onLogout();
+                }}
+                className="flex w-full items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm text-red transition-colors duration-150 hover:bg-red/10"
+              >
+                <LogOut size={15} aria-hidden />
+                Sair
+              </button>
+            )}
+          </div>
+        )}
 
         {open && (
           <button

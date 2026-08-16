@@ -16,7 +16,8 @@
     "paths": {
       "~/*": ["./src/*"],
       "@/*": ["../src/*"],
-      "@logos/*": ["../public/logos/*"]
+      "@logos/*": ["../public/logos/*"],
+      "@assets/*": ["../assets/*"]
     }
   },
   "include": ["src", "vite.config.ts"]

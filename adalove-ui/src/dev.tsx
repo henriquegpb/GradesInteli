@@ -4,6 +4,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "~/App";
+import { Login } from "~/screens/Login";
 import { SkeletonShell } from "~/ui/Skeleton";
 import { fixtureNameFor, type ApiClient } from "~/data/api";
 import { avatarUrl, type AdaloveUser } from "~/data/client";
@@ -13,6 +14,40 @@ import "~/theme.css";
 
 const FIXTURES = import.meta.glob<{ default: RawUserdata }>("../fixtures/*.json");
 const ALL_FIXTURES = import.meta.glob<{ default: unknown }>("../fixtures/*.json");
+
+interface SectionRow {
+  uuid: string;
+  caption?: string | null;
+  projectCaption?: string | null;
+  status?: string | null;
+}
+
+/** Só existe UM /userdata gravado: trocar de turma no harness devolveria a mesma
+ *  tela e o seletor pareceria quebrado. Carimbamos no fixture a identidade da
+ *  turma pedida (uuid, nome, projeto) para exercitar o seletor de ponta a ponta.
+ *  As notas e os cards seguem sendo os do fixture — aqui só se testa a UI. */
+async function stampSection(path: string, data: unknown): Promise<unknown> {
+  const uuid = /^\/sections\/([0-9a-f]{24,36})\/userdata/i.exec(path)?.[1];
+  if (!uuid || !data || typeof data !== "object") return data;
+
+  const key = Object.keys(ALL_FIXTURES).find((k) => k.endsWith("/sections.json"));
+  if (!key) return data;
+
+  const rows = (await ALL_FIXTURES[key]!()).default as SectionRow[];
+  const row = Array.isArray(rows) ? rows.find((s) => s.uuid === uuid) : null;
+  if (!row) return data;
+
+  const raw = data as RawUserdata;
+  return {
+    ...raw,
+    section: {
+      ...raw.section,
+      sectionUuid: row.uuid,
+      sectionCaption: row.caption ?? raw.section?.sectionCaption ?? null,
+      projectCaption: row.projectCaption ?? raw.section?.projectCaption ?? null,
+    },
+  };
+}
 
 /** Cliente de dev: em vez de rede, resolve o fixture gerado por
  *  scripts/split-captures.mjs a partir do caminho do endpoint. */
@@ -30,7 +65,7 @@ const devApi: ApiClient = {
     // os skeletons; sem o parâmetro, só a latência simbólica de sempre.
     const slow = Number(new URLSearchParams(location.search).get("slow"));
     await new Promise((r) => setTimeout(r, Number.isFinite(slow) && slow > 0 ? slow : 120));
-    return (await ALL_FIXTURES[key]!()).default as T;
+    return (await stampSection(path, (await ALL_FIXTURES[key]!()).default)) as T;
   },
   // Sem rede no harness: a escrita só resolve, para exercitar o optimistic update.
   put: async () => {
@@ -124,6 +159,17 @@ async function boot() {
     });
   }
 
+  // `?login=1` abre a tela de entrada. O formulário é o de verdade: submeter
+  // aqui fala com o Cognito da Inteli igual na extensão.
+  if (params.has("login")) {
+    createRoot(el).render(
+      <StrictMode>
+        <Login onDone={() => console.info("[dev] login ok")} />
+      </StrictMode>,
+    );
+    return;
+  }
+
   // `?skeleton=1` mostra o primeiro paint da extensão (antes do /userdata),
   // que no harness normal nunca aparece — o fixture já está em memória.
   if (params.has("skeleton")) {
@@ -144,6 +190,9 @@ async function boot() {
         // Sem localStorage do Adalove aqui: o usuário vem do fixture de
         // /users/details, o que exercita a foto real e o fallback de erro.
         user={devUser}
+        // No harness sair não pode sair de nada: o item aparece no menu da conta
+        // para poder ser visto e fotografado, e só registra o clique.
+        onLogout={() => console.info("[dev] logout")}
         // Sem rede no harness: o drag funciona e o optimistic update é exercido,
         // só não há PUT. `?fail=1` força o caminho de erro para testar o rollback.
         persistStatus={async () => {

@@ -314,6 +314,8 @@ export function Overview({
   onParticipacao,
   multipliers,
   onMultipliers,
+  onSelectSection,
+  switchingSection,
 }: {
   view: SectionView;
   onOpenWeek?: (week: string) => void;
@@ -331,6 +333,9 @@ export function Overview({
   onParticipacao: (p: ParticipacaoLetra) => void;
   multipliers: ParticipacaoMultipliers;
   onMultipliers: (m: ParticipacaoMultipliers) => void;
+  /** Troca a turma carregada — o seletor mora no indicador de módulo. */
+  onSelectSection?: (uuid: string) => void;
+  switchingSection?: string | null;
 }) {
   const [tab, setTab] = useState<OverviewTab>("atividades");
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -388,7 +393,11 @@ export function Overview({
           <InteliSymbol size={22} />
           Adalove
         </h1>
-        <ModuleProgress view={view} />
+        <ModuleProgress
+          view={view}
+          onSelectSection={onSelectSection}
+          switchingTo={switchingSection}
+        />
         <div className="ml-auto flex items-center gap-2">
           <GitlabButton />
           <GithubStarButton />

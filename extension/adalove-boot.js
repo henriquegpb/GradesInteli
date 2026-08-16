@@ -41,6 +41,23 @@
     path.indexOf("/exchange-program/") === 0;
   if (!covered) return;
 
+  // Quem pediu o login do Adalove (o botão do Google, na nossa tela de entrada)
+  // marcou esta aba. Aí a tela deles TEM que aparecer, e escondê-la aqui daria
+  // uma página preta até o mount.tsx desfazer no document_idle. Só vale sem
+  // sessão: com token, o desvio já cumpriu o papel e a overlay volta a mandar.
+  // A chave vive duplicada aqui pelo mesmo motivo da lista acima — este arquivo
+  // roda antes de qualquer import (fonte: adalove-ui/src/data/auth.ts).
+  try {
+    if (
+      !localStorage.getItem("@buzz:token") &&
+      sessionStorage.getItem("gi:adalove-login") === "1"
+    ) {
+      return;
+    }
+  } catch (e) {
+    /* storage bloqueado: segue o fluxo normal */
+  }
+
   chrome.storage.local.get("uiMode", (res) => {
     if (!res || res.uiMode !== "new") return;
     if (document.getElementById(STYLE_ID)) return;

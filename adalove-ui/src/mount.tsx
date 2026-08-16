@@ -6,17 +6,20 @@
 import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import App from "~/App";
+import { adaloveLoginPreferred, forgetAdaloveLogin, signOut } from "~/data/auth";
 import {
   adaloveGet,
   adalovePut,
   AdaloveAuthError,
-  currentSectionUuid,
   currentUser,
   fetchNews,
   fetchUserdata,
+  getToken,
   putActivityAnswer,
   putActivityStatus,
+  resolveSectionUuid,
 } from "~/data/client";
+import { Login } from "~/screens/Login";
 import type { ApiClient } from "~/data/api";
 import type { RawUserdata } from "~/data/types";
 import { ensureFonts } from "~/lib/fonts";
@@ -39,6 +42,10 @@ const UI_MODE_KEY = "uiMode";
 
 let root: Root | null = null;
 let host: HTMLElement | null = null;
+/** Qual das duas telas está no ar. Guardado à parte de `host` porque as duas
+ *  dividem o mesmo host: sem isso, pedir o login com o app montado não faria
+ *  nada. */
+let mounted: "app" | "login" | null = null;
 
 /** `@theme` do Tailwind compila para `:root`, que não casa dentro de um shadow
  *  root. Reescrever para `:host` é o que faz os tokens resolverem lá dentro. */
@@ -184,7 +191,7 @@ async function lastCapture(): Promise<RawUserdata | null> {
 }
 
 async function loadUserdata(): Promise<RawUserdata> {
-  const sectionUuid = currentSectionUuid();
+  const sectionUuid = await resolveSectionUuid();
   if (sectionUuid) {
     try {
       return await fetchUserdata(sectionUuid);
@@ -200,6 +207,17 @@ async function loadUserdata(): Promise<RawUserdata> {
   throw new AdaloveAuthError(
     "Não consegui identificar sua turma. Abra a Vida Acadêmica no Adalove uma vez e tente de novo.",
   );
+}
+
+/** Sair pelo menu da conta: apaga a sessão local, invalida o refresh token no
+ *  Cognito e recarrega na raiz — onde a nossa própria tela de login aparece,
+ *  porque a preferência de UI continua sendo a nova. */
+function logout() {
+  // A captura guardada é o retrato do /userdata de QUEM estava logado. Deixá-la
+  // para trás faria a próxima pessoa a entrar neste navegador ver os dados da
+  // anterior caso a chamada de rede falhasse e o fallback entrasse.
+  void ext?.storage.local.remove("lastCapture");
+  void signOut().finally(() => location.assign("/"));
 }
 
 function Splash({ message, error }: { message: string; error?: boolean }) {
@@ -225,11 +243,13 @@ function renderShell(node: React.ReactNode) {
   root?.render(<StrictMode>{node}</StrictMode>);
 }
 
-export async function mountOverlay() {
-  if (host) return;
-
+/** Cria (uma vez) o host, o shadow root e a raiz do React. Duas telas moram
+ *  aqui: o app e o login. */
+function createHost() {
   hideOriginalUi();
   ensureFonts();
+
+  if (host) return;
 
   host = document.createElement("div");
   host.id = HOST_ID;
@@ -249,12 +269,23 @@ export async function mountOverlay() {
   shadow.appendChild(container);
 
   root = createRoot(container);
+}
+
+export async function mountOverlay() {
+  if (mounted === "app") return;
+  if (mounted) unmountOverlay();
+
+  createHost();
+  mounted = "app";
   // Esqueleto, e não um "Carregando…" centralizado: o layout já entra no lugar
   // certo, então quando o /userdata chega nada salta de posição.
   renderShell(<SkeletonShell />);
 
   try {
     const raw = await loadUserdata();
+    // A sessão pode ter caído entre montar e a resposta chegar (logout em outra
+    // aba); sem isto, a tela do app apareceria por cima do login.
+    if (mounted !== "app") return;
     renderShell(
       <App
         raw={raw}
@@ -263,10 +294,12 @@ export async function mountOverlay() {
         persistAnswer={putActivityAnswer}
         fetchNews={fetchNews}
         user={currentUser()}
+        onLogout={logout}
         api={API}
       />,
     );
   } catch (error) {
+    if (mounted !== "app") return;
     renderShell(
       <Splash
         error
@@ -278,7 +311,20 @@ export async function mountOverlay() {
   }
 }
 
+/** Tela de login nossa, no lugar da do Adalove. Entrar recarrega na Vida
+ *  Acadêmica: com o token gravado, o boot monta o app como em qualquer visita —
+ *  o mesmo caminho que o login deles faz. */
+export function mountLogin() {
+  if (mounted === "login") return;
+  if (mounted) unmountOverlay();
+
+  createHost();
+  mounted = "login";
+  renderShell(<Login onDone={() => location.assign("/academic-life")} />);
+}
+
 export function unmountOverlay() {
+  mounted = null;
   root?.unmount();
   root = null;
   host?.remove();
@@ -360,6 +406,25 @@ export async function setUiMode(mode: "new" | "original") {
 async function syncToRoute() {
   const res = await ext!.storage.local.get(UI_MODE_KEY);
   const wantsOverlay = res?.[UI_MODE_KEY] === "new";
+
+  // Sem sessão não há dados: toda chamada nossa depende do token. Em vez de
+  // devolver a pessoa para a tela do Adalove — a UI que ela escolheu não usar —,
+  // a overlay mostra o NOSSO login, que é onde a sessão nasce. É o estado logo
+  // depois de "Sair" e o de qualquer sessão expirada.
+  //
+  // Só no território da overlay: `/signup`, `/forgot-password` e a volta do
+  // Google (`/login-google`) são telas deles que a gente não reconstruiu, e
+  // cobri-las prenderia a pessoa do lado de fora da própria conta.
+  if (!getToken()) {
+    if (wantsOverlay && isOverlayPath() && !adaloveLoginPreferred()) mountLogin();
+    else {
+      unmountOverlay();
+      setToggleVisible(false);
+    }
+    return;
+  }
+
+  forgetAdaloveLogin();
 
   if (wantsOverlay && isOverlayPath()) {
     setToggleVisible(false);
