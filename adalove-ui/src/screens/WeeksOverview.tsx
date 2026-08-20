@@ -28,7 +28,7 @@ function WeekCard({ week, onOpen }: { week: WeekGroup; onOpen?: (week: string) =
         </span>
       </div>
       <div className={cn("mt-1 text-xs", pending > 0 ? "text-fg-soft" : "text-green")}>
-        {pending > 0 ? `${pending} não concluída${pending > 1 ? "s" : ""}` : "tudo concluído"}
+        {pending > 0 ? `${pending} não concluída${pending > 1 ? "s" : ""}` : "Tudo concluído"}
       </div>
 
       {/* Contagem fora da barra: dentro dela ficaria ilegível sempre que a

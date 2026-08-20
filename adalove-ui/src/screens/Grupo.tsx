@@ -18,6 +18,12 @@ function BackLink({ onBack }: { onBack?: () => void }) {
   );
 }
 
+/** "G03" -> 3; sem grupo (raro, mas existe) vai para o fim da lista. */
+function groupOrder(caption: string | null): number {
+  const n = caption ? parseInt(caption.replace(/\D/g, ""), 10) : NaN;
+  return Number.isNaN(n) ? Infinity : n;
+}
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? "") + (parts.at(-1)?.[0] ?? "")).toUpperCase();
@@ -41,7 +47,22 @@ function PersonRow({ student, me }: { student: RawStudent; me: boolean }) {
 }
 
 export function Grupo({ view, onBack }: { view: SectionView; onBack?: () => void }) {
-  const others = view.classmates.filter((s) => !view.group.members.some((m) => m.uuid === s.uuid));
+  const others = view.classmates
+    .filter((s) => !view.group.members.some((m) => m.uuid === s.uuid))
+    .sort(
+      (a, b) =>
+        groupOrder(a.groupCaption) - groupOrder(b.groupCaption) || a.name.localeCompare(b.name),
+    );
+
+  // Quebra a lista em blocos por grupo (a ordenação acima já deixa cada grupo
+  // contíguo) — sem isso a Turma inteira vira uma lista corrida e o olho perde
+  // onde um grupo termina e o outro começa.
+  const clusters: RawStudent[][] = [];
+  for (const s of others) {
+    const last = clusters.at(-1);
+    if (last && last[0]?.groupCaption === s.groupCaption) last.push(s);
+    else clusters.push([s]);
+  }
 
   return (
     <div className="space-y-4">
@@ -70,11 +91,15 @@ export function Grupo({ view, onBack }: { view: SectionView; onBack?: () => void
         <div className="border-b border-line px-4 py-3">
           <CardTitle>Turma · {others.length} colegas</CardTitle>
         </div>
-        <ul className="divide-y divide-line-soft">
-          {others.map((s) => (
-            <PersonRow key={s.uuid} student={s} me={false} />
+        <div className="divide-y divide-line">
+          {clusters.map((cluster) => (
+            <ul key={cluster[0]!.groupCaption ?? cluster[0]!.uuid} className="divide-y divide-line-soft">
+              {cluster.map((s) => (
+                <PersonRow key={s.uuid} student={s} me={false} />
+              ))}
+            </ul>
           ))}
-        </ul>
+        </div>
       </Card>
     </div>
   );

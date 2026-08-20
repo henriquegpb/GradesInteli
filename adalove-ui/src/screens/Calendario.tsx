@@ -299,7 +299,11 @@ export function Calendario({
 
       <div className="space-y-3">
         {weeks.map((week) => (
-          <div key={week.label} ref={week.label === currentWeekLabel ? currentWeekRef : undefined}>
+          <div
+            key={week.label}
+            ref={week.label === currentWeekLabel ? currentWeekRef : undefined}
+            className="scroll-mt-6"
+          >
             <WeekRow week={week} view={view} onOpen={onOpen} />
           </div>
         ))}

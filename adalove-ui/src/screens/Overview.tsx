@@ -11,6 +11,7 @@ import type {
 } from "@/types/grades";
 import type { NewsItem } from "~/data/news";
 import type { ActivityView, SectionView } from "~/data/viewmodel";
+import { buildSubjects } from "~/ai/summary";
 import { SummaryButton } from "~/ai/SummaryButton";
 import { cn } from "~/lib/cn";
 import { InteliSymbol } from "~/lib/logos";
@@ -218,6 +219,47 @@ function ProgressBars({ view }: { view: SectionView }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Uma linha fina por matéria: quantos encontros já aconteceram (qualquer slot
+ *  fora de "futuro") das aulas previstas. Reaproveita o agrupamento por
+ *  professor de `buildSubjects` — é o mesmo "matéria" usado no resumo por IA,
+ *  já que o /userdata não tem esse campo de verdade. */
+function SubjectsAttendance({ view }: { view: SectionView }) {
+  const rows = buildSubjects(view)
+    .map((s) => {
+      const encontros = s.activities.filter((a) => a.attendance.length > 0);
+      const happened = encontros.filter((a) =>
+        a.attendance.some((slot) => slot.status !== "futuro"),
+      ).length;
+      return { label: s.label, happened, total: encontros.length };
+    })
+    .filter((r) => r.total > 0)
+    .sort((a, b) => b.total - a.total);
+
+  if (!rows.length) return null;
+
+  return (
+    <Card className="p-4">
+      <CardTitle>Aulas por matéria</CardTitle>
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
+        {rows.map((r) => (
+          <div key={r.label} className="flex min-w-36 flex-1 items-center gap-2">
+            <span className="shrink-0 whitespace-nowrap text-xs text-fg-soft">{r.label}</span>
+            <span className="h-1.5 min-w-10 flex-1 overflow-hidden rounded-full bg-line-soft">
+              <span
+                className="block h-full rounded-full bg-accent transition-[width] duration-500"
+                style={{ width: `${(r.happened / r.total) * 100}%` }}
+              />
+            </span>
+            <span className="shrink-0 font-mono text-[0.62rem] text-fg-muted tabular">
+              {r.happened}/{r.total}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
@@ -495,6 +537,8 @@ export function Overview({
         </Card>
         <AttendanceCard view={view} onOpen={openFaltas} />
       </div>
+
+      <SubjectsAttendance view={view} />
 
       <Simulador
         metrics={m as MetricasModulo}
