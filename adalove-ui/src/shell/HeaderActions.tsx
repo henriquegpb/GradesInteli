@@ -35,6 +35,27 @@ export function GitlabButton() {
 }
 
 /** Só o mark do GitHub e uma estrela, sem rótulo: mora numa fileira de ícones. */
+/** Todo aluno do Inteli está só neste workspace, então o link genérico do
+ *  cliente web já cai direto nele — sem precisar do subdomínio ou de um
+ *  team ID fixo. */
+export const INTELI_SLACK_URL = "https://app.slack.com/client/";
+
+export function SlackButton() {
+  return (
+    <Tooltip label="Slack do Inteli">
+      <a
+        href={INTELI_SLACK_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Abrir o Slack do Inteli"
+        className={cn(BUTTON, "hover:border-purple/60")}
+      >
+        <Logo name="slack" size={16} mono />
+      </a>
+    </Tooltip>
+  );
+}
+
 export function GithubStarButton() {
   return (
     <Tooltip label="Star on Github">

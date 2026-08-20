@@ -9,6 +9,7 @@ import instagramRaw from "@logos/Instagram.svg?raw";
 import symbolInline from "@logos/InteliSymbolWhite.png?inline";
 import linkedinRaw from "@logos/LinkedIn.svg?raw";
 import openaiRaw from "@logos/OpenAI.svg?raw";
+import slackRaw from "@assets/img/Slack.svg?raw";
 import youtubeRaw from "@logos/Youtube.svg?raw";
 import { cn } from "~/lib/cn";
 import { ext } from "~/lib/ext";
@@ -47,6 +48,7 @@ const SVGS = {
   facebook: normalize(facebookRaw),
   instagram: normalize(instagramRaw),
   linkedin: normalize(linkedinRaw),
+  slack: normalize(slackRaw),
   youtube: normalize(youtubeRaw),
 } as const;
 

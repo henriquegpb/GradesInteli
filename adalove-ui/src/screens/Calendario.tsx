@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AskAiButtons } from "~/ai/AskAiButton";
 import { CATEGORY_COLOR } from "~/data/activityTypes";
 import type { ActivityView, SectionView } from "~/data/viewmodel";
@@ -259,6 +259,29 @@ export function Calendario({
     });
   }, [view.weeks]);
 
+  // UTC porque a grade toda trata data como calendário puro (ver comentário no
+  // topo de lib/date) — comparar contra um "hoje" local desalinharia perto da
+  // virada do dia.
+  const todayKey = dayKey(new Date().toISOString());
+  const currentWeekLabel = useMemo(() => {
+    for (const week of weeks) {
+      if (!week.monday) continue;
+      for (let i = 0; i < 7; i++) {
+        if (dayKey(addDays(week.monday, i)) === todayKey) return week.label;
+      }
+    }
+    return null;
+  }, [weeks, todayKey]);
+
+  const currentWeekRef = useRef<HTMLDivElement>(null);
+
+  // Roda a cada abertura da aba: o componente é montado/desmontado pela troca
+  // de aba em Overview, então "no mount" já é exatamente "quando eu clico em
+  // Calendário".
+  useEffect(() => {
+    currentWeekRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   if (!weeks.length) {
     return (
       <Card className="p-6">
@@ -276,7 +299,9 @@ export function Calendario({
 
       <div className="space-y-3">
         {weeks.map((week) => (
-          <WeekRow key={week.label} week={week} view={view} onOpen={onOpen} />
+          <div key={week.label} ref={week.label === currentWeekLabel ? currentWeekRef : undefined}>
+            <WeekRow week={week} view={view} onOpen={onOpen} />
+          </div>
         ))}
       </div>
     </div>

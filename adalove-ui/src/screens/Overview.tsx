@@ -14,7 +14,7 @@ import type { ActivityView, SectionView } from "~/data/viewmodel";
 import { SummaryButton } from "~/ai/SummaryButton";
 import { cn } from "~/lib/cn";
 import { InteliSymbol } from "~/lib/logos";
-import { GitlabButton, GithubStarButton, ThemeToggle, type Theme } from "~/shell/HeaderActions";
+import { GitlabButton, GithubStarButton, SlackButton, ThemeToggle, type Theme } from "~/shell/HeaderActions";
 import { ModuleProgress } from "~/shell/ModuleProgress";
 import { Calendario } from "~/screens/Calendario";
 import { NotificationsButton } from "~/screens/Notificacoes";
@@ -287,6 +287,24 @@ function AttendanceCard({ view, onOpen }: { view: SectionView; onOpen?: () => vo
         />
         <div className="h-full bg-red" style={{ width: `${(a.faltas / a.totalUnits) * 100}%` }} />
       </div>
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-soft">
+        <span className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ background: "#2FAA5C" }} />
+          Presente <span className="font-mono text-fg tabular">{u.fmt(a.presentes)}</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ background: "#0777DB" }} />
+          Justificado <span className="font-mono text-fg tabular">{u.fmt(a.justificados)}</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ background: "#F05086" }} />
+          Faltas <span className="font-mono text-fg tabular">{u.fmt(a.faltas)}</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ background: "#B3B3C3" }} />
+          A avaliar <span className="font-mono text-fg tabular">{u.fmt(a.futuros)}</span>
+        </span>
+      </div>
       <p className="mt-3 text-xs text-fg-soft">
         Restam <span className="font-mono text-fg tabular">{u.fmt(a.faltasRestantes)}</span> de{" "}
         <span className="font-mono tabular">{u.fmt(a.maxFaltasAllowed)}</span> faltas permitidas.
@@ -399,6 +417,7 @@ export function Overview({
           switchingTo={switchingSection}
         />
         <div className="ml-auto flex items-center gap-2">
+          <SlackButton />
           <GitlabButton />
           <GithubStarButton />
           <ThemeToggle

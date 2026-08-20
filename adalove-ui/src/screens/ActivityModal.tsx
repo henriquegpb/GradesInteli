@@ -802,7 +802,9 @@ export function ActivityModal({
                 <div className="text-[0.58rem] uppercase tracking-[0.06em] text-fg-muted">
                   Individual
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-fg-soft">{activity.feedback}</p>
+                <div className="mt-1">
+                  <Html html={activity.feedback} />
+                </div>
               </div>
             ) : (
               <Empty>Sem feedback do professor até o momento.</Empty>
@@ -813,9 +815,9 @@ export function ActivityModal({
                 <div className="text-[0.58rem] uppercase tracking-[0.06em] text-fg-muted">
                   Do grupo
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-fg-soft">
-                  {activity.feedbackGroup}
-                </p>
+                <div className="mt-1">
+                  <Html html={activity.feedbackGroup} />
+                </div>
               </div>
             )}
           </div>
