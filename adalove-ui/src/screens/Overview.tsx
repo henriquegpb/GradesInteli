@@ -233,7 +233,7 @@ function SubjectsAttendance({ view }: { view: SectionView }) {
       const happened = encontros.filter((a) =>
         a.attendance.some((slot) => slot.status !== "futuro"),
       ).length;
-      return { label: s.label, happened, total: encontros.length };
+      return { id: s.id, label: s.label, happened, total: encontros.length };
     })
     .filter((r) => r.total > 0)
     .sort((a, b) => b.total - a.total);
@@ -245,7 +245,12 @@ function SubjectsAttendance({ view }: { view: SectionView }) {
       <CardTitle>Aulas por matéria</CardTitle>
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
         {rows.map((r) => (
-          <div key={r.label} className="flex min-w-36 flex-1 items-center gap-2">
+          // Chave pelo professor, nunca pelo label: dois professores caem no
+          // mesmo rótulo sempre que `derivedLabel` usa o eixo (vira "COM" duas
+          // vezes). Com chave repetida o React reaproveita o nó da primeira
+          // ocorrência — a lista sai fora do sort e uma linha do módulo
+          // anterior sobrevive à troca de turma.
+          <div key={r.id} className="flex min-w-36 flex-1 items-center gap-2">
             <span className="shrink-0 whitespace-nowrap text-xs text-fg-soft">{r.label}</span>
             <span className="h-1.5 min-w-10 flex-1 overflow-hidden rounded-full bg-line-soft">
               <span
