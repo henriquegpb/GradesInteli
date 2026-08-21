@@ -43,6 +43,23 @@ export function kindOf(type: number | null): ActivityKind {
   return (type != null && ACTIVITY_KINDS[type]) || FALLBACK;
 }
 
+/** O /userdata só traz a sigla do eixo (`axisCaption`: "COM", "MTF"…), e sigla
+ *  não diz nada para quem está lendo a grade da semana. Os nomes são os cinco
+ *  eixos do Inteli; sigla fora da lista cai nela mesma — melhor mostrar "XYZ"
+ *  do que engolir a informação. */
+export const AXIS_NAME: Record<string, string> = {
+  COM: "Computação",
+  MTF: "Matemática e Física",
+  NEG: "Negócios",
+  UEX: "User Experience",
+  LID: "Liderança",
+};
+
+export function axisName(axis: string | null): string | null {
+  if (!axis) return null;
+  return AXIS_NAME[axis.toUpperCase()] ?? axis;
+}
+
 /** Cor da categoria de nota — a paleta theme-invariant do GradesInteli. O verde
  *  da Autoavaliação é o que o próprio Adalove usa nessas atividades. */
 export const CATEGORY_COLOR: Record<string, string> = {

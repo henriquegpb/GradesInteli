@@ -11,7 +11,7 @@ import type { AdaloveUser } from "~/data/client";
 import { normalizeNews, type NewsItem } from "~/data/news";
 import { getPref, setPref } from "~/lib/prefs";
 import type { Theme } from "~/shell/HeaderActions";
-import type { ActivityStatus, RawUserdata } from "~/data/types";
+import { STATUS_DONE, type ActivityStatus, type RawUserdata } from "~/data/types";
 import { buildSectionView, type ActivityView } from "~/data/viewmodel";
 import { ActivityModal } from "~/screens/ActivityModal";
 import { Atividades } from "~/screens/Atividades";
@@ -32,6 +32,7 @@ import { Sidebar } from "~/shell/Sidebar";
 import type { RouteId } from "~/shell/nav";
 import { onHistoryRoute, pushRoute } from "~/shell/history";
 import { routeForPath } from "~/shell/routes";
+import { ConfirmDialog } from "~/ui/ConfirmDialog";
 import { ToastProvider, useToast } from "~/ui/Toast";
 
 export interface AppProps {
@@ -59,6 +60,24 @@ export interface AppProps {
   api: ApiClient;
 }
 
+/** Levar uma atividade PONDERADA para Feito é o único movimento do kanban que
+ *  não dá para desfazer: o Adalove tranca a resposta junto com a coluna (é o que
+ *  o `ActivityModal` já reflete ao mostrar a resposta como leitura em Feito).
+ *  Por isso este — e só este — pede confirmação; card sem peso na nota vai
+ *  direto, senão a pergunta apareceria nos 200 cards da turma e viraria ruído. */
+function locksAnswer(activity: ActivityView, status: ActivityStatus): boolean {
+  return status === STATUS_DONE && activity.status !== STATUS_DONE && activity.weight > 0;
+}
+
+/** Posição 1-based do card na coluna em que ele está — a mesma unidade que o
+ *  `sort` de `handleMove`, e o que permite devolvê-lo ao lugar exato. */
+function columnIndexOf(activity: ActivityView, activities: ActivityView[]): number {
+  const index = activities
+    .filter((a) => a.week === activity.week && a.status === activity.status)
+    .findIndex((a) => a.id === activity.id);
+  return index === -1 ? activity.sort : index + 1;
+}
+
 function Workspace({
   raw: initialRaw,
   onExit,
@@ -78,6 +97,15 @@ function Workspace({
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selected, setSelected] = useState<ActivityView | null>(null);
+  // Movimento aplicado na tela mas ainda não enviado: espera a confirmação de
+  // "Feito" numa ponderada. `activity` é o estado ANTES do movimento — é dele
+  // que sai o caminho de volta se a pessoa cancelar.
+  const [pendingMove, setPendingMove] = useState<{
+    activity: ActivityView;
+    status: ActivityStatus;
+    sort: number;
+    previousSort: number;
+  } | null>(null);
   const [week, setWeek] = useState("all");
   const [news, setNews] = useState<NewsItem[] | null>(null);
   const [simulacao, setSimulacao] = useState<SimulacaoConfig>(DEFAULT_SIMULACAO);
@@ -270,28 +298,77 @@ function Workspace({
     });
   }, []);
 
-  const handleMove = useCallback(
-    (activity: ActivityView, status: ActivityStatus, sort: number) => {
-      if (!persistStatus) return;
+  /** Resolve `true` só quando o Adalove aceitou o movimento — é o que permite a
+   *  quem chamou avisar a pessoa sem prometer o que o PUT ainda pode recusar. */
+  const commitMove = useCallback(
+    (
+      activity: ActivityView,
+      status: ActivityStatus,
+      sort: number,
+      previousSort: number,
+    ): Promise<boolean> => {
+      if (!persistStatus) return Promise.resolve(false);
 
       const previousStatus = activity.status;
-      const previousSort = activity.sort;
 
       // Optimistic: a coluna muda na hora. Se o PUT falhar, o card volta —
       // nunca fica um estado local que o Adalove não conhece.
       setActivityStatus(activity.id, status, sort);
 
-      void persistStatus(activity.id, status, sort).catch((error: unknown) => {
-        setActivityStatus(activity.id, previousStatus, previousSort);
-        toast.error(
-          error instanceof Error
-            ? `Não foi possível mover: ${error.message}`
-            : "Não foi possível mover a atividade.",
-        );
-      });
+      return persistStatus(activity.id, status, sort)
+        .then(() => true)
+        .catch((error: unknown) => {
+          setActivityStatus(activity.id, previousStatus, previousSort);
+          toast.error(
+            error instanceof Error
+              ? `Não foi possível mover: ${error.message}`
+              : "Não foi possível mover a atividade.",
+          );
+          return false;
+        });
     },
     [persistStatus, setActivityStatus, toast],
   );
+
+  const handleMove = useCallback(
+    (activity: ActivityView, status: ActivityStatus, sort: number) => {
+      if (!persistStatus) return;
+
+      const previousSort = columnIndexOf(activity, view.activities);
+
+      // O card já vai para Feito — é o que a pessoa acabou de fazer, e travá-lo
+      // no lugar antigo faria o arraste parecer ter falhado. O que espera o
+      // Confirmar é o PUT; no Cancelar o card volta para a coluna de origem.
+      if (locksAnswer(activity, status)) {
+        setActivityStatus(activity.id, status, sort);
+        setPendingMove({ activity, status, sort, previousSort });
+        return;
+      }
+
+      void commitMove(activity, status, sort, previousSort);
+    },
+    [commitMove, persistStatus, setActivityStatus, view.activities],
+  );
+
+  const confirmPendingMove = useCallback(() => {
+    if (!pendingMove) return;
+    const { activity, status, sort, previousSort } = pendingMove;
+    setPendingMove(null);
+
+    // O aviso sai depois do PUT, não do clique: a coluna muda de forma otimista,
+    // e prometer "movida" antes da resposta poderia ser desmentido pelo toast de
+    // erro um instante depois.
+    void commitMove(activity, status, sort, previousSort).then((ok) => {
+      if (ok) toast.success("Movida para Feito. A resposta não pode mais ser alterada.");
+    });
+  }, [commitMove, pendingMove, toast]);
+
+  const cancelPendingMove = useCallback(() => {
+    if (!pendingMove) return;
+    const { activity, previousSort } = pendingMove;
+    setPendingMove(null);
+    setActivityStatus(activity.id, activity.status, previousSort);
+  }, [pendingMove, setActivityStatus]);
 
   /** Ao contrário do kanban, a resposta NÃO é otimista: o texto já está na tela
    *  (é o que a pessoa acabou de digitar), então antecipar não ganha nada, e
@@ -400,6 +477,22 @@ function Workspace({
         onClose={() => setSelected(null)}
         onMove={persistStatus ? handleMove : undefined}
         onAnswer={persistAnswer ? handleAnswer : undefined}
+      />
+
+      <ConfirmDialog
+        open={!!pendingMove}
+        title="Atenção"
+        message={
+          <>
+            <strong className="font-medium text-fg">
+              Confirma mover o card para FEITO?
+            </strong>{" "}
+            Ao mover o card de uma atividade ponderada para FEITO, você não poderá mais alterar a
+            sua resposta.
+          </>
+        }
+        onConfirm={confirmPendingMove}
+        onCancel={cancelPendingMove}
       />
     </div>
   );

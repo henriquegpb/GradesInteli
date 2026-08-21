@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { cn } from "~/lib/cn";
+import { useScrollLock } from "~/lib/scrollLock";
 
 /** Sem portal de propósito: a overlay já é um host fixed full-screen, então um
  *  `fixed` aqui dentro se posiciona pela viewport e continua isolado no shadow root. */
@@ -23,6 +24,8 @@ export function Modal({
   footer?: ReactNode;
   className?: string;
 }) {
+  useScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {

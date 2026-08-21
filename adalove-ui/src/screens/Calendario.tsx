@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AskAiButtons } from "~/ai/AskAiButton";
-import { CATEGORY_COLOR } from "~/data/activityTypes";
+import { axisName, CATEGORY_COLOR } from "~/data/activityTypes";
 import type { ActivityView, SectionView } from "~/data/viewmodel";
 import { cn } from "~/lib/cn";
 import { addDays, dayKey, dayParts, startOfWeek, WEEKDAY_SHORT } from "~/lib/date";
@@ -34,6 +34,16 @@ function byCategory(activities: ActivityView[]): ActivityView[] {
   return [...activities].sort(
     (a, b) => (CATEGORY_ORDER[a.category] ?? 9) - (CATEGORY_ORDER[b.category] ?? 9),
   );
+}
+
+/** Encontro de Orientação (sprint planning, review, prova, workshop) vem sem
+ *  eixo no /userdata, e não é omissão deles: esse encontro não pertence a
+ *  matéria nenhuma. Então o rótulo passa a ser o próprio tipo do encontro —
+ *  assim todo card do dia tem o de trás, e a grade não fica dente de serra. */
+const ENCOUNTER_LABEL: Record<number, string> = { 1: "Orientação", 2: "Instrução" };
+
+function subjectLabel(a: ActivityView): string {
+  return axisName(a.axis) ?? ENCOUNTER_LABEL[a.kind.id] ?? a.kind.name;
 }
 
 interface WeekAgenda {
@@ -82,17 +92,40 @@ function DayCell({
             type="button"
             onClick={() => onOpen(a)}
             title={a.caption}
-            className="flex w-full items-start gap-1 rounded border-l-2 bg-surface-hover px-1.5 py-1 text-left transition-colors duration-150 hover:bg-line-soft"
-            style={{ borderLeftColor: a.kind.color }}
+            className="group flex w-full flex-col text-left"
           >
-            <Icon
-              size={11}
-              aria-hidden
-              className="mt-[3px] shrink-0"
-              style={{ color: a.kind.color }}
-            />
-            <span className="line-clamp-3 min-w-0 text-[0.65rem] leading-tight text-fg">
-              {a.caption}
+            {/* Card de trás: a matéria mora nele, e o da frente cobre o resto.
+                Tingido com a cor do tipo — o fundo neutro do card da frente não
+                serviria: contra o `surface` da célula os dois viravam uma faixa
+                só.
+
+                A conta da faixa: `pb-2.5` menos os `-mb-1.5` que o card da
+                frente engole deixa 4px abaixo do texto, os mesmos 4px do `pt-1`
+                acima dele. Mexer num sem mexer no outro descentraliza o nome. */}
+            <span
+              className="-mb-1.5 truncate rounded-t px-1.5 pb-2.5 pt-1 text-[0.58rem] font-medium leading-[1.15]"
+              style={{
+                color: a.kind.color,
+                backgroundColor: `color-mix(in srgb, ${a.kind.color} 18%, transparent)`,
+              }}
+            >
+              {subjectLabel(a)}
+            </span>
+            {/* `relative` garante a ordem de pintura: o da frente cobre o de
+                trás mesmo quando a margem negativa os sobrepõe. */}
+            <span
+              className="relative flex items-start gap-1 rounded border-l-2 bg-surface-hover px-1.5 py-1 transition-colors duration-150 group-hover:bg-line-soft"
+              style={{ borderLeftColor: a.kind.color }}
+            >
+              <Icon
+                size={11}
+                aria-hidden
+                className="mt-[3px] shrink-0"
+                style={{ color: a.kind.color }}
+              />
+              <span className="line-clamp-3 min-w-0 text-[0.65rem] leading-tight text-fg">
+                {a.caption}
+              </span>
             </span>
           </button>
         );
