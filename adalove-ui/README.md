@@ -48,6 +48,7 @@ compartilhável. O mapa é `src/shell/routes.ts`:
 | `simulados` | `/mock-tests` |
 | `atendimento` | `/service-channels` |
 | `pagina:*` | `/pages/calendar`, `/pages/library`, `/pages/institutional-norms`, `/pages/tools` |
+| `nao-encontrada` | `/not-found` (para onde o Adalove manda todo endereço que ele não conhece) |
 
 Endereço fora do mapa (`/checkin`, `/notifications`, `/surveys`) é do Adalove: a overlay desmonta e
 a página deles aparece. A mesma lista está duplicada em `../extension/adalove-boot.js`, que roda em

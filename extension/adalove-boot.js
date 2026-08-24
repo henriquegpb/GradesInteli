@@ -32,6 +32,10 @@
     "/pages/library",
     "/pages/institutional-norms",
     "/pages/tools",
+    // Onde o Adalove larga quem abriu um endereço que ele não conhece: o 404 é
+    // nosso também, senão um link quebrado devolvia a tela deles no meio da
+    // navegação.
+    "/not-found",
   ];
 
   var path = location.pathname.replace(/\/+$/, "") || "/";

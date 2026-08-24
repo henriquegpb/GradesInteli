@@ -17,12 +17,14 @@ import {
 
 /** Todas as telas são nossas. `atividades`, `grupo` e `perfil` não têm item na
  *  sidebar: entram de dentro da Visão geral — pela semana, pelo "Ver todos" do
- *  card da turma e pela linha do usuário no topo. */
+ *  card da turma e pela linha do usuário no topo. `nao-encontrada` também não:
+ *  ninguém escolhe ir para um 404, chega-se nele por link quebrado. */
 export type RouteId =
   | "overview"
   | "atividades"
   | "grupo"
   | "perfil"
+  | "nao-encontrada"
   | "noticias"
   | "financeiro"
   | "cardapio"

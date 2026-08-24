@@ -18,6 +18,11 @@ export const ROUTE_PATHS: Record<RouteId, string> = {
   atividades: "/academic-life/atividades",
   grupo: "/academic-life/grupo",
 
+  // Onde o Adalove larga quem abriu um endereço que ele não conhece. É rota
+  // nossa para que o link quebrado não jogue a pessoa no 404 deles no meio da
+  // navegação — a overlay mostra o próprio.
+  "nao-encontrada": "/not-found",
+
   perfil: "/profile",
   noticias: "/feed",
   financeiro: "/financial",

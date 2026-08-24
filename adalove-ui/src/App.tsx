@@ -22,6 +22,7 @@ import { Carreiras } from "~/screens/Carreiras";
 import { Financeiro } from "~/screens/Financeiro";
 import { Historico } from "~/screens/Historico";
 import { Intercambio } from "~/screens/Intercambio";
+import { NaoEncontrada } from "~/screens/NaoEncontrada";
 import { Noticias } from "~/screens/Noticias";
 import { Pagina, type PageSlug } from "~/screens/Pagina";
 import { Perfil } from "~/screens/Perfil";
@@ -457,6 +458,7 @@ function Workspace({
         {route === "carreiras" && <Carreiras onBack={() => setRoute("overview")} />}
         {route === "intercambio" && <Intercambio onBack={() => setRoute("overview")} />}
         {route === "simulados" && <Simulados onBack={() => setRoute("overview")} />}
+        {route === "nao-encontrada" && <NaoEncontrada onRoute={setRoute} />}
         {route.startsWith("pagina:") && (
           <Pagina
             key={route}
